@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-# tested under Python 2.7
+# -*- coding: utf-8 -*-
 
 '''
-Template Python script
+Run a series of analysis tasks, as an extension to the sns pipeline output
+
+tested under Python 2.7
 '''
 
 # ~~~~ LOAD PACKAGES ~~~~~~ #
+# system modules
 import os
 import sys
 import csv
 
+# this program's modules
 import find
 from classes import AnalysisItem
 from classes import SnsAnalysisSample
