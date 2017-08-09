@@ -10,6 +10,7 @@ import csv
 from collections import defaultdict
 
 import find
+import log
 
 
 # ~~~~ CUSTOM CLASSES ~~~~~~ #
@@ -95,9 +96,16 @@ class SnsAnalysisSample(AnalysisItem):
     Container for metadata about a sample in the sns WES targeted exome sequencing run analysis output
     '''
 
-    def __init__(self, id):
+    def __init__(self, id, extra_handlers = None):
         AnalysisItem.__init__(self)
         self.id = str(id)
+        # set up per-sample logger
+        self.logger = log.build_logger(name = self.id)
+        if extra_handlers:
+            self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
+
+        self.logger.debug("Initialized logging for sample: {0}".format(self.id))
+
         self.search_pattern = '{0}*'.format(self.id)
 
     def __repr__(self):
@@ -112,13 +120,26 @@ class SnsWESAnalysisOutput(AnalysisItem):
     '''
     Container for metadata about a sns WES targeted exome sequencing run analysis
     '''
-    def __init__(self, dir, id, results_id = None):
-        AnalysisItem.__init__(self)
-        # path to the directory containing analysis output
-        self.dir = os.path.abspath(dir)
+    def __init__(self, dir, id, results_id = None, extra_handlers = None):
+        '''
+        Initialize the object
 
+        extra_filehandlers = None or a list of handlers to add
+        '''
+        AnalysisItem.__init__(self)
         # ID for the analysis run output; should match NextSeq ID
         self.id = str(id)
+
+        # set up per-analysis logger
+        self.logger = log.build_logger(name = self.id)
+        self.extra_handlers = extra_handlers
+        if self.extra_handlers:
+            self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
+
+        self.logger.debug("Initialized logging for analysis: {0}".format(self.id))
+
+        # path to the directory containing analysis output
+        self.dir = os.path.abspath(dir)
 
         # timestamped ID for the analysis results
         self.results_id = results_id
@@ -152,7 +173,7 @@ class SnsWESAnalysisOutput(AnalysisItem):
                 reader = csv.reader(csvfile)
                 for row in reader:
                     samples.append(row[0])
-            samples = [SnsAnalysisSample(x) for x in set(samples)]
+            samples = [SnsAnalysisSample(x, extra_handlers = self.extra_handlers) for x in set(samples)]
         return(samples)
 
     def __repr__(self):

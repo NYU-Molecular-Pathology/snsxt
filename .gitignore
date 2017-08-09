@@ -2,3 +2,4 @@ demo/*
 *.pyc
 results_dir
 template.py
+logs/*
