@@ -26,9 +26,9 @@ def run_delly2():
     Run Delly2 on a sample
     '''
 
-def main():
+def demo():
     '''
-    Main control function for the program
+    Run a demo of the program
     '''
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
@@ -40,17 +40,14 @@ def main():
     print(x.get_files(name = 'summary_combined_wes'))
     print(x.get_files(name = 'settings'))
     print(x.get_files(name = 'targets_bed'))
+    print(x.samples)
 
+def main():
+    '''
+    Main control function for the program
+    '''
+    demo()
 
-
-
-    # print(x.list_none(find.find(search_dir = x.dir, pattern = "*.foood", search_type = 'file', num_limit = 1, level_limit = None)))
-    # print(x.paired_samples_file)
-    # print(x.samples_fastq_raw_file)
-    # print(x.summary_combined_wes_file)
-    # print(x.settings_file)
-    # print(x.targets_bed_file)
-    # print(x.sample_list)
 
 def run():
     '''

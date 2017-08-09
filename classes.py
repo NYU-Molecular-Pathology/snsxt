@@ -19,7 +19,6 @@ class AnalysisItem(object):
     '''
     def __init__(self):
         # a dictionary of files associated with the item
-        # self.files = defaultdict(lambda: list)
         self.files = defaultdict(list)
 
     def list_none(self, l):
@@ -28,10 +27,8 @@ class AnalysisItem(object):
         '''
         if len(l) == 0:
             return(None)
-        elif len(l) == 1:
+        elif len(l) > 0:
             return(l[0])
-        else:
-            return(l)
 
     def set_file(self, name, path):
         '''
@@ -119,14 +116,14 @@ class SnsWESAnalysisOutput(AnalysisItem):
         AnalysisItem.__init__(self)
         # path to the directory containing analysis output
         self.dir = os.path.abspath(dir)
+
         # ID for the analysis run output; should match NextSeq ID
         self.id = str(id)
+
         # timestamped ID for the analysis results
         self.results_id = results_id
 
-        # self.set_file(name = '', path = '')
-
-        # # samplesheet file with the run's paired samples
+        # samplesheet file with the run's paired samples
         self.set_file(name = 'paired_samples', path = find.find(search_dir = self.dir, inclusion_patterns = "samples.pairs.csv", search_type = 'file', num_limit = 1, level_limit = 0))
 
         # file with the original starting .fastq file paths & id's
@@ -141,27 +138,22 @@ class SnsWESAnalysisOutput(AnalysisItem):
         # the .bed file with the chromosome target regions
         self.set_file(name = 'targets_bed', path = find.find(search_dir = self.dir, inclusion_patterns = "*.bed", exclusion_patterns = '*.pad10.bed', search_type = 'file', num_limit = 1, level_limit = 0))
 
-        # self.sample_list = self.get_sample_list()
+        # get the samples for the analysis
+        self.samples = self.get_samples()
 
-
-        # TODO: need find exclusion filter to keep from picking up '.pad10.bed'
-        # https://codereview.stackexchange.com/questions/74713/filtering-with-multiple-inclusion-and-exclusion-patterns
-        #
-
-    def get_sample_list(self):
+    def get_samples(self):
         '''
-        Get a list of samples in the run from the samples_fastq_raw_file
+        Get the samples in the run from the samples_fastq_raw file
         '''
         samples = []
-        with open(self.samples_fastq_raw_file, "rb") as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                samples.append(row[0])
-        samples = [SnsAnalysisSample(x) for x in set(samples)]
+        samples_fastq_raw_file = self.list_none(self.get_files(name = 'samples_fastq_raw'))
+        if samples_fastq_raw_file:
+            with open(samples_fastq_raw_file, "rb") as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    samples.append(row[0])
+            samples = [SnsAnalysisSample(x) for x in set(samples)]
         return(samples)
-
-
-
 
     def __repr__(self):
         return("SnsWESAnalysisOutput {0} ({1})\nlocated at {2}".format(self.id, self.results_id, self.dir))
