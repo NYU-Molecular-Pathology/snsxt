@@ -95,10 +95,11 @@ def run_delly2(analysis):
     logger.debug("Running Delly2 on analysis: {0}".format(analysis))
 
     samples = analysis.samples
-    # setup the output location
+    # setup the output locations
     delly2_output_dir = config.Delly2['output_dir']
     output_dir = t.mkdirs(path = os.path.join(analysis.dir, delly2_output_dir), return_path = True)
-    qsub_log_dir = analysis.list_none(analysis.dirs['logs-qsub'])
+    # qsub_log_dir = t.mkdirs(path = analysis.list_none(analysis.dirs['logs-qsub']), return_path = True)
+    qsub_log_dir = analysis.dirs['logs-qsub']
 
     # track the qsub job submissions
     job_id_list = []
@@ -117,8 +118,9 @@ def run_delly2(analysis):
             logger.error("Bam file not found for sample {0}, sample_bam: {1}".format(sample, sample_bam))
     # wait for jobs to complete, if there are any in the list
     if job_id_list:
-        qsub.wait_all_jobs_start(job_id_list)
-        qsub.wait_all_jobs_finished(job_id_list)
+        jobs_started = qsub.wait_all_jobs_start(job_id_list)
+        if jobs_started:
+            qsub.wait_all_jobs_finished(job_id_list)
 
 
 def demo():

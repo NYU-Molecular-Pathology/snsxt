@@ -120,8 +120,12 @@ def wait_all_jobs_start(job_id_list):
     while not all([check_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
         sys.stdout.write('.')
         sys.stdout.flush()
-        sleep(3) # Time in seconds.
-    elapsed_time = datetime.datetime.now() - startTime
+        elapsed_time = datetime.datetime.now() - startTime
+        # make sure the jobs did not die
+        if all([check_job_absent(job_id = job_id) for job_id in job_id_list]):
+            logger.debug("all jobs are now absent from 'qstat' list; elapsed time: {0}".format(elapsed_time))
+            return(jobs_started)
+        sleep(2) # Time in seconds.
     logger.debug("all jobs have started; elapsed time: {0}".format(elapsed_time))
     if all([check_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
         jobs_started = True
