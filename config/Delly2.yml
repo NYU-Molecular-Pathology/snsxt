@@ -1,3 +1,16 @@
 bin: /ifs/home/kellys04/software/delly/src/delly
 bcftools_bin: /ifs/home/kellys04/software/delly/src/bcftools/bcftools
 hg19_fa: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
+call_types:
+- - deletions
+  - DEL
+- - duplications
+  - DUP
+- - inversions
+  - INV
+- - translocations
+  - BND
+- - insertions
+  - INS
+output_SV_bcf_ext: .bcf
+output_dir: delly2-snv

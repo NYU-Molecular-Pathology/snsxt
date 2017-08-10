@@ -44,6 +44,7 @@ import sys
 import csv
 
 # this program's modules
+import tools as t
 import find
 import config
 import qsub
@@ -54,27 +55,35 @@ from classes import SnsWESAnalysisOutput
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def delly2(sample, bam_dir):
+def delly2_cmd(sampleID, bam_file, output_dir):
     '''
-    Run Delly2 on a single sample
-    sample is a SnsAnalysisSample object
+    Build the terminal commands to run Delly2 on a single sample
     '''
-    logger.debug("Running Delly2 on sample: {0}".format(sample))
+    logger.debug("Running Delly2 on sample: {0}".format(sampleID))
+
+    # get params from config
     delly2_bin = config.Delly2['bin']
     bcftools_bin = config.Delly2['bcftools_bin']
     hg19_fa = config.Delly2['hg19_fa']
-    logger.debug([delly2_bin, bcftools_bin, hg19_fa])
-    call_types = {'deletions': 'DEL', 'duplications': 'DUP', 'inversions': 'INV', 'translocations': 'BND', 'insertions': 'INS'}
+    call_types = config.Delly2['call_types']
+    output_SV_bcf_ext = config.Delly2['output_SV_bcf_ext']
+    logger.debug([delly2_bin, bcftools_bin, hg19_fa, call_types])
 
-    sampleID = sample.id
-
-
-    # [ ! -f "${sample_output_SV_bcf}" ] && ${delly_bin} call -t ${type_command} -g "${hg19_fa}" -o "${sample_output_SV_bcf}" "${sample_bam}"
-    SV_calling_command = '''
+    # [ ! -f "${sample_output_SV_bcf}" ] && ${delly2_bin} call -t ${call_type_arg} -g "${hg19_fa}" -o "${sample_output_SV_bcf}" "${bam_file}"
+    SV_calling_commands = []
+    for call_type_name, call_type_arg in call_types:
+        logger.debug("call_type: {0}".format([call_type_name, call_type_arg]))
+        sample_output_SV_bcf_basename = ''.join([sampleID, '.' + call_type_name, output_SV_bcf_ext])
+        sample_output_SV_bcf = os.path.join(output_dir, sample_output_SV_bcf_basename)
+        command = '''
 {0} call -t {1} -g "{2}" -o "{3}" "{4}"
 '''.format(
-delly2_bin, type_command, hg19_fa, sample_output_SV_bcf, sample_bam
+delly2_bin, call_type_arg, hg19_fa, sample_output_SV_bcf, bam_file
 )
+        SV_calling_commands.append(command)
+    delly2_command = '\n\n'.join(SV_calling_commands)
+    logger.debug(delly2_command)
+    return(delly2_command)
 
 
 
@@ -84,10 +93,20 @@ def run_delly2(analysis):
     analysis is a SnsWESAnalysisOutput objects
     '''
     logger.debug("Running Delly2 on analysis: {0}".format(analysis))
-    parent_dir = analysis.dir
+
     samples = analysis.samples
+    # setup the output location
+    delly2_output_dir = config.Delly2['output_dir']
+    output_dir = t.mkdirs(path = os.path.join(analysis.dir, delly2_output_dir), return_path = True)
+    # 'logs-qsub'
+
     for sample in samples:
-        delly2(sample, bam_dir = analysis.get_dirs(name ='BAM-GATK-RA-RC'))
+        sample_bam = sample.get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam')
+        if sample_bam:
+            command = delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir)
+
+        else:
+            logger.error("Bam file not found for sample {0}, sample_bam: {1}".format(sample, sample_bam))
 
 
 def demo():
@@ -98,6 +117,7 @@ def demo():
     results_id = "results_2017-06-26_20-11-26"
     results_dir = "results_dir"
     x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
+    # t.my_debugger(locals().copy())
     logger.debug(x)
     logger.debug(x.get_files(name = 'paired_samples'))
     logger.debug(x.get_files(name = 'samples_fastq_raw'))
@@ -110,14 +130,22 @@ def demo():
     y = x.samples[0].search_pattern
     logger.debug(find.find(search_dir = x.list_none(x.get_dirs(name ='BAM-GATK-RA-RC')), inclusion_patterns = ("*.bam", y), search_type = 'file', match_mode = 'all') )
 
-    # run_delly2(analysis = x)
+    logger.debug(x.samples[0].get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam'))
+    # get_output_files(analysis_step, pattern)
+
+    run_delly2(analysis = x)
 
 
 def main():
     '''
     Main control function for the program
     '''
-    demo()
+    # demo()
+    analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
+    results_id = "results_2017-06-26_20-11-26"
+    results_dir = "results_dir"
+    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
+    run_delly2(analysis = x)
 
 
 def run():

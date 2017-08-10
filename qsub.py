@@ -23,12 +23,12 @@ def subprocess_cmd(command, return_stdout = False):
         logger.debug(proc_stdout)
 
 
-def get_qsub_job_ID_name(proc_stdout):
+def get_job_ID_name(proc_stdout):
     '''
     return a tuple of the form (<id number>, <job name>)
     usage:
-    proc_stdout = submit_qsub_job(return_stdout = True) # 'Your job 1245023 ("python") has been submitted'
-    job_id, job_name = get_qsub_job_ID_name(proc_stdout)
+    proc_stdout = submit_job(return_stdout = True) # 'Your job 1245023 ("python") has been submitted'
+    job_id, job_name = get_job_ID_name(proc_stdout)
     '''
     import re
     proc_stdout_list = proc_stdout.split()
@@ -39,7 +39,7 @@ def get_qsub_job_ID_name(proc_stdout):
     return((job_id, job_name))
 
 
-def submit_qsub_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False):
+def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False):
     '''
     Basic format for job submission to the SGE cluster with qsub
     '''
@@ -57,7 +57,7 @@ E0F
     elif return_stdout == False:
         logger.debug(proc_stdout)
 
-def check_qsub_job_status(job_id, desired_status = "r"):
+def check_job_status(job_id, desired_status = "r"):
     '''
     Use 'qstat' to check on the run status of a qsub job
     returns True or False if the job status matches the desired_status
@@ -81,7 +81,7 @@ def check_qsub_job_status(job_id, desired_status = "r"):
     elif job_status == False:
         return(job_status)
 
-def wait_qsub_job_start(job_id, return_True = False):
+def wait_job_start(job_id, return_True = False):
     '''
     Monitor the output of 'qstat' to determine if a job is running or not
     equivalent of
@@ -89,11 +89,11 @@ def wait_qsub_job_start(job_id, return_True = False):
     from time import sleep
     import sys
     logger.debug('waiting for job to start')
-    while check_qsub_job_status(job_id = job_id, desired_status = "r") != True:
+    while check_job_status(job_id = job_id, desired_status = "r") != True:
         sys.stdout.write('.')
         sys.stdout.flush()
         sleep(3) # Time in seconds.
-    if check_qsub_job_status(job_id = job_id, desired_status = "r") == True:
+    if check_job_status(job_id = job_id, desired_status = "r") == True:
         logger.debug('job {0} has started'.format(job_id))
         if return_True == True:
             return(True)
@@ -108,17 +108,17 @@ def wait_all_jobs_start(job_id_list):
     jobs_started = False
     startTime = datetime.datetime.now()
     logger.debug("waiting for all jobs {0} to start...".format(job_id_list))
-    while not all([check_qsub_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
+    while not all([check_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
         sys.stdout.write('.')
         sys.stdout.flush()
         sleep(3) # Time in seconds.
     elapsed_time = datetime.datetime.now() - startTime
     logger.debug("all jobs have started; elapsed time: {0}".format(elapsed_time))
-    if all([check_qsub_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
+    if all([check_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
         jobs_started = True
     return(jobs_started)
 
-def check_qsub_job_absent(job_id):
+def check_job_absent(job_id):
     '''
     Check that a single job is not in the 'qstat' list
     '''
@@ -145,13 +145,13 @@ def wait_all_jobs_finished(job_id_list):
     jobs_finished = False
     startTime = datetime.datetime.now()
     logger.debug("waiting for all jobs {0} to finish...".format(job_id_list))
-    while not all([check_qsub_job_absent(job_id = job_id) for job_id in job_id_list]):
+    while not all([check_job_absent(job_id = job_id) for job_id in job_id_list]):
         sys.stdout.write('.')
         sys.stdout.flush()
         sleep(3) # Time in seconds.
     elapsed_time = datetime.datetime.now() - startTime
     logger.debug("all jobs have finished; elapsed time: {0}".format(elapsed_time))
-    if all([check_qsub_job_absent(job_id = job_id) for job_id in job_id_list]):
+    if all([check_job_absent(job_id = job_id) for job_id in job_id_list]):
         jobs_finished = True
     return(jobs_finished)
 
@@ -164,11 +164,11 @@ def demo_qsub():
     cat /etc/hosts
     sleep 300
     '''
-    proc_stdout = submit_qsub_job(command = command, verbose = True, return_stdout = True)
-    job_id, job_name = get_qsub_job_ID_name(proc_stdout)
+    proc_stdout = submit_job(command = command, verbose = True, return_stdout = True)
+    job_id, job_name = get_job_ID_name(proc_stdout)
     logger.debug('Job ID: {0}'.format(job_id))
     logger.debug('Job Name: {0}'.format(job_name))
-    wait_qsub_job_start(job_id)
+    wait_job_start(job_id)
 
 def demo_multi_qsub():
     '''
@@ -181,8 +181,8 @@ def demo_multi_qsub():
     '''
     job_id_list = []
     for i in range(5):
-        proc_stdout = submit_qsub_job(command = command, verbose = True, return_stdout = True)
-        job_id, job_name = get_qsub_job_ID_name(proc_stdout)
+        proc_stdout = submit_job(command = command, verbose = True, return_stdout = True)
+        job_id, job_name = get_job_ID_name(proc_stdout)
         logger.debug("Job submitted...")
         logger.debug('Job ID: {0}'.format(job_id))
         logger.debug('Job Name: {0}'.format(job_name))
