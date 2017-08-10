@@ -12,7 +12,7 @@ from collections import defaultdict
 import find
 import log
 import tools
-
+import config
 
 # ~~~~ CUSTOM CLASSES ~~~~~~ #
 class AnalysisItem(object):
@@ -122,30 +122,6 @@ class AnalysisItem(object):
 
 
 
-class SnsAnalysisSample(AnalysisItem):
-    '''
-    Container for metadata about a sample in the sns WES targeted exome sequencing run analysis output
-    '''
-
-    def __init__(self, id, extra_handlers = None):
-        AnalysisItem.__init__(self)
-        self.id = str(id)
-        # set up per-sample logger
-        self.logger = log.build_logger(name = self.id)
-        if extra_handlers:
-            self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
-        self.logger.debug("Initialized logging for sample: {0}".format(self.id))
-
-        # file matching pattern based on the sample's id
-        self.search_pattern = '{0}*'.format(self.id)
-
-    def __repr__(self):
-        return(self.id)
-    def __str__(self):
-        return(self.id)
-    def __len__(self):
-        return(len(self.id))
-
 
 class SnsWESAnalysisOutput(AnalysisItem):
     '''
@@ -175,6 +151,40 @@ class SnsWESAnalysisOutput(AnalysisItem):
         # timestamped ID for the analysis results
         self.results_id = results_id
 
+        # list of dirnames and filename patterns for the output steps in the sns WES analysis output
+        self.analysis_output_index = {
+        'analysis_output_index':{
+        'BAM-BWA': {'file_types': ['.bam','.bam.bai']},
+        'BAM-DD': {'file_types': ['.dd.bam', '.dd.bam.bai']},
+        'BAM-GATK-RA': {'file_types': []},
+        'BAM-GATK-RA-RC': {'file_types': ['.dd.ra.rc.bam', '.dd.ra.rc.bam.bai']},
+        'FASTQ-CLEAN': {'file_types': ['.fastq.gz']},
+        'FASTQ-TRIMMED': {'file_types': ['.trim.fastq.gz']},
+        'QC-coverage': {'file_types': ['.sample_summary', '.sample_cumulative_coverage_counts', '.sample_cumulative_coverage_proportions', '.sample_interval_summary', '.sample_summary']},
+        'QC-fragment-sizes': {'file_types': ['.freq.csv', '.png', '.stats.csv']},
+        'QC-target-reads': {'file_types': ['.bed.sample_statistics', '.bed.sample_summary', '.genome.sample_statistics', '.genome.sample_summary', '.pad100.sample_statistics', '.pad100.sample_summary', '.pad500.sample_statistics', '.pad500.sample_summary']},
+        'VCF-GATK-HC': {'file_types': ['.original.vcf', '.original.vcf.idx', '.vcf']},
+        'VCF-GATK-HC-annot': {'file_types': ['.combined.txt', '.hg19_multianno.txt', '.vcf.txt']},
+        'VCF-LoFreq': {'file_types': ['.original.vcf', '.original.vcf.bgz', '.original.vcf.bgz.csi', '.vcf']},
+        'VCF-LoFreq-annot': {'file_types': ['.combined.txt', '.hg19_multianno.txt', '.vcf.txt']},
+        'VCF-MuTect2': {'file_types': ['.original.vcf', '.original.vcf.idx', '.vcf']},
+        'VCF-MuTect2-annot': {'file_types': ['.combined.txt', '.hg19_multianno.txt', '.vcf.txt']},
+        'logs-align-bwa-mem': {'file_types': ['.flagstat.txt']},
+        'logs-bam-dedup-sambamba': {'file_types': ['.flagstat.txt', '.log.txt']},
+        'logs-bam-ra-rc-gatk': {'file_types': ['.csv', '.pdf']},
+        'logs-qsub': {'file_patterns': ['.o*']},
+        'logs-trimmomatic': {'file_types': ['.txt']},
+        'sns': {},
+        'summary': {'file_types': ['.VCF-GATK-HC-annot.csv', '.VCF-LoFreq-annot.csv', '.align-bwa-mem.csv', '.bam-dedup-sambamba.csv', '.fastq-clean.csv', '.fastq-trim-trimmomatic.csv', '.qc-coverage-gatk.csv', '.qc-fragment-sizes.csv', '.qc-target-reads-gatk.csv'], 'file_patterns': ['*:*.VCF-MuTect2-annot.csv']}
+        }
+        }
+        self.analysis_output_index = config.sns['analysis_output_index']
+
+        # self.set_dir(name = 'VCF-GATK-HC', path = find.find(search_dir = self.dir, inclusion_patterns = "VCF-GATK-HC", search_type = "dir", level_limit = 0))
+        for name, attributes in self.analysis_output_index.items():
+            self.set_dir(name = name, path = find.find(search_dir = self.dir, inclusion_patterns = name, search_type = "dir", level_limit = 0))
+
+        # SINGLE FILES
         # samplesheet file with the run's paired samples
         self.set_file(name = 'paired_samples', path = find.find(search_dir = self.dir, inclusion_patterns = "samples.pairs.csv", search_type = 'file', num_limit = 1, level_limit = 0))
 
@@ -190,8 +200,7 @@ class SnsWESAnalysisOutput(AnalysisItem):
         # the .bed file with the chromosome target regions
         self.set_file(name = 'targets_bed', path = find.find(search_dir = self.dir, inclusion_patterns = "*.bed", exclusion_patterns = '*.pad10.bed', search_type = 'file', num_limit = 1, level_limit = 0))
 
-        self.set_dir(name = 'VCF-GATK-HC', path = find.find(search_dir = self.dir, inclusion_patterns = "VCF-GATK-HC", search_type = "dir", level_limit = 0))
-        self.set_dir(name = 'BAM-GATK-RA-RC', path = find.find(search_dir = self.dir, inclusion_patterns = "BAM-GATK-RA-RC", search_type = "dir", level_limit = 0))
+
 
 
         # get the samples for the analysis
@@ -215,3 +224,29 @@ class SnsWESAnalysisOutput(AnalysisItem):
 
     def __repr__(self):
         return("SnsWESAnalysisOutput {0} ({1})\nlocated at {2}".format(self.id, self.results_id, self.dir))
+
+
+
+class SnsAnalysisSample(AnalysisItem):
+    '''
+    Container for metadata about a sample in the sns WES targeted exome sequencing run analysis output
+    '''
+
+    def __init__(self, id, extra_handlers = None):
+        AnalysisItem.__init__(self)
+        self.id = str(id)
+        # set up per-sample logger
+        self.logger = log.build_logger(name = self.id)
+        if extra_handlers:
+            self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
+        self.logger.debug("Initialized logging for sample: {0}".format(self.id))
+
+        # file matching pattern based on the sample's id
+        self.search_pattern = '{0}*'.format(self.id)
+
+    def __repr__(self):
+        return(self.id)
+    def __str__(self):
+        return(self.id)
+    def __len__(self):
+        return(len(self.id))

@@ -3,3 +3,4 @@ demo/*
 results_dir
 template.py
 logs/*
+shrink.sh

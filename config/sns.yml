@@ -1,0 +1,105 @@
+analysis_output_index:
+  BAM-BWA:
+    file_types:
+    - .bam
+    - .bam.bai
+  BAM-DD:
+    file_types:
+    - .dd.bam
+    - .dd.bam.bai
+  BAM-GATK-RA:
+    file_types: []
+  BAM-GATK-RA-RC:
+    file_types:
+    - .dd.ra.rc.bam
+    - .dd.ra.rc.bam.bai
+  FASTQ-CLEAN:
+    file_types:
+    - .fastq.gz
+  FASTQ-TRIMMED:
+    file_types:
+    - .trim.fastq.gz
+  QC-coverage:
+    file_types:
+    - .sample_summary
+    - .sample_cumulative_coverage_counts
+    - .sample_cumulative_coverage_proportions
+    - .sample_interval_summary
+    - .sample_summary
+  QC-fragment-sizes:
+    file_types:
+    - .freq.csv
+    - .png
+    - .stats.csv
+  QC-target-reads:
+    file_types:
+    - .bed.sample_statistics
+    - .bed.sample_summary
+    - .genome.sample_statistics
+    - .genome.sample_summary
+    - .pad100.sample_statistics
+    - .pad100.sample_summary
+    - .pad500.sample_statistics
+    - .pad500.sample_summary
+  VCF-GATK-HC:
+    file_types:
+    - .original.vcf
+    - .original.vcf.idx
+    - .vcf
+  VCF-GATK-HC-annot:
+    file_types:
+    - .combined.txt
+    - .hg19_multianno.txt
+    - .vcf.txt
+  VCF-LoFreq:
+    file_types:
+    - .original.vcf
+    - .original.vcf.bgz
+    - .original.vcf.bgz.csi
+    - .vcf
+  VCF-LoFreq-annot:
+    file_types:
+    - .combined.txt
+    - .hg19_multianno.txt
+    - .vcf.txt
+  VCF-MuTect2:
+    file_types:
+    - .original.vcf
+    - .original.vcf.idx
+    - .vcf
+  VCF-MuTect2-annot:
+    file_types:
+    - .combined.txt
+    - .hg19_multianno.txt
+    - .vcf.txt
+  logs-align-bwa-mem:
+    file_types:
+    - .flagstat.txt
+  logs-bam-dedup-sambamba:
+    file_types:
+    - .flagstat.txt
+    - .log.txt
+  logs-bam-ra-rc-gatk:
+    file_types:
+    - .csv
+    - .pdf
+  logs-qsub:
+    file_patterns:
+    - .o*
+  logs-trimmomatic:
+    file_types:
+    - .txt
+  sns: {}
+  summary:
+    file_patterns:
+    - '*:*.VCF-MuTect2-annot.csv'
+    file_types:
+    - .VCF-GATK-HC-annot.csv
+    - .VCF-LoFreq-annot.csv
+    - .align-bwa-mem.csv
+    - .bam-dedup-sambamba.csv
+    - .fastq-clean.csv
+    - .fastq-trim-trimmomatic.csv
+    - .qc-coverage-gatk.csv
+    - .qc-fragment-sizes.csv
+    - .qc-target-reads-gatk.csv

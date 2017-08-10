@@ -97,7 +97,7 @@ def demo():
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
     results_dir = "results_dir"
-    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler, console_handler])
+    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
     logger.debug(x)
     logger.debug(x.get_files(name = 'paired_samples'))
     logger.debug(x.get_files(name = 'samples_fastq_raw'))

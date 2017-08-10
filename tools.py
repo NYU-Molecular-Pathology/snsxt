@@ -8,6 +8,12 @@ import logging
 logger = logging.getLogger("tools")
 logger.debug("loading tools module")
 
+import sys
+import os
+import datetime
+import csv
+import json
+import yaml
 
 # ~~~~ CUSTOM CLASSES ~~~~~~ #
 class Container(object):
@@ -50,7 +56,6 @@ def timestamp():
     '''
     Return a timestamp string
     '''
-    import datetime
     return('{:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()))
 
 def print_dict(mydict):
@@ -81,7 +86,6 @@ def write_dicts_to_csv(dict_list, output_file):
     '''
     write a list of dicts to a CSV file
     '''
-    import csv
     with open(output_file, 'w') as outfile:
         fp = csv.DictWriter(outfile, dict_list[0].keys())
         fp.writeheader()
@@ -91,7 +95,6 @@ def backup_file(input_file, return_path=False, sys_print = False):
     '''
     backup a file by moving it to a folder called 'old' and appending a timestamp
     '''
-    import os
     if os.path.isfile(input_file):
         filename, extension = os.path.splitext(input_file)
         new_filename = '{0}.{1}{2}'.format(filename, timestamp(), extension)
@@ -109,21 +112,45 @@ mv {0} {1}
         return input_file
 
 def print_json(object):
-    import json
+    '''
+    Pretty printing of JSON formatted object to logger
+    helps with easier viewing of heavily nested objects
+    '''
     logger.debug(json.dumps(object, sort_keys=True, indent=4))
 
 def json_dumps(object):
-    import json
+    '''
+    Return object in JSON format
+    '''
     return(json.dumps(object, sort_keys=True, indent=4))
 
 
 def write_json(object, output_file):
-    import json
+    '''
+    Write an object to JSON format
+    '''
     with open(output_file,"w") as f:
         json.dump(object, f, sort_keys=True, indent=4)
 
 def load_json(input_file):
-    import json
+    '''
+    Load an object from JSON file
+    '''
     with open(input_file,"r") as f:
-        my_item = json.load(f)
-    return my_item
+        x = json.load(f)
+    return(x)
+
+def write_yaml(object, output_file):
+    '''
+    Write an object to YAML output formatted file
+    '''
+    with open(output_file, 'w') as outfile:
+        yaml.dump(object, outfile, default_flow_style = False)
+
+def load_yaml(input_file):
+    '''
+    Load a YAML formatted file
+    '''
+    with open(input_file, "r") as f:
+        x = yaml.load(f)
+        return(x)

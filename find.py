@@ -6,6 +6,7 @@ Functions for finding files and dirs
 
 tested with python 2.7
 '''
+
 import logging
 logger = logging.getLogger("find")
 logger.debug("loading find module")
@@ -96,10 +97,8 @@ def multi_filter(names, patterns, match_mode = "any"):
         if isinstance(patterns, str):
             if fnmatch.fnmatch(basename, patterns):
                 yield(name)
-        # in case an empty list or tuple was passed
-        elif len(patterns) < 1:
-            pass
-        else:
+        # patterns is not an empty list
+        elif patterns:
             if match_mode == 'any':
                 if any(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
                     logger.debug("match found")
