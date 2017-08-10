@@ -11,6 +11,74 @@ import logging
 logger = logging.getLogger("qsub")
 logger.debug("loading qsub module")
 
+from collections import defaultdict
+
+job_state_key = defaultdict(lambda: None)
+job_state_key['Eqw'] = 'Error'
+job_state_key['r'] = 'Running'
+job_state_key['qw'] = 'Waiting'
+job_state_key['t'] = None
+
+
+# ~~~~ CUSTOM CLASSES ~~~~~~ #
+class Job(object):
+    '''
+    A class to track a qsub job that has been submitted
+    '''
+    def __init__(self, id):
+        global job_state_key
+        self.job_state_key = job_state_key
+        self.id = id
+        self._update()
+
+    def get_status(self, id, qstat_stdout = None):
+        '''
+        Get the status of the qsub job
+        '''
+        import re
+        from sh import qstat
+        # regex for the pattern matching https://docs.python.org/2/library/re.html
+        job_id_pattern = r"^.*{0}.*\s([a-zA-Z]+)\s.*$".format(id)
+        # get the qstat if it wasnt passed
+        if not qstat_stdout:
+            qstat_stdout = qstat()
+        status = re.search(str(job_id_pattern), str(qstat_stdout), re.MULTILINE).group(1)
+        return(status)
+
+    def get_state(self, status, job_state_key):
+        '''
+        Get the interpretation of the job's status
+        '''
+        # defaultdict returns None if the key is not present
+        state = job_state_key[status]
+        return(state)
+
+    def get_is_running(self, state, job_state_key):
+        '''
+        Check if the job is considered to be running
+        '''
+        is_running = False
+        if state in ['Running']:
+            is_running = True
+        return(is_running)
+
+    def _update(self):
+        '''
+        Update the object's status attributes
+        '''
+        self.status = self.get_status(id = self.id)
+        self.state = self.get_state(status = self.status, job_state_key = self.job_state_key)
+        self.is_running = self.get_is_running(state = self.state, job_state_key = self.job_state_key)
+
+    def running(self):
+        '''
+        Return the most recent running state of the job
+        '''
+        self._update()
+        return(self.is_running)
+
+
+
 def subprocess_cmd(command, return_stdout = False):
     # run a terminal command with stdout piping enabled
     import subprocess as sp
@@ -65,6 +133,22 @@ post_commands)
         return(proc_stdout)
     elif return_stdout == False:
         logger.debug(proc_stdout)
+
+def get_job_status(job_id, qstat_stdout = None):
+    '''
+    Get the status of a qsub job
+    '''
+    import re
+    from sh import qstat
+    # job_id = '2305564'
+    # regex for the pattern matching https://docs.python.org/2/library/re.html
+    job_id_pattern = r"^.*{0}.*\s([a-zA-Z]+)\s.*$".format(job_id)
+    # get the qstat if it wasnt passed
+    if not qstat_stdout:
+        qstat_stdout = qstat()
+    status = re.search(str(job_id_pattern), str(qstat_stdout), re.MULTILINE).group(1)
+    return(status)
+
 
 def check_job_status(job_id, desired_status = "r"):
     '''
