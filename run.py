@@ -36,9 +36,7 @@ console_handler = log.get_logger_handler(logger = logger, handler_name = "consol
 
 logger.debug("The program is starting...")
 logger.debug("Path to the monitor's log file: {0}".format(log.logger_filepath(logger = logger, handler_name = "main")))
-logger.debug('{0}'.format(type(main_filehandler)))
-logger.debug('{0}'.format(isinstance(main_filehandler, logging.FileHandler)))
-logger.debug('{0}'.format(type(console_handler)))
+
 
 # ~~~~ LOAD PACKAGES ~~~~~~ #
 # system modules
@@ -48,6 +46,7 @@ import csv
 # this program's modules
 import find
 import config
+import qsub
 from classes import AnalysisItem
 from classes import SnsAnalysisSample
 from classes import SnsWESAnalysisOutput
@@ -55,10 +54,41 @@ from classes import SnsWESAnalysisOutput
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def run_delly2():
+def delly2(sample, bam_dir):
     '''
-    Run Delly2 on a sample
+    Run Delly2 on a single sample
+    sample is a SnsAnalysisSample object
     '''
+    logger.debug("Running Delly2 on sample: {0}".format(sample))
+    delly2_bin = config.Delly2['bin']
+    bcftools_bin = config.Delly2['bcftools_bin']
+    hg19_fa = config.Delly2['hg19_fa']
+    logger.debug([delly2_bin, bcftools_bin, hg19_fa])
+    call_types = {'deletions': 'DEL', 'duplications': 'DUP', 'inversions': 'INV', 'translocations': 'BND', 'insertions': 'INS'}
+
+    sampleID = sample.id
+
+
+    # [ ! -f "${sample_output_SV_bcf}" ] && ${delly_bin} call -t ${type_command} -g "${hg19_fa}" -o "${sample_output_SV_bcf}" "${sample_bam}"
+    SV_calling_command = '''
+{0} call -t {1} -g "{2}" -o "{3}" "{4}"
+'''.format(
+delly2_bin, type_command, hg19_fa, sample_output_SV_bcf, sample_bam
+)
+
+
+
+def run_delly2(analysis):
+    '''
+    Run Delly2 on the samples in the analysis
+    analysis is a SnsWESAnalysisOutput objects
+    '''
+    logger.debug("Running Delly2 on analysis: {0}".format(analysis))
+    parent_dir = analysis.dir
+    samples = analysis.samples
+    for sample in samples:
+        delly2(sample, bam_dir = analysis.get_dirs(name ='BAM-GATK-RA-RC'))
+
 
 def demo():
     '''
@@ -75,6 +105,13 @@ def demo():
     logger.debug(x.get_files(name = 'settings'))
     logger.debug(x.get_files(name = 'targets_bed'))
     logger.debug(x.samples)
+    logger.debug(x.get_dirs(name = 'VCF-GATK-HC'))
+    logger.debug(x.get_dirs(name ='BAM-GATK-RA-RC'))
+    y = x.samples[0].search_pattern
+    logger.debug(find.find(search_dir = x.list_none(x.get_dirs(name ='BAM-GATK-RA-RC')), inclusion_patterns = ("*.bam", y), search_type = 'file', match_mode = 'all') )
+
+    # run_delly2(analysis = x)
+
 
 def main():
     '''
@@ -90,5 +127,6 @@ def run():
     '''
     main()
 
+# ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":
     run()

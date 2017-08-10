@@ -11,6 +11,7 @@ from collections import defaultdict
 
 import find
 import log
+import tools
 
 
 # ~~~~ CUSTOM CLASSES ~~~~~~ #
@@ -21,15 +22,37 @@ class AnalysisItem(object):
     def __init__(self):
         # a dictionary of files associated with the item
         self.files = defaultdict(list)
+        # a dictionary of dirs associated with the item
+        self.dirs = defaultdict(list)
 
     def list_none(self, l):
         '''
-        return None for an empty list, or the first element of a list if present
+        return None for an empty list, or the first element of a list
+        convenience function for dealing with object's file lists
         '''
         if len(l) == 0:
             return(None)
         elif len(l) > 0:
             return(l[0])
+
+    def set_dir(self, name, path):
+        '''
+        Add a single dir to the analysis object's 'dirs' dict
+        name = dict key
+        path = dict value
+        '''
+        if isinstance(path, str):
+            self.dirs[name] = [os.path.abspath(path)]
+        else:
+            self.dirs[name] = [os.path.abspath(p) for p in path]
+
+    def set_dirs(self, name, paths_list):
+        '''
+        Add dirs to the analysis object's 'dirs' dict
+        name = dict key
+        paths_list = list of file paths
+        '''
+        self.set_dir(name = name, path = paths_list)
 
     def set_file(self, name, path):
         '''
@@ -77,6 +100,14 @@ class AnalysisItem(object):
         '''
         return(self.files[name])
 
+    def get_dirs(self, name):
+        '''
+        Retrieve a file by name from the object's 'files' dict
+        name = dict key
+        i = index entry in file list
+        '''
+        return(self.dirs[name])
+
     # def get_file(self, name):
     #     '''
     #     Retrieve a file by name from the object's 'files' dict
@@ -103,9 +134,9 @@ class SnsAnalysisSample(AnalysisItem):
         self.logger = log.build_logger(name = self.id)
         if extra_handlers:
             self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
-
         self.logger.debug("Initialized logging for sample: {0}".format(self.id))
 
+        # file matching pattern based on the sample's id
         self.search_pattern = '{0}*'.format(self.id)
 
     def __repr__(self):
@@ -135,9 +166,9 @@ class SnsWESAnalysisOutput(AnalysisItem):
         self.extra_handlers = extra_handlers
         if self.extra_handlers:
             self.logger = log.add_handlers(logger = self.logger, handlers = extra_handlers)
-
         self.logger.debug("Initialized logging for analysis: {0}".format(self.id))
 
+        # ~~~~ FIND ANALYSIS ITEMS ~~~~~~ #
         # path to the directory containing analysis output
         self.dir = os.path.abspath(dir)
 
@@ -159,13 +190,19 @@ class SnsWESAnalysisOutput(AnalysisItem):
         # the .bed file with the chromosome target regions
         self.set_file(name = 'targets_bed', path = find.find(search_dir = self.dir, inclusion_patterns = "*.bed", exclusion_patterns = '*.pad10.bed', search_type = 'file', num_limit = 1, level_limit = 0))
 
+        self.set_dir(name = 'VCF-GATK-HC', path = find.find(search_dir = self.dir, inclusion_patterns = "VCF-GATK-HC", search_type = "dir", level_limit = 0))
+        self.set_dir(name = 'BAM-GATK-RA-RC', path = find.find(search_dir = self.dir, inclusion_patterns = "BAM-GATK-RA-RC", search_type = "dir", level_limit = 0))
+
+
         # get the samples for the analysis
         self.samples = self.get_samples()
+
 
     def get_samples(self):
         '''
         Get the samples in the run from the samples_fastq_raw file
         '''
+        self.logger.debug("Getting samples for the analysis")
         samples = []
         samples_fastq_raw_file = self.list_none(self.get_files(name = 'samples_fastq_raw'))
         if samples_fastq_raw_file:

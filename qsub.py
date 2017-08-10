@@ -8,8 +8,8 @@ based on https://github.com/stevekm/pyqsub/tree/59c607d72a5b41d4804a969f9d543a89
 modified for use with run-monitor system
 '''
 import logging
-logger = logging.getLogger("git")
-logger.debug("loading git module")
+logger = logging.getLogger("qsub")
+logger.debug("loading qsub module")
 
 def subprocess_cmd(command, return_stdout = False):
     # run a terminal command with stdout piping enabled

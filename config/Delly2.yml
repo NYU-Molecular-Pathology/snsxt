@@ -1,0 +1,3 @@
+bin: /ifs/home/kellys04/software/delly/src/delly
+bcftools_bin: /ifs/home/kellys04/software/delly/src/bcftools/bcftools
+hg19_fa: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa

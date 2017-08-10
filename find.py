@@ -14,28 +14,30 @@ import os
 import sys
 import itertools
 import fnmatch
+from collections import defaultdict
 
-def find(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), search_type = 'all', num_limit = None, level_limit = None):
+def find(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), search_type = 'all', num_limit = None, level_limit = None, match_mode = "any"):
     '''
     Function to search for
     num_limit is the number of matches to return; use None for no limit
     level_limit is the number of directory levels to recurse; 0 is parent dir only
+    match_mode is 'any' or 'all'; match any of the provided inclusion_patterns, or all of them
     '''
     import sys
     import itertools
     if num_limit != None:
         matches = []
-        for item in find_gen(search_dir = search_dir, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns, search_type = search_type, level_limit = level_limit):
+        for item in find_gen(search_dir = search_dir, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns, search_type = search_type, level_limit = level_limit, match_mode = match_mode):
             if len(matches) <= int(num_limit):
                 matches.append(item)
         logger.debug("Matches found: {0}".format(matches))
         return(matches)
     else:
-        matches = [item for item in find_gen(search_dir = search_dir, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns, search_type = search_type, level_limit = level_limit)]
+        matches = [item for item in find_gen(search_dir = search_dir, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns, search_type = search_type, level_limit = level_limit, match_mode = match_mode)]
         logger.debug("Matches found: {0}".format(matches))
         return(matches)
 
-def find_gen(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), search_type = 'all', level_limit = None):
+def find_gen(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), search_type = 'all', level_limit = None, match_mode = "any"):
     '''
     Generator function to return file matches
     search_type = 'all', 'file', or 'dir'
@@ -59,7 +61,7 @@ def find_gen(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), s
             logger.error("Search type '{0}' not valid, exiting script".format(search_type))
             sys.exit()
         # yeild the results
-        for item in super_filter(names = items, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns):
+        for item in super_filter(names = items, inclusion_patterns = inclusion_patterns, exclusion_patterns = exclusion_patterns, match_mode = match_mode):
             yield(os.path.join(root, item))
         # check for a level limit
         if level_limit != None:
@@ -68,7 +70,7 @@ def find_gen(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), s
                 del dirs[:]
 
 
-def super_filter(names, inclusion_patterns = ('*',), exclusion_patterns = ()):
+def super_filter(names, inclusion_patterns = ('*',), exclusion_patterns = (), match_mode = "any"):
     '''
     Enhanced version of fnmatch.filter() that accepts multiple inclusion and exclusion patterns.
 
@@ -77,24 +79,55 @@ def super_filter(names, inclusion_patterns = ('*',), exclusion_patterns = ()):
     Adapted from:
     https://codereview.stackexchange.com/questions/74713/filtering-with-multiple-inclusion-and-exclusion-patterns
     '''
-    included = multi_filter(names, patterns = inclusion_patterns)
-    excluded = multi_filter(names, patterns = exclusion_patterns)
+    included = multi_filter(names, patterns = inclusion_patterns, match_mode = match_mode)
+    excluded = multi_filter(names, patterns = exclusion_patterns, match_mode = match_mode)
     for item in set(included) - set(excluded):
         yield(item)
 
-def multi_filter(names, patterns):
+def multi_filter(names, patterns, match_mode = "any"):
     '''
     Generator function which yields the names that match one or more of the patterns.
     '''
+    # logger.debug("Filtering {0} against {1}; match_mode: {2}".format(names, patterns, match_mode))
     for name in names:
+        basename = os.path.basename(name)
+        # logger.debug("item: {0}".format(basename))
         # in case a single string was passed as a pattern
         if isinstance(patterns, str):
-            if fnmatch.fnmatch(name, patterns):
-                yield name
+            if fnmatch.fnmatch(basename, patterns):
+                yield(name)
+        # in case an empty list or tuple was passed
+        elif len(patterns) < 1:
+            pass
         else:
-            for pattern in patterns:
-                if fnmatch.fnmatch(name, pattern):
-                    yield name
+            if match_mode == 'any':
+                if any(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
+                    logger.debug("match found")
+                    yield(name)
+            elif match_mode == 'all':
+                if all(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
+                    logger.debug("match found")
+                    yield(name)
+        # else:
+        #     pattern_matches = {}
+        #     for pattern in patterns:
+        #         pattern_matches[pattern] = fnmatch.fnmatch(basename, pattern)
+        #     logger.debug(pattern_matches)
+        #     if match_mode == 'any':
+        #         logger.debug(any(pattern_matches.values()))
+        #         if any(pattern_matches.values()):
+        #             yield name
+        #         # if any(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
+        #     elif match_mode == 'all':
+        #         # if all(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
+        #             # yield name
+        #         logger.debug(all(pattern_matches.values()))
+        #         if all(pattern_matches.values()):
+        #             yield name
+            #
+            # for pattern in patterns:
+            #     if fnmatch.fnmatch(name, pattern):
+            #         yield name
 
 
 
@@ -105,14 +138,14 @@ def find_files(search_dir, search_filename):
     return the paths to all files matching the supplied filename in the search dir
     '''
     import os
-    print('Now searching for file "{0}" in directory {1}'.format(search_filename, search_dir))
+    logger.debug('Now searching for file "{0}" in directory {1}'.format(search_filename, search_dir))
     file_list = []
     for root, dirs, files in os.walk(search_dir):
         for file in files:
             if file == search_filename:
                 found_file = os.path.join(root, file)
                 file_list.append(found_file)
-    print('Found {0} matches'.format(len(file_list)))
+    logger.debug('Found {0} matches'.format(len(file_list)))
     return(file_list)
 
 def walklevel(some_dir, level=1):
