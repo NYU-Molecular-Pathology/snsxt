@@ -108,22 +108,6 @@ def multi_filter(names, patterns, match_mode = "any"):
                 if all(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
                     logger.debug("match found")
                     yield(name)
-        # else:
-        #     pattern_matches = {}
-        #     for pattern in patterns:
-        #         pattern_matches[pattern] = fnmatch.fnmatch(basename, pattern)
-        #     logger.debug(pattern_matches)
-        #     if match_mode == 'any':
-        #         logger.debug(any(pattern_matches.values()))
-        #         if any(pattern_matches.values()):
-        #             yield name
-        #         # if any(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
-        #     elif match_mode == 'all':
-        #         # if all(fnmatch.fnmatch(basename, pattern) for pattern in patterns):
-        #             # yield name
-        #         logger.debug(all(pattern_matches.values()))
-        #         if all(pattern_matches.values()):
-        #             yield name
             #
             # for pattern in patterns:
             #     if fnmatch.fnmatch(name, pattern):
