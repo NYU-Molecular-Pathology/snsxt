@@ -98,15 +98,27 @@ def run_delly2(analysis):
     # setup the output location
     delly2_output_dir = config.Delly2['output_dir']
     output_dir = t.mkdirs(path = os.path.join(analysis.dir, delly2_output_dir), return_path = True)
-    # 'logs-qsub'
+    qsub_log_dir = analysis.dirs['logs-qsub']
+
+    # track the qsub job submissions
+    job_id_list = []
 
     for sample in samples:
         sample_bam = sample.get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam')
         if sample_bam:
             command = delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir)
-
+            proc_stdout = qsub.submit_job(command = command, params = '-j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = False, verbose = False)
+            job_id, job_name = qsub.get_job_ID_name(proc_stdout)
+            logger.debug("Job submitted...")
+            logger.debug('Job ID: {0}'.format(job_id))
+            logger.debug('Job Name: {0}'.format(job_name))
+            job_id_list.append(job_id)
         else:
             logger.error("Bam file not found for sample {0}, sample_bam: {1}".format(sample, sample_bam))
+    # wait for jobs to complete, if there are any in the list
+    if job_id_list:
+        wait_all_jobs_start(job_id_list)
+        wait_all_jobs_finished(job_id_list)
 
 
 def demo():
@@ -145,6 +157,7 @@ def main():
     results_id = "results_2017-06-26_20-11-26"
     results_dir = "results_dir"
     x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
+    t.my_debugger(locals().copy())
     run_delly2(analysis = x)
 
 

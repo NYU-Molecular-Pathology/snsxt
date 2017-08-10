@@ -39,7 +39,7 @@ def get_job_ID_name(proc_stdout):
     return((job_id, job_name))
 
 
-def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False):
+def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False, pre_commands = 'set -x', post_commands = 'set +x'):
     '''
     Basic format for job submission to the SGE cluster with qsub
     '''
@@ -47,8 +47,17 @@ def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_lo
     qsub_command = '''
 qsub {0} -N {1} -o :{2}/ -e :{3}/ <<E0F
 {4}
+{5}
+{6}
 E0F
-'''.format(params, name, stdout_log_dir, stderr_log_dir, command)
+'''.format(
+params,
+name,
+stdout_log_dir,
+stderr_log_dir,
+pre_commands,
+command,
+post_commands)
     if verbose == True:
         logger.debug('Command is:\n{0}'.format(qsub_command))
     proc_stdout = subprocess_cmd(command = qsub_command, return_stdout = True)
