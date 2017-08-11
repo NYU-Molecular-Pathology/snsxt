@@ -12,7 +12,16 @@ logger = logging.getLogger("qsub")
 logger.debug("loading qsub module")
 
 from collections import defaultdict
+import subprocess as sp
+import re
+import datetime
+from time import sleep
+import sys
+from sh import qstat
 
+
+# ~~~~ GLOBALS ~~~~~~ #
+# possible qsub job states; default is None
 job_state_key = defaultdict(lambda: None)
 job_state_key['Eqw'] = 'Error'
 job_state_key['r'] = 'Running'
@@ -24,33 +33,52 @@ job_state_key['t'] = None
 class Job(object):
     '''
     A class to track a qsub job that has been submitted
+
+    x = qsub.Job('2379768')
+    x.running()
+    x.present()
     '''
-    def __init__(self, id):
+    def __init__(self, id, name = None):
         global job_state_key
         self.job_state_key = job_state_key
         self.id = id
+        self.name = name
+        # add the rest of the attributes as per the update function
         self._update()
 
-    def get_status(self, id, qstat_stdout = None):
+    def get_job(self, id, qstat_stdout = None):
+        '''
+        Retrieve the job's qstat entry
+        '''
+        import re
+        from sh import qstat
+        job_id_pattern = r"^\s*{0}\s.*$".format(id)
+        if not qstat_stdout:
+            qstat_stdout = qstat()
+        entry = re.findall(str(job_id_pattern), str(qstat_stdout), re.MULTILINE)
+        return(entry)
+
+    def get_status(self, id, entry = None, qstat_stdout = None):
         '''
         Get the status of the qsub job
         '''
         import re
-        from sh import qstat
         # regex for the pattern matching https://docs.python.org/2/library/re.html
-        job_id_pattern = r"^.*{0}.*\s([a-zA-Z]+)\s.*$".format(id)
-        # get the qstat if it wasnt passed
-        if not qstat_stdout:
-            qstat_stdout = qstat()
-        status = re.search(str(job_id_pattern), str(qstat_stdout), re.MULTILINE).group(1)
-        return(status)
+        job_id_pattern = r"^.*\s*{0}.*\s([a-zA-Z]+)\s.*$".format(id)
+        if not entry:
+            entry = self.get_job(id = id, qstat_stdout = qstat_stdout)
+        status = re.search(str(job_id_pattern), str(entry), re.MULTILINE)
+        if status:
+            return(status.group(1))
+        else:
+            return(status)
 
     def get_state(self, status, job_state_key):
         '''
         Get the interpretation of the job's status
         '''
         # defaultdict returns None if the key is not present
-        state = job_state_key[status]
+        state = job_state_key[str(status)]
         return(state)
 
     def get_is_running(self, state, job_state_key):
@@ -62,13 +90,27 @@ class Job(object):
             is_running = True
         return(is_running)
 
+    def get_is_present(self, id, entry = None, qstat_stdout = None):
+        '''
+        Find out if a job is present in qsub
+        '''
+        if not entry:
+            entry = self.get_job(id = id, qstat_stdout = qstat_stdout)
+        if entry:
+            return(True)
+        else:
+            return(False)
+
     def _update(self):
         '''
         Update the object's status attributes
         '''
-        self.status = self.get_status(id = self.id)
+        self.qstat_stdout = qstat()
+        self.entry = self.get_job(id = self.id, qstat_stdout = self.qstat_stdout)
+        self.status = self.get_status(id = self.id, entry = self.entry, qstat_stdout = self.qstat_stdout)
         self.state = self.get_state(status = self.status, job_state_key = self.job_state_key)
         self.is_running = self.get_is_running(state = self.state, job_state_key = self.job_state_key)
+        self.is_present = self.get_is_present(id = self.id, entry = self.entry, qstat_stdout = self.qstat_stdout)
 
     def running(self):
         '''
@@ -77,11 +119,28 @@ class Job(object):
         self._update()
         return(self.is_running)
 
+    def present(self):
+        '''
+        Return the most recent presence or absence of the job
+        '''
+        self._update()
+        return(self.is_present)
+
+
+def submit(*args, **kwargs):
+    '''
+    Main function for submitting a qsub job
+    passes args to 'submit_job'
+    returns a Jobs object for the job
+    '''
+    proc_stdout = submit_job(*args, **kwargs)
+    job_id, job_name = get_job_ID_name(proc_stdout)
+    job = Job(id = job_id, name = job_name)
+    return(job)
 
 
 def subprocess_cmd(command, return_stdout = False):
     # run a terminal command with stdout piping enabled
-    import subprocess as sp
     process = sp.Popen(command,stdout=sp.PIPE, shell=True, universal_newlines=True)
      # universal_newlines=True required for Python 2 3 compatibility with stdout parsing
     proc_stdout = process.communicate()[0].strip()
@@ -98,7 +157,6 @@ def get_job_ID_name(proc_stdout):
     proc_stdout = submit_job(return_stdout = True) # 'Your job 1245023 ("python") has been submitted'
     job_id, job_name = get_job_ID_name(proc_stdout)
     '''
-    import re
     proc_stdout_list = proc_stdout.split()
     job_id = proc_stdout_list[2]
     job_name = proc_stdout_list[3]
@@ -111,7 +169,6 @@ def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_lo
     '''
     Basic format for job submission to the SGE cluster with qsub
     '''
-    import subprocess
     qsub_command = '''
 qsub {0} -N {1} -o :{2}/ -e :{3}/ <<E0F
 {4}
@@ -125,7 +182,8 @@ stdout_log_dir,
 stderr_log_dir,
 pre_commands,
 command,
-post_commands)
+post_commands
+)
     if verbose == True:
         logger.debug('Command is:\n{0}'.format(qsub_command))
     proc_stdout = subprocess_cmd(command = qsub_command, return_stdout = True)
@@ -134,6 +192,7 @@ post_commands)
     elif return_stdout == False:
         logger.debug(proc_stdout)
 
+# deprecated
 def get_job_status(job_id, qstat_stdout = None):
     '''
     Get the status of a qsub job
@@ -159,8 +218,6 @@ def check_job_status(job_id, desired_status = "r"):
     job waiting:
     desired_status = "qw"
     '''
-    import re
-    from sh import qstat
     job_id_pattern = r"^.*{0}.*\s{1}\s.*$".format(job_id, desired_status)
     # using the 'sh' package
     qstat_stdout = qstat()
@@ -179,8 +236,6 @@ def wait_job_start(job_id, return_True = False):
     Monitor the output of 'qstat' to determine if a job is running or not
     equivalent of
     '''
-    from time import sleep
-    import sys
     logger.debug('waiting for job to start')
     while check_job_status(job_id = job_id, desired_status = "r") != True:
         sys.stdout.write('.')
@@ -195,9 +250,6 @@ def wait_all_jobs_start(job_id_list):
     '''
     Wait for every job in a list to start
     '''
-    import datetime
-    from time import sleep
-    import sys
     jobs_started = False
     startTime = datetime.datetime.now()
     logger.debug("waiting for all jobs {0} to start...".format(job_id_list))
@@ -219,8 +271,6 @@ def check_job_absent(job_id):
     '''
     Check that a single job is not in the 'qstat' list
     '''
-    import re
-    from sh import qstat
     qstat_stdout = qstat()
     job_id_pattern = r"^.*{0}.*$".format(job_id)
     job_match = re.findall(str(job_id_pattern), str(qstat_stdout), re.MULTILINE)
@@ -236,9 +286,6 @@ def wait_all_jobs_finished(job_id_list):
     Wait for all jobs in the list to finish
     A finished job is no longer present in the 'qstat' list
     '''
-    import datetime
-    from time import sleep
-    import sys
     jobs_finished = False
     startTime = datetime.datetime.now()
     logger.debug("waiting for all jobs {0} to finish...".format(job_id_list))
