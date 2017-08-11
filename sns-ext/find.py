@@ -47,7 +47,7 @@ def find_gen(search_dir, inclusion_patterns = ('*',), exclusion_patterns = (), s
     import sys
     import fnmatch
     search_dir = search_dir.rstrip(os.path.sep)
-    assert os.path.isdir(search_dir)
+    # assert os.path.isdir(search_dir)
     num_sep = search_dir.count(os.path.sep)
     logger.debug("Searching {0} for {1} matching {2}, level limit: {3}".format(search_dir, search_type, inclusion_patterns, level_limit))
     for root, dirs, files in os.walk(search_dir):
