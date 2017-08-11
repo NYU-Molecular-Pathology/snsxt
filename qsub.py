@@ -165,10 +165,11 @@ def get_job_ID_name(proc_stdout):
     return((job_id, job_name))
 
 
-def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False, pre_commands = 'set -x', post_commands = 'set +x'):
+def submit_job(command = 'echo foo', params = '-j y', name = "python", stdout_log_dir = '${PWD}', stderr_log_dir = '${PWD}', return_stdout = False, verbose = False, pre_commands = 'set -x', post_commands = 'set +x', sleeps = None):
     '''
     Basic format for job submission to the SGE cluster with qsub
     '''
+    # bash terminal command template using heredoc
     qsub_command = '''
 qsub {0} -N {1} -o :{2}/ -e :{3}/ <<E0F
 {4}
@@ -186,11 +187,22 @@ post_commands
 )
     if verbose == True:
         logger.debug('Command is:\n{0}'.format(qsub_command))
+
+    # submit the job
     proc_stdout = subprocess_cmd(command = qsub_command, return_stdout = True)
+
+    # sleep after submitting the job
+    if sleeps:
+        sleep(sleeps)
     if return_stdout == True:
         return(proc_stdout)
     elif return_stdout == False:
         logger.debug(proc_stdout)
+
+
+
+
+
 
 # deprecated
 def get_job_status(job_id, qstat_stdout = None):
