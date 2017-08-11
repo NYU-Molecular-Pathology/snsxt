@@ -4,3 +4,4 @@ results_dir
 template.py
 logs/*
 shrink.sh
+sns-ext/logs/*
