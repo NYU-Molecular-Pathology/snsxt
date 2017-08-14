@@ -38,13 +38,14 @@ class Job(object):
     x.running()
     x.present()
     '''
-    def __init__(self, id, name = None):
+    def __init__(self, id, name = None, debug = False):
         global job_state_key
         self.job_state_key = job_state_key
         self.id = id
         self.name = name
         # add the rest of the attributes as per the update function
-        self._update()
+        if not debug:
+            self._update()
 
     def get_job(self, id, qstat_stdout = None):
         '''
@@ -106,6 +107,17 @@ class Job(object):
         Update the object's status attributes
         '''
         self.qstat_stdout = qstat()
+        self.entry = self.get_job(id = self.id, qstat_stdout = self.qstat_stdout)
+        self.status = self.get_status(id = self.id, entry = self.entry, qstat_stdout = self.qstat_stdout)
+        self.state = self.get_state(status = self.status, job_state_key = self.job_state_key)
+        self.is_running = self.get_is_running(state = self.state, job_state_key = self.job_state_key)
+        self.is_present = self.get_is_present(id = self.id, entry = self.entry, qstat_stdout = self.qstat_stdout)
+
+    def _debug_update(self, qstat_stdout):
+        '''
+        Debug update mode with requires a qstat_stdout to be passed
+        '''
+        self.qstat_stdout = qstat_stdout
         self.entry = self.get_job(id = self.id, qstat_stdout = self.qstat_stdout)
         self.status = self.get_status(id = self.id, entry = self.entry, qstat_stdout = self.qstat_stdout)
         self.state = self.get_state(status = self.status, job_state_key = self.job_state_key)
