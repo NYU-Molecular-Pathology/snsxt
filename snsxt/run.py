@@ -98,7 +98,7 @@ def run_delly2(analysis):
     # setup the output locations
     delly2_output_dir = config.Delly2['output_dir']
 
-    ## !! intentional error placed here to generate bad qsub jobs for testing !! 
+    ## !! intentional error placed here to generate bad qsub jobs for testing !!
     output_dir = t.mkdirs(path = os.path.join(analysis.dir, delly2_output_dir), return_path = True)
     # qsub_log_dir = t.mkdirs(path = analysis.list_none(analysis.dirs['logs-qsub']), return_path = True)
     qsub_log_dir = analysis.dirs['logs-qsub']
@@ -130,9 +130,10 @@ def demo():
     '''
     Run a demo of the program
     '''
+    global scriptdir
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
-    results_dir = "sns-ext/results_dir"
+    results_dir = os.path.join(scriptdir, 'results_dir')
     x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
     # t.my_debugger(locals().copy())
     logger.debug(x)
@@ -157,10 +158,10 @@ def main():
     '''
     Main control function for the program
     '''
-    # demo()
+    global scriptdir
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
-    results_dir = "sns-ext/results_dir"
+    results_dir = os.path.join(scriptdir, 'results_dir')
     x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, extra_handlers = [main_filehandler])
     # t.my_debugger(locals().copy())
     run_delly2(analysis = x)

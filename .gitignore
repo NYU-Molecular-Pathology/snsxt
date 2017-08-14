@@ -5,3 +5,5 @@ template.py
 logs/*
 shrink.sh
 sns-ext/logs/*
+snsxt/logs/*
+misc/
