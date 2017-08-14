@@ -1,6 +1,8 @@
 # snsxt
 Extension to the sns pipeline
 
+- __NOTE: Under Construction!!__
+
 # Overview
 
 This program is meant to be an extension to the [sns](https://github.com/NYU-Molecular-Pathology/sns) WES pipeline for whole/target exome sequencing data analysis. 
