@@ -16,6 +16,7 @@ class TestJob(unittest.TestCase):
         self.qstat_stdout_all_Eqw_file = os.path.join(self.fixture_dir, "qstat_stdout_all_Eqw.txt")
         self.qstat_stdout_Eqw_qw_file = os.path.join(self.fixture_dir, "qstat_stdout_Eqw_qw.txt")
         self.qstat_stdout_r_Eqw_file = os.path.join(self.fixture_dir, "qstat_stdout_r_Eqw.txt")
+        self.got_job_file = os.path.join(self.fixture_dir, "got_job.txt")
 
         with open(self.qstat_stdout_all_Eqw_file, "rb") as f:
             self.qstat_stdout_all_Eqw_str = f.read()
@@ -28,6 +29,11 @@ class TestJob(unittest.TestCase):
         with open(self.qstat_stdout_r_Eqw_file, "rb") as f:
             self.qstat_stdout_r_Eqw_str = f.read()
         # print(self.qstat_stdout_r_Eqw_str)
+
+        with open(self.got_job_file, "rb") as f:
+            self.got_job_str = f.read()
+        self.got_job_out = [self.got_job_str]
+        # print(self.got_job_out)
 
         self.debug_job = Job(id = '', debug = True)
 
@@ -43,8 +49,7 @@ class TestJob(unittest.TestCase):
 
         del self.qstat_stdout_r_Eqw_file
         del self.qstat_stdout_r_Eqw_str
-        return()
-        # del self.fixture
+
 
     def test_true(self):
         self.assertTrue(True, 'Demo assertion')
@@ -54,6 +59,14 @@ class TestJob(unittest.TestCase):
 
     def test_error(self):
         self.assertRaises(ValueError)
+
+    def test_debug_init_Job(self):
+        '''
+        Make sure that the 'debug' init setting prevents attributes from being set
+        '''
+        attributes = [hasattr(self.debug_job, item) for item in ["entry", "status", "state", "is_running", "is_present"]]
+        self.assertFalse(any(attributes))
+
 
     def test_running_job1(self):
         '''
@@ -66,18 +79,40 @@ class TestJob(unittest.TestCase):
         from qsub import Job
         x = Job(id = '2495634', debug = True)
         '''
-        self.job = Job(id = '2495634', debug = True)
-        self.job._debug_update(qstat_stdout = self.qstat_stdout_r_Eqw_str)
-        self.assertTrue(self.job.is_running)
+        x = Job(id = '2495634', debug = True)
+        x._debug_update(qstat_stdout = self.qstat_stdout_r_Eqw_str)
+        self.assertTrue(x.is_running)
+
+    def test_job_Eqw(self):
+        '''
+        Make sure an Eqw job can be identified
+        '''
+        x = Job(id = '2493898', debug = True)
+        x._debug_update(qstat_stdout = self.qstat_stdout_r_Eqw_str)
+        status = x.status
+        expected = 'Eqw'
+        self.assertTrue(status == expected)
+
+    def test_job_Eqw_not_running(self):
+        '''
+        Make sure an Eqw job is labeled as not running
+        '''
+        x = Job(id = '2493898', debug = True)
+        x._debug_update(qstat_stdout = self.qstat_stdout_r_Eqw_str)
+        status = x.status
+        expected = 'Eqw'
+        self.assertFalse(x.is_running)
+
+    def test_get_job1(self):
+        '''
+        Test that a job can be retrieved from qstat_stdout
+        '''
+        x = Job(id = '2495634', debug = True)
+        expected = self.got_job_out
+        got_job = x.get_job(id = x.id, qstat_stdout = self.qstat_stdout_r_Eqw_str)
+        self.assertTrue(got_job == expected)
 
 
-
-
-    # def test_super_filter_all_Eqw(self):
-    #     filenames = ['fixtures/qstat_stdout_all_Eqw.txt', 'fixtures/qstat_stdout_r_Eqw.txt', 'fixtures/qstat_stdout_Eqw_qw.txt']
-    #     match_result = [x for x in super_filter(names = filenames, inclusion_patterns = "*Eqw*")]
-    #     self.assertTrue(filenames == match_result)
-    #
 
 
 
