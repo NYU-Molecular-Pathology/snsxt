@@ -1,3 +1,6 @@
 [submodule "sh"]
 	path = sh
 	url = https://github.com/amoffat/sh.git
+[submodule "snsxt/util"]
+	path = snsxt/util
+	url = https://github.com/NYU-Molecular-Pathology/util.git
