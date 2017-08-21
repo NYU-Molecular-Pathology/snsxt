@@ -8,7 +8,7 @@ tested under Python 2.7
 '''
 # ~~~~~ LOGGING ~~~~~~ #
 import os
-import log
+from util import log
 import logging
 
 # path to the script's dir
@@ -44,10 +44,10 @@ import sys
 import csv
 
 # this program's modules
-import tools as t
-import find
 import config
-import qsub
+from util import tools as t
+from util import find
+from util import qsub
 from classes import AnalysisItem
 from classes import SnsAnalysisSample
 from classes import SnsWESAnalysisOutput
@@ -110,17 +110,18 @@ def run_delly2(analysis):
         sample_bam = sample.get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam')
         if sample_bam:
             command = delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir)
-            job = qsub.submit(command = command, params = '-q all.q -j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = True, verbose = True, sleeps = 1)
+            # job = qsub.submit(command = command, params = '-q all.q -j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = True, verbose = True, sleeps = 1)
             # proc_stdout = qsub.submit_job(command = command, params = '-q all.q -j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = True, verbose = True)
             # job_id, job_name = qsub.get_job_ID_name(proc_stdout)
 
-            logger.debug("Submitted job: {0} [{1}]".format(job.name, job.id))
-            jobs.append(job)
+            # logger.debug("Submitted job: {0} [{1}]".format(job.name, job.id))
+            # jobs.append(job)
+            logger.debug("Job comand is:\n\n{0}\n".format(command))
         else:
             logger.error("Bam file not found for sample {0}, sample_bam: {1}".format(sample, sample_bam))
     # wait for jobs to complete, if there are any in the list
-    if jobs:
-        logger.debug([(job.id, job.running(), job.present()) for job in jobs])
+    # if jobs:
+    #     logger.debug([(job.id, job.running(), job.present()) for job in jobs])
         # jobs_started = qsub.wait_all_jobs_start(job_id_list)
         # if jobs_started:
         #     qsub.wait_all_jobs_finished(job_id_list)
@@ -130,7 +131,6 @@ def demo():
     '''
     Run a demo of the program
     '''
-    global scriptdir
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
     results_dir = os.path.join(scriptdir, 'results_dir')
@@ -158,7 +158,6 @@ def main():
     '''
     Main control function for the program
     '''
-    global scriptdir
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
     results_dir = os.path.join(scriptdir, 'results_dir')

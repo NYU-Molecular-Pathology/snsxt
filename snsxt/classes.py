@@ -9,9 +9,9 @@ import sys
 import csv
 from collections import defaultdict
 
-import find
-import log
-import tools
+from util import find
+from util import log
+from util import tools
 import config
 
 # ~~~~ CUSTOM CLASSES ~~~~~~ #
