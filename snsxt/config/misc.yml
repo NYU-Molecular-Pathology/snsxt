@@ -1,4 +1,2 @@
-email_recipients_file: /ifs/data/molecpathlab/scripts/email_recipients.txt
+# location for NextSeq output
 nextseq_dir: /ifs/data/molecpathlab/quicksilver
-run_monitor_log_dir: /ifs/data/molecpathlab/scripts/run-monitor/logs
-script_dir: /ifs/data/molecpathlab/scripts
