@@ -167,7 +167,7 @@ class SnsWESAnalysisOutput(AnalysisItem):
 
         self._init_attrs()
         self._init_dirs()
-        self._init_targets_bed()
+        self._init_files()
         self._init_static_files()
         # self._init_analysis_config()
 
@@ -203,9 +203,10 @@ class SnsWESAnalysisOutput(AnalysisItem):
         '''
         self.static_files = {key: value for key, value in self.expected_static_files().items()}
 
-    def _init_targets_bed(self):
+    def _init_files(self):
         '''
-        Initialize the path to the targets .bed file with the chromosome target regions
+        Initialize the paths to files that might not have consistent naming
+        including: the targets .bed file with the chromosome target regions
         '''
         self.set_file(name = 'targets_bed', path = find.find(search_dir = self.dir, inclusion_patterns = "*.bed", exclusion_patterns = '*.pad10.bed', search_type = 'file', num_limit = 1, level_limit = 0))
 
@@ -422,6 +423,15 @@ class SnsWESAnalysisOutput(AnalysisItem):
 class SnsAnalysisSample(AnalysisItem):
     '''
     Container for metadata about a sample in the sns WES targeted exome sequencing run analysis output
+
+
+    from sns_classes import SnsWESAnalysisOutput
+    import config
+    d = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/fixtures/sns_output/sns_analysis1'
+    x = SnsWESAnalysisOutput(dir = d, id = 'sns_analysis1', sns_config = config.sns)
+    samples = x.get_samples()
+    sample = samples[0]
+    sample.sns_config['analysis_output_index'].items()
     '''
 
     def __init__(self, id, analysis_config, sns_config, extra_handlers = None):
@@ -434,10 +444,48 @@ class SnsAnalysisSample(AnalysisItem):
         # self.logger.debug("Initialized logging for sample: {0}".format(self.id))
 
         self.analysis_config = analysis_config
+        self.sns_config = sns_config
         # self.logger.debug("Analysis is: {0}".format(self.analysis))
 
         # file matching pattern based on the sample's id
         self.search_pattern = '{0}*'.format(self.id)
+
+        self._init_analysis_attrs()
+        self._init_dirs()
+        self._init_files()
+
+    def _init_analysis_attrs(self, analysis_config = None):
+        '''
+        Initialize the attributes passed from the parent analysis
+        '''
+        if not analysis_config:
+            analysis_config = self.analysis_config
+        self.analysis_id = analysis_config['analysis_id']
+        self.analysis_dir = analysis_config['analysis_dir']
+        self.results_id = analysis_config['results_id']
+        self.static_files = analysis_config['static_files']
+        self.analysis_is_valid = analysis_config['analysis_is_valid']
+
+    def _init_dirs(self, analysis_config = None):
+        '''
+        Initialize the paths to dirs for the sample in the analysis
+        '''
+        if not analysis_config:
+            analysis_config = self.analysis_config
+        for name, paths in analysis_config['dirs'].items():
+            if name not in ['_parent']:
+                self.set_dir(name = name, path = paths)
+
+    def _init_files(self, analysis_config = None):
+        '''
+        Initialize the paths to files in the analysis
+        '''
+        if not analysis_config:
+            analysis_config = self.analysis_config
+
+        for name, paths in analysis_config['files'].items():
+            self.set_file(name = name, path = paths)
+
 
     def get_output_files(self, analysis_step, pattern):
         '''
