@@ -169,6 +169,7 @@ class SnsWESAnalysisOutput(AnalysisItem):
         self._init_dirs()
         self._init_targets_bed()
         self._init_static_files()
+        # self._init_analysis_config()
 
         # get the samples for the analysis
         # self.samples = self.get_samples()
@@ -186,7 +187,6 @@ class SnsWESAnalysisOutput(AnalysisItem):
         '''
         self.email_recipients = self.sns_config['email_recipients']
         self.analysis_output_index = self.sns_config['analysis_output_index']
-
 
     def _init_dirs(self):
         '''
@@ -209,6 +209,24 @@ class SnsWESAnalysisOutput(AnalysisItem):
         '''
         self.set_file(name = 'targets_bed', path = find.find(search_dir = self.dir, inclusion_patterns = "*.bed", exclusion_patterns = '*.pad10.bed', search_type = 'file', num_limit = 1, level_limit = 0))
 
+    def get_analysis_config(self):
+        '''
+        Return a dictionary of config values to pass to child Sample objects
+        '''
+        analysis_config = {}
+        analysis_config['analysis_id'] = self.id
+        analysis_config['analysis_dir'] = self.dir
+        analysis_config['results_id'] = self.results_id
+
+        analysis_config['dirs'] = self.dirs
+        analysis_config['files'] = self.files
+        analysis_config['static_files'] = self.static_files
+
+        analysis_config['analysis_is_valid'] = self.is_valid
+
+        # analysis_config['sns_config'] = self.sns_config
+        return(analysis_config)
+
     def expected_static_files(self):
         '''
         Return a dict of files that are expected to exist in the analysis dir
@@ -224,12 +242,62 @@ class SnsWESAnalysisOutput(AnalysisItem):
         expected_files['summary_combined_wes'] = os.path.join(self.dir, 'summary-combined.wes.csv')
         return(expected_files)
 
+    def get_qsub_logfiles(self, logdir = None):
+        '''
+        Get the list of log files from the qsub dir
+
+        logdir = x.list_none(x.get_dirs('logs-qsub'))
+        log_files = [item for item in find.find(logdir, search_type = 'file')]
+        '''
+        log_files = []
+        # try to get the logdir from self
+        if not logdir:
+            logdir = self.list_none(self.get_dirs('logs-qsub'))
+        if not logdir:
+            # TODO: need an exception here
+            self.logger.error('Qsub log dir not found.')
+        else:
+            # find all the log files
+            for item in find.find(logdir, search_type = 'file'):
+                log_files.append(item)
+        return(log_files)
+
+    def check_qsub_log_errors_present(self, log_files = None, err_patterns = ("ERROR:",)):
+        '''
+        Check the qsub logs for errors
+        '''
+        contains_errors = {}
+        # try to find the log files from self
+        if not log_files:
+            log_files = self.get_qsub_logfiles()
+        if not log_files:
+            # TODO: need an exception here
+            self.logger.error('Qsub log files not found.')
+
+        # check all the files for the patterns
+        for log_file in log_files:
+            with open(log_file, 'rb') as f:
+                lines = f.readlines()
+            for line in lines:
+                for err_pattern in err_patterns:
+                    if err_pattern in line:
+                        contains_errors[log_file] = True
+
+        # return a boolean for presence of errors
+        if len(contains_errors) < 1:
+            return(False)
+        else:
+            # True or False; any values are True = some log(s) contained error(s)
+            if any(contains_errors.values()): self.logger.warning('Error messages were found in qsub logs: {0}'.format([path for path, value in contains_errors.items() if value == True]))
+            return(any(contains_errors.values()))
+
     def validate(self):
         '''
-        Check if the analysis is valid
+        Check if the analysis is valid for downstream usage
         '''
         # make sure dir exists
         dir_validation = os.path.exists(self.dir)
+
         # make sure all expected files exist
         static_files_validations = {}
         for key, value in self.expected_static_files().items():
@@ -237,9 +305,14 @@ class SnsWESAnalysisOutput(AnalysisItem):
             self.logger.debug('{0} : {1} : {2}'.format(key, value, exists))
             static_files_validations[key] = exists
 
+        # check for qsub log errors
+        qsub_log_error_validation = not self.check_qsub_log_errors_present()
+
         validations = {}
         validations['dir_validation'] = dir_validation
+        validations['qsub_log_error_validation'] = qsub_log_error_validation
         validations['static_files_validations'] = all(static_files_validations.values())
+
 
         self.logger.debug(validations)
 
@@ -282,9 +355,8 @@ class SnsWESAnalysisOutput(AnalysisItem):
         if not samplesIDs:
             samplesIDs = self.get_samplesIDs_from_samples_fastq_raw()
         for samplesID in samplesIDs:
-            samples.append(SnsAnalysisSample(id = samplesID, analysis_config = {}, sns_config = self.sns_config, extra_handlers = self.extra_handlers))
+            samples.append(SnsAnalysisSample(id = samplesID, analysis_config = self.get_analysis_config(), sns_config = self.sns_config, extra_handlers = self.extra_handlers))
         return(samples)
-
 
     def __repr__(self):
         return("SnsWESAnalysisOutput {0} ({1}) located at {2}".format(self.id, self.results_id, self.dir))

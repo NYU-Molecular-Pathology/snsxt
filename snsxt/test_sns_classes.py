@@ -20,6 +20,8 @@ fixture_dir = os.path.join(scriptdir, "fixtures")
 sns_output_dir = os.path.join(fixture_dir, 'sns_output')
 sns_analysis1_dir = os.path.join(sns_output_dir, 'sns_analysis1')
 sns_analysis1_nosettings_dir = os.path.join(sns_output_dir, 'sns_analysis1_nosettings')
+sns_analysis1_qsuberrors_dir = os.path.join(sns_output_dir, "sns_analysis1_qsuberrors")
+
 
 # ~~~~ SETUP CONFIGS FROM EXTERNAL RESOURCES ~~~~~~ #
 config_dir = "config"
@@ -79,6 +81,9 @@ class TestSnsWESAnalysisOutput(unittest.TestCase):
         self.sns_analysis1_nosettings = SnsWESAnalysisOutput(dir = sns_analysis1_nosettings_dir, id = 'analysis1_nosettings', sns_config = configs)
         self.sns_analysis1_nosettings.logger = log.remove_all_handlers(logger = self.sns_analysis1_nosettings.logger)
 
+        self.sns_analysis1_qsuberrors = SnsWESAnalysisOutput(dir = sns_analysis1_qsuberrors_dir, id = 'sns_analysis1_qsuberrors', sns_config = configs)
+        self.sns_analysis1_qsuberrors.logger = log.remove_all_handlers(logger = self.sns_analysis1_qsuberrors.logger)
+
     def tearDown(self):
         del self.analysis_output_1
         del self.sns_analysis1_nosettings
@@ -91,6 +96,9 @@ class TestSnsWESAnalysisOutput(unittest.TestCase):
 
     def test_no_settings(self):
         self.assertFalse(self.sns_analysis1_nosettings.validate(), 'Analysis dir with no settings file returns True validation')
+
+    def test_qsub_errors(self):
+        self.assertFalse(self.sns_analysis1_qsuberrors.validate(), 'Analysis dir with no settings file returns True validation')
 
     def test_valid_analysis_output(self):
         self.assertTrue(self.analysis_output_1.validate(), 'Valid analysis dir returns False validation')

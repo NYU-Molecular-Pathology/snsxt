@@ -97,6 +97,7 @@ analysis_output_index:
   logs-qsub:
     file_patterns:
     - .o*
+    - .po*
   logs-trimmomatic:
     file_types:
     - .txt

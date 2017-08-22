@@ -1,0 +1,5 @@
+logs-qsub/sns.wes.Sample1.o2926365:ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'python/2.7'
+logs-qsub/sns.wes.Sample1.o2926365:ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'git/2.6.5'
+logs-qsub/sns.wes.Sample1.o2926365:ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'r/3.3.0'
+logs-qsub/sns.wes.Sample1.o2926365:ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'trimmomatic/0.33'
+
