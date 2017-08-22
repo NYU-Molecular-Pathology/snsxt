@@ -1,0 +1,6 @@
+GENOME-DIR|/ifs/home/id460/ref/hg19
+REF-FASTA|/ifs/data/sequence/Illumina/igor/ref/hg19/genome.fa
+REF-BWA|/ifs/data/sequence/Illumina/igor/ref/hg19/BWA/genome.fa
+REF-DICT|/ifs/data/sequence/Illumina/igor/ref/hg19/genome.dict
+EXP-TARGETS-BED|/ifs/data/molecpathlab/NGS580_WES-development/sns-downstream-processing/example_sns_analysis/targets.bed
+REF-CHROMSIZES|/ifs/data/sequence/Illumina/igor/ref/hg19/chrom.sizes

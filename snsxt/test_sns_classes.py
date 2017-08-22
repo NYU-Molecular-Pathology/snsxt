@@ -21,6 +21,7 @@ sns_output_dir = os.path.join(fixture_dir, 'sns_output')
 sns_analysis1_dir = os.path.join(sns_output_dir, 'sns_analysis1')
 sns_analysis1_nosettings_dir = os.path.join(sns_output_dir, 'sns_analysis1_nosettings')
 sns_analysis1_qsuberrors_dir = os.path.join(sns_output_dir, "sns_analysis1_qsuberrors")
+sns_analysis1_summaryX_dir = os.path.join(sns_output_dir, "sns_analysis1_summaryX")
 
 
 # ~~~~ SETUP CONFIGS FROM EXTERNAL RESOURCES ~~~~~~ #
@@ -84,24 +85,33 @@ class TestSnsWESAnalysisOutput(unittest.TestCase):
         self.sns_analysis1_qsuberrors = SnsWESAnalysisOutput(dir = sns_analysis1_qsuberrors_dir, id = 'sns_analysis1_qsuberrors', sns_config = configs)
         self.sns_analysis1_qsuberrors.logger = log.remove_all_handlers(logger = self.sns_analysis1_qsuberrors.logger)
 
+        self.sns_analysis1_summaryX = SnsWESAnalysisOutput(dir = sns_analysis1_summaryX_dir, id = 'sns_analysis1_summaryX', sns_config = configs)
+        self.sns_analysis1_summaryX.logger = log.remove_all_handlers(logger = self.sns_analysis1_summaryX.logger)
+
+
     def tearDown(self):
         del self.analysis_output_1
         del self.sns_analysis1_nosettings
 
     def test_invalid_path(self):
         analysis_dir = os.path.join(sns_output_dir, 'foo')
-        x = SnsWESAnalysisOutput(dir = analysis_dir, id = 'foo', sns_config = configs)
-        x.logger = log.remove_all_handlers(logger = x.logger)
-        self.assertFalse(x.validate(), 'Analysis dir with invalid path returns True validation')
+        # x = SnsWESAnalysisOutput(dir = analysis_dir, id = 'foo', sns_config = configs)
+        # x.logger = log.remove_all_handlers(logger = x.logger)
+        # self.assertFalse(x.validate(), 'Analysis dir with invalid path returns True validation')
+        with self.assertRaises(IOError):
+            SnsWESAnalysisOutput(dir = analysis_dir, id = 'foo', sns_config = configs)
 
     def test_no_settings(self):
-        self.assertFalse(self.sns_analysis1_nosettings.validate(), 'Analysis dir with no settings file returns True validation')
+        self.assertFalse(self.sns_analysis1_nosettings.validate(), 'Analysis dir with no settings file returned True validation')
 
     def test_qsub_errors(self):
-        self.assertFalse(self.sns_analysis1_qsuberrors.validate(), 'Analysis dir with no settings file returns True validation')
+        self.assertFalse(self.sns_analysis1_qsuberrors.validate(), 'Analysis dir with no settings file returned True validation')
+
+    def test_summary_combined_errors(self):
+        self.assertFalse(self.sns_analysis1_summaryX.validate(), 'Analysis dir with errors in summary-combined file returned True validation')
 
     def test_valid_analysis_output(self):
-        self.assertTrue(self.analysis_output_1.validate(), 'Valid analysis dir returns False validation')
+        self.assertTrue(self.analysis_output_1.validate(), 'Valid analysis dir returned False validation')
 
     def test_get_samples(self):
         self.assertTrue(len(self.analysis_output_1.get_samples()) == 4, 'Analysis dir "analysis_output_1" did not return 4 samples')

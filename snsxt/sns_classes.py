@@ -291,6 +291,58 @@ class SnsWESAnalysisOutput(AnalysisItem):
             if any(contains_errors.values()): self.logger.warning('Error messages were found in qsub logs: {0}'.format([path for path, value in contains_errors.items() if value == True]))
             return(any(contains_errors.values()))
 
+    def get_summary_combined_contents(self, summary_combined_wes_file = None):
+        '''
+        Get the contents of the 'summary-combined.wes.csv' file
+        '''
+        # try to get the file from self if not passed
+        if not summary_combined_wes_file:
+            summary_combined_wes_file = self.static_files.get('summary_combined_wes', None)
+        if not summary_combined_wes_file:
+            # TODO: put an exception here
+            self.logger.error('Could not find the summary_combined_wes_file')
+
+        # try to open it anyway
+        rows = []
+        with open(summary_combined_wes_file, 'rb') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                rows.append(row)
+        return(rows)
+
+    def summary_combined_contains_errors(self, summary_combined_wes_rows = None, err_pattern = 'X'):
+        '''
+        Check the 'summary-combined.wes.csv' file for errors; any entry in the sheet that looks like 'X'
+        summary_combined_wes_rows = list of dicts read in by CSV DictReader
+        '''
+        # try to get the contents from self if not passed
+        if not summary_combined_wes_rows:
+            summary_combined_wes_rows = self.get_summary_combined_contents()
+        if not summary_combined_wes_rows:
+            # TODO: put an exception here
+            self.logger.error('Could not find the summary_combined_wes_file contents')
+
+        contains_errors = {}
+        # try to parse it anyway
+        for row in summary_combined_wes_rows:
+            sampleID = row['#SAMPLE']
+            # check all entries except the 'Sample'
+            for item in [value for key, value in row.items() if key != '#SAMPLE']:
+                if item == err_pattern:
+                    contains_errors[sampleID] = True
+
+        # return a boolean for presence of errors
+        if len(contains_errors) < 1:
+            return(False)
+        else:
+            # True or False; any values are True = some log(s) contained error(s)
+            if any(contains_errors.values()): self.logger.warning('Error messages were found in "summary-combined.wes.csv" file for samples: {0}'.format([sampleID for sampleID, value in contains_errors.items() if value == True]))
+            return(any(contains_errors.values()))
+
+
+
+
+
     def validate(self):
         '''
         Check if the analysis is valid for downstream usage
@@ -308,8 +360,12 @@ class SnsWESAnalysisOutput(AnalysisItem):
         # check for qsub log errors
         qsub_log_error_validation = not self.check_qsub_log_errors_present()
 
+        # check for 'X' error entries in
+        summary_combined_validation = not self.summary_combined_contains_errors()
+
         validations = {}
         validations['dir_validation'] = dir_validation
+        validations['summary_combined_validation'] = summary_combined_validation
         validations['qsub_log_error_validation'] = qsub_log_error_validation
         validations['static_files_validations'] = all(static_files_validations.values())
 
