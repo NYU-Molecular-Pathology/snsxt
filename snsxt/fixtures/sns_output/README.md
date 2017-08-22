@@ -22,4 +22,7 @@ find sns_analysis1 -type f | while read item; do
 done
 
 
+# delete excess items with
+find . -size 0 -type f -delete
 ```
+
