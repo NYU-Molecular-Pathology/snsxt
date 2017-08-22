@@ -4,3 +4,9 @@
 [submodule "snsxt/util"]
 	path = snsxt/util
 	url = https://github.com/NYU-Molecular-Pathology/util.git
+[submodule "snsxt/sns_tasks"]
+	path = snsxt/sns_tasks
+	url = https://github.com/NYU-Molecular-Pathology/sns_tasks.git
+[submodule "snsxt/sns_classes"]
+	path = snsxt/sns_classes
+	url = https://github.com/NYU-Molecular-Pathology/sns_classes.git
