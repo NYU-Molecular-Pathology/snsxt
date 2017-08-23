@@ -55,87 +55,14 @@ import sys
 import csv
 
 # this program's modules
-import config
 from util import tools as t
 from util import find
-from sns_classes import SnsWESAnalysisOutput
-import delly2
+from sns_classes.classes import SnsWESAnalysisOutput
+from sns_tasks import Delly2
 
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-# def delly2_cmd(sampleID, bam_file, output_dir):
-#     '''
-#     Build the terminal commands to run Delly2 on a single sample
-#     '''
-#     logger.debug("Running Delly2 on sample: {0}".format(sampleID))
-#
-#     # get params from config
-#     delly2_bin = config.Delly2['bin']
-#     bcftools_bin = config.Delly2['bcftools_bin']
-#     hg19_fa = config.Delly2['hg19_fa']
-#     call_types = config.Delly2['call_types']
-#     output_SV_bcf_ext = config.Delly2['output_SV_bcf_ext']
-#     logger.debug([delly2_bin, bcftools_bin, hg19_fa, call_types])
-#
-#     # [ ! -f "${sample_output_SV_bcf}" ] && ${delly2_bin} call -t ${call_type_arg} -g "${hg19_fa}" -o "${sample_output_SV_bcf}" "${bam_file}"
-#     SV_calling_commands = []
-#     for call_type_name, call_type_arg in call_types:
-#         logger.debug("call_type: {0}".format([call_type_name, call_type_arg]))
-#         sample_output_SV_bcf_basename = ''.join([sampleID, '.' + call_type_name, output_SV_bcf_ext])
-#         sample_output_SV_bcf = os.path.join(output_dir, sample_output_SV_bcf_basename)
-#         command = '''
-# {0} call -t {1} -g "{2}" -o "{3}" "{4}"
-# '''.format(
-# delly2_bin, call_type_arg, hg19_fa, sample_output_SV_bcf, bam_file
-# )
-#         SV_calling_commands.append(command)
-#     delly2_command = '\n\n'.join(SV_calling_commands)
-#     logger.debug(delly2_command)
-#     return(delly2_command)
-#
-#
-#
-# def run_delly2(analysis):
-#     '''
-#     Run Delly2 on the samples in the analysis
-#     analysis is a SnsWESAnalysisOutput objects
-#     '''
-#     logger.debug("Running Delly2 on analysis: {0}".format(analysis))
-#
-#     samples = analysis.samples
-#     # setup the output locations
-#     delly2_output_dir = config.Delly2['output_dir']
-#
-#     ## !! intentional error placed here to generate bad qsub jobs for testing !!
-#     output_dir = t.mkdirs(path = os.path.join(analysis.dir, delly2_output_dir), return_path = True)
-#     # qsub_log_dir = t.mkdirs(path = analysis.list_none(analysis.dirs['logs-qsub']), return_path = True)
-#     qsub_log_dir = analysis.dirs['logs-qsub']
-#
-#     # track the qsub job submissions
-#     jobs = []
-#
-#     for sample in samples:
-#         sample_bam = sample.get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam')
-#         if sample_bam:
-#             command = delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir)
-#             # job = qsub.submit(command = command, params = '-q all.q -j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = True, verbose = True, sleeps = 1)
-#             # proc_stdout = qsub.submit_job(command = command, params = '-q all.q -j y -wd $PWD', name = "delly2.{0}".format(sample.id), stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, return_stdout = True, verbose = True)
-#             # job_id, job_name = qsub.get_job_ID_name(proc_stdout)
-#
-#             # logger.debug("Submitted job: {0} [{1}]".format(job.name, job.id))
-#             # jobs.append(job)
-#             logger.debug("Job comand is:\n\n{0}\n".format(command))
-#         else:
-#             logger.error("Bam file not found for sample {0}, sample_bam: {1}".format(sample, sample_bam))
-#     # wait for jobs to complete, if there are any in the list
-#     # if jobs:
-#     #     logger.debug([(job.id, job.running(), job.present()) for job in jobs])
-#         # jobs_started = qsub.wait_all_jobs_start(job_id_list)
-#         # if jobs_started:
-#         #     qsub.wait_all_jobs_finished(job_id_list)
-#
-
 def demo():
     '''
     Run a demo of the program
@@ -158,9 +85,17 @@ def demo():
     logger.debug(find.find(search_dir = x.list_none(x.get_dirs(name ='BAM-GATK-RA-RC')), inclusion_patterns = ("*.bam", y), search_type = 'file', match_mode = 'all') )
 
     logger.debug(x.samples[0].get_output_files(analysis_step = 'BAM-GATK-RA-RC', pattern = '*.dd.ra.rc.bam'))
-    # get_output_files(analysis_step, pattern)
 
-    # run_delly2(analysis = x)
+
+def run_task(analysis, task, *args, **kwargs):
+    '''
+    Run an analysis task on all the samples in the analysis output
+    analysis is an SnsWESAnalysisOutput object
+    task is a module with a function 'main' that runs a single sample and returns a qsub job
+    '''
+    samples = analysis.get_samples()
+    for sample in samples:
+        task.main(sample = sample, *args, **kwargs)
 
 
 def main():
@@ -170,10 +105,13 @@ def main():
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
     results_dir = os.path.join(scriptdir, 'results_dir')
-    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = [main_filehandler])
+    extra_handlers = [main_filehandler]
+    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
     logger.debug(x)
     # t.my_debugger(locals().copy())
-    # run_delly2(analysis = x)
+    run_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+
+
 
 
 def run():

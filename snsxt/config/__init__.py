@@ -26,10 +26,7 @@ with open(os.path.join(scriptdir, "misc.yml"), "r") as f:
 with open(os.path.join(scriptdir, "NextSeq.yml"), "r") as f:
     NextSeq = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'Delly2.yml'), "r") as f:
-    Delly2 = yaml.load(f)
 
 logger.debug(sns)
 logger.debug(misc)
 logger.debug(NextSeq)
-logger.debug(Delly2)
