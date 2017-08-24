@@ -2,8 +2,6 @@
 # snsxt
 Extension to the sns pipeline
 
-- __NOTE: Under Construction!!__
-
 # Overview
 
 This program is meant to be an extension to the [sns](https://github.com/NYU-Molecular-Pathology/sns) WES pipeline for whole/target exome sequencing data analysis. 
@@ -30,19 +28,19 @@ Unit tests for the various modules included in the program can be run with the `
 
 The `config` submodule is used to load various configuration files into global objects which will be accessed later throughout the main program. Configurations should be loaded and set in the `snsxt/config/__init__.py` submodule script. See existing code for examples.
 
-## `classes.py`
+## `classes`
 
 The `classes` submodule contains Python object classes used to represent data from an sns wes analysis. 
 
-## `find.py`
+## `find`
 
 The `find` submodule is used throughout the program to find files that match given pattern criteria in the filesystem.
 
-## `log.py`
+## `log`
 
 The `log` submodule contains functions used to intialize, load, and manipulate logging throughout the program. The primary program logging configuration for the program come from the `logging.yml` file, and default log file output is in the `snsxt/logs` directory.
 
-## `qsub.py`
+## `qsub`
 
 The `qsub` module contains classes and functions used to submit and monitor jobs on the HPC cluster used at NYULMC, running Sun Grid Engine. 
 
