@@ -104,6 +104,7 @@ def run_task(analysis, task, *args, **kwargs):
     logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
 
+    # TODO: debug here 
     logger.debug('Waiting for all jobs to start...')
     # wait for start
     while not all([job.running() for job in jobs]):
