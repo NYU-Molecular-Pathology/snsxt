@@ -53,6 +53,7 @@ sns_config['analysis_output_index'] = analysis_output_index
 # system modules
 import sys
 import csv
+from time import sleep
 
 # this program's modules
 from util import tools as t
@@ -94,8 +95,36 @@ def run_task(analysis, task, *args, **kwargs):
     task is a module with a function 'main' that runs a single sample and returns a qsub job
     '''
     samples = analysis.get_samples()
+    jobs = []
     for sample in samples:
-        task.main(sample = sample, *args, **kwargs)
+        # task should return a qsub Job object
+        job = task.main(sample = sample, *args, **kwargs)
+        if job:
+            jobs.append(job)
+    logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+
+
+    logger.debug('Waiting for all jobs to start...')
+    # wait for start
+    while not all([job.running() for job in jobs]):
+        sleep(1)
+        # make sure the jobs did not die
+        if all([not job.present() for job in jobs]):
+            logger.warning('All jobs exited while waiting for jobs to start')
+    # wait for jobs to finish
+    # make sure there's at least 1 job running
+    if any([job.running() for job in jobs]):
+        logger.debug('Waiting for all jobs to finish...')
+        while any([job.running() for job in jobs]):
+            sleep(5)
+    # jobs are all done
+    if not any([job.running() for job in jobs]) and not any([job.present() for job in jobs]):
+        logger.debug('No jobs remaining in the job queue')
+    elif not any([job.running() for job in jobs]) and any([job.present() for job in jobs]):
+        logger.warning('Some jobs are remaining in the job queue but are not running')
+    return()
+
+
 
 
 def main():
