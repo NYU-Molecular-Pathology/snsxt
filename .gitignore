@@ -9,3 +9,4 @@ snsxt/logs/*
 misc/
 oldcode/
 example_sns_analysis/
+snsxt/sns_tasks/logs/*

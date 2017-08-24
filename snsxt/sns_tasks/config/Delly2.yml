@@ -1,0 +1,33 @@
+# path to the Delly2 program binary
+bin: /ifs/home/kellys04/software/delly/src/delly
+
+# path to Delly2's bcftools binary
+bcftools_bin: /ifs/home/kellys04/software/delly/src/bcftools/bcftools
+
+# path to reference genome file to use
+hg19_fa: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
+
+# SNV call types from Delly2 to use
+call_types:
+- - deletions
+  - DEL
+- - duplications
+  - DUP
+- - inversions
+  - INV
+- - translocations
+  - BND
+- - insertions
+  - INS
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'BAM-GATK-RA-RC'
+
+# filename pattern to use for input file
+input_pattern: '*.dd.ra.rc.bam'
+
+# file extension for .bcf files
+output_SV_bcf_ext: .bcf
+
+# name of the parent directory to use for the program output
+output_dir_name: delly2-snv
