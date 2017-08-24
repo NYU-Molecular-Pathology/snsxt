@@ -10,6 +10,8 @@ This program is meant to be an extension to the [sns](https://github.com/NYU-Mol
 
 `snsxt` is a BYOC framework (Bring Your Own Code) for running downstream analysis tasks on sns-wes pipeline output. 
 
+Use this framework to run any extra analysis tasks you like after an `sns` pipeline analysis has finished.
+
 # Usage
 
 ## Run
@@ -22,7 +24,7 @@ Unit tests for the various modules included in the program can be run with the `
 
 # Components
 
-Code and components of the `snsxt` program are contained in the `snsxt` directory, including the following:
+`snsxt` uses the [`util`](https://github.com/NYU-Molecular-Pathology/util) submodule for expanded functionality and features, including the following:
 
 ## `config`
 
