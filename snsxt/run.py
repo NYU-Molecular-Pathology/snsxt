@@ -40,6 +40,7 @@ logger.debug("Path to the monitor's log file: {0}".format(log.logger_filepath(lo
 import sys
 import csv
 from time import sleep
+import argparse
 
 # this program's modules
 from util import tools as t
@@ -64,9 +65,9 @@ sns_config['analysis_output_index'] = analysis_output_index
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def run_task(analysis, task, *args, **kwargs):
+def run_qsub_analysis_task(analysis, task, *args, **kwargs):
     '''
-    Run an analysis task on all the samples in the analysis output
+    Run an analysis task that submits qsub jobs on all the samples in the analysis output
     analysis is an SnsWESAnalysisOutput object
     task is a module with a function 'main' that runs a single sample and returns a qsub Job object
     '''
@@ -86,21 +87,24 @@ def run_task(analysis, task, *args, **kwargs):
 
 
 
-
-
-
-def main():
+def demo():
     '''
-    Main control function for the program
+    Demo of the script run for testing
     '''
     analysis_id = "170623_NB501073_0015_AHY5Y3BGX2"
     results_id = "results_2017-06-26_20-11-26"
-    results_dir = os.path.join(scriptdir, 'results_dir')
+    analysis_dir = os.path.join(scriptdir, 'results_dir')
+    main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
+
+
+def main(analysis_dir, analysis_id = None, results_id = None):
+    '''
+    Main control function for the program
+    '''
     extra_handlers = [main_filehandler]
-    x = SnsWESAnalysisOutput(dir = results_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
+    x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
     logger.debug(x)
-    # t.my_debugger(locals().copy())
-    run_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+    run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
 
     logger.info('All tasks completed')
 
@@ -112,7 +116,29 @@ def run():
     Run the monitoring program
     arg parsing goes here, if program was run as a script
     '''
-    main()
+    # ~~~~ GET SCRIPT ARGS ~~~~~~ #
+    parser = argparse.ArgumentParser(description='snsxt: sns bioinformatics pipeline extension program')
+    # required positional args
+    parser.add_argument("analysis_dir", help="Path to the analysis output directory used for the sns pipeline") # nargs=1,
+
+    # optional flags
+    parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
+    parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
+    parser.add_argument("--demo", default = False, action='store_true', dest = 'run_demo', help="Run the demo of the script instead of processing args")
+
+    args = parser.parse_args()
+
+    analysis_dir = args.analysis_dir
+    analysis_id = args.analysis_id
+    results_id = args.results_id
+    run_demo = args.run_demo
+
+    logger.debug(args)
+
+    if run_demo:
+        demo()
+    else:
+        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":
