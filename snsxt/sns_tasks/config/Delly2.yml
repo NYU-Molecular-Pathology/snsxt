@@ -1,3 +1,17 @@
+# REQUIRED TASK ITEMS
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'BAM-GATK-RA-RC'
+
+# filename pattern to use for input file
+input_pattern: '*.dd.ra.rc.bam'
+
+# name of the parent directory to use for the program output
+output_dir_name: VCF-SNV-Delly2
+
+
+
+
+# TASK SPECIFIC CUSTOM ITEMS
 # path to the Delly2 program binary
 bin: /ifs/home/kellys04/software/delly/src/delly
 
@@ -20,14 +34,9 @@ call_types:
 - - insertions
   - INS
 
-# name of the sns output subdirectory from which to take input files 
-input_dir: 'BAM-GATK-RA-RC'
-
-# filename pattern to use for input file
-input_pattern: '*.dd.ra.rc.bam'
-
 # file extension for .bcf files
 output_SV_bcf_ext: .bcf
 
-# name of the parent directory to use for the program output
-output_dir_name: delly2-snv
+# file extension for .bcf files
+output_SV_vcf_ext: .vcf
+

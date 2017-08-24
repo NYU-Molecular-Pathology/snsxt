@@ -58,7 +58,7 @@ configs['input_dir'] = config.Delly2['input_dir']
 configs['input_pattern'] = config.Delly2['input_pattern']
 configs['output_SV_bcf_ext'] = config.Delly2['output_SV_bcf_ext']
 configs['output_dir_name'] = config.Delly2['output_dir_name']
-
+configs['output_SV_vcf_ext'] = config.Delly2['output_SV_vcf_ext']
 
 
 
@@ -68,10 +68,6 @@ def delly2_cmd(sampleID, bam_file, output_dir):
     Build the terminal commands to run Delly2 on a single sample
 
     Make a separate command for each SV calling type, concatenate them all together
-
-    example command:
-
-    delly call -t DEL -g "genome.fa" -o "results_dir/delly2-snv/Sample1.deletions.bcf" "results_dir/BAM-GATK-RA-RC/Sample1.dd.ra.rc.bam"
     '''
     # get params from config
     delly2_bin = configs['bin']
@@ -79,22 +75,37 @@ def delly2_cmd(sampleID, bam_file, output_dir):
     hg19_fa = configs['hg19_fa']
     call_types = configs['call_types']
     output_SV_bcf_ext = configs['output_SV_bcf_ext']
+    output_SV_vcf_ext = configs['output_SV_vcf_ext']
 
     # empty list to hold individual command strings
     SV_calling_commands = []
 
-    # make a command for each SV calling type
+    # make a command for each SV calling type:
     for call_type_name, call_type_arg in call_types:
+        # make filepath for the .bcf output
         sample_output_SV_bcf_basename = ''.join([sampleID, '.' + call_type_name, output_SV_bcf_ext])
         sample_output_SV_bcf = os.path.join(output_dir, sample_output_SV_bcf_basename)
+
+        # make filepath for the .vcf converted output
+        sample_output_SV_vcf_basename = ''.join([sampleID, '.' + call_type_name, output_SV_vcf_ext])
+        sample_output_SV_vcf = os.path.join(output_dir, sample_output_SV_vcf_basename)
+
+        # delly call -t DEL -g "genome.fa" -o "results_dir/delly2-snv/Sample1.deletions.bcf" "results_dir/BAM-GATK-RA-RC/Sample1.dd.ra.rc.bam"
+        # bcftools view "results_dir/delly2-snv/Sample1.deletions.bcf" > "results_dir/delly2-snv/Sample1.deletions.vcf"
         command = '''
 {0} call -t {1} -g "{2}" -o "{3}" "{4}"
+
+{5} view "{6}" "{7}"
 '''.format(
 delly2_bin,
 call_type_arg,
 hg19_fa,
 sample_output_SV_bcf,
-bam_file
+bam_file,
+
+bcftools_bin,
+sample_output_SV_bcf,
+sample_output_SV_vcf
 )
         SV_calling_commands.append(command)
 
@@ -129,24 +140,21 @@ def main(sample, extra_handlers = None):
 
     sample_bam = sample.list_none(sample.get_output_files(analysis_step = configs['input_dir'], pattern = configs['input_pattern']))
 
-
     if sample_bam and output_dir and qsub_log_dir:
         logger.debug('sample_bam: {0}'.format(sample_bam))
 
         # make the shell command to run
         command = delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir)
-        # logger.debug('command: {0}'.format(command))
 
         # submit the command as a qsub job on the HPC
-        command = 'sleep 30'
-        job = qsub.submit(command = command, name = task_name + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, sleeps = 1, verbose = True)
+        # commands to create debug jobs
+        # command = 'sleep 60'
+        # qsub_log_dir = qsub_log_dir[:-1]
+        job = qsub.submit(command = command, name = task_name + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
 
         return(job)
     else:
         logger.error('A required item does not exist')
-
-
-    # run_delly2(sample = sample)
 
 
 
