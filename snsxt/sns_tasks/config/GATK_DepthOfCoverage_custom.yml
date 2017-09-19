@@ -1,0 +1,26 @@
+# REQUIRED TASK ITEMS
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'BAM-GATK-RA-RC'
+
+# filename pattern to use for input file
+input_pattern: '*.dd.ra.rc.bam'
+
+# name of the parent directory to use for the program output
+output_dir_name: QC-Coverage-Custom
+
+
+
+
+# TASK SPECIFIC CUSTOM ITEMS
+# path to the GATK binary
+bin: /ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar
+
+# path to reference genome file to use
+ref_fasta: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
+
+thresholds:
+  - 10
+  - 50
+  - 100
+  - 200
+  - 500

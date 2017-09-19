@@ -50,7 +50,7 @@ from sns_classes.classes import SnsWESAnalysisOutput
 
 # ~~~~ LOAD sns_tasks MODULES ~~~~~~ #
 from sns_tasks import Delly2
-
+from sns_tasks import GATK_DepthOfCoverage_custom
 
 # ~~~~ GET EXTERNAL CONFIGS ~~~~~~ #
 import config
@@ -104,7 +104,12 @@ def main(analysis_dir, analysis_id = None, results_id = None):
     extra_handlers = [main_filehandler]
     x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
     logger.debug(x)
-    run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+
+    # Delly2
+    # run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+
+    # GATK_DepthOfCoverage_custom
+    run_qsub_analysis_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
 
     logger.info('All tasks completed')
 
