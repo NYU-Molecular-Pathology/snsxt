@@ -103,7 +103,7 @@ def gatk_DepthOfCoverage_cmd(sampleID, bam_file, intervals_bed_file, output_dir)
     readFilter = configs['readFilter']
     downsampling_type = configs['downsampling_type']
     thresholds_arg = make_tresholds_arg()
-    output_summary_file = os.path.join(output_dir, '{0}.sample_summary'.format(sampleID))
+    output_summary_file = os.path.join(output_dir, '{0}'.format(sampleID))
 
     gatk_cmd = '''
 java -Xms16G -Xmx16G -jar {0} -T DepthOfCoverage \
