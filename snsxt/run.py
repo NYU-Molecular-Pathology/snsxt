@@ -65,11 +65,11 @@ sns_config['analysis_output_index'] = analysis_output_index
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def run_qsub_analysis_task(analysis, task, *args, **kwargs):
+def run_qsub_sample_task(analysis, task, *args, **kwargs):
     '''
-    Run an analysis task that submits qsub jobs on all the samples in the analysis output
+    Run a task that submits qsub jobs on all the samples in the analysis output
     analysis is an SnsWESAnalysisOutput object
-    task is a module with a function 'main' that runs a single sample and returns a qsub Job object
+    task is a module with a function 'main' that returns a qsub Job object
     '''
     # get all the Sample objects for the analysis
     samples = analysis.get_samples()
@@ -83,6 +83,25 @@ def run_qsub_analysis_task(analysis, task, *args, **kwargs):
     logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
     # montitor the qsub jobs until they are all completed
     qsub.monitor_jobs(jobs = jobs)
+    return()
+
+def run_qsub_analysis_task(analysis, task, *args, **kwargs):
+    '''
+    Run a task that submits one qsub job for the analysis
+    analysis is an SnsWESAnalysisOutput object
+    task is a module with a function 'main' that returns a qsub Job object
+    '''
+    # empty list to hold the qsub jobs
+    jobs = []
+    # run the task on each sample; should return a qsub Job object
+    job = task.main(sample = sample, *args, **kwargs)
+    if job:
+        jobs.append(job)
+        logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+        # montitor the qsub jobs until they are all completed
+        qsub.monitor_jobs(jobs = jobs)
+    else:
+        logger.info("No jobs were submitted for task {0}".format(task.__name__))
     return()
 
 
@@ -105,11 +124,12 @@ def main(analysis_dir, analysis_id = None, results_id = None):
     x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
     logger.debug(x)
 
+    # run the per-sample tasks; each sample in the analysis is run individually
     # Delly2
-    run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+    run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
 
     # GATK_DepthOfCoverage_custom
-    run_qsub_analysis_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
+    run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
 
     logger.info('All tasks completed')
 
