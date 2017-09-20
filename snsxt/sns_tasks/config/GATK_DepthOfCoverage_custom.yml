@@ -12,6 +12,7 @@ output_dir_name: QC-Coverage-Custom
 
 
 # TASK SPECIFIC CUSTOM ITEMS
+# https://software.broadinstitute.org/gatk/documentation/tooldocs/current/org_broadinstitute_gatk_tools_walkers_coverage_DepthOfCoverage.php
 # path to the GATK binary
 bin: /ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar
 
@@ -24,3 +25,13 @@ thresholds:
   - 100
   - 200
   - 500
+
+minBaseQuality: 20
+minMappingQuality: 20
+nBins: 999
+start: 1
+stop: 1000
+outputFormat: csv
+readFilter: BadCigar
+downsampling_type: NONE
+

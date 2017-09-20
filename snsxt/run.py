@@ -106,7 +106,7 @@ def main(analysis_dir, analysis_id = None, results_id = None):
     logger.debug(x)
 
     # Delly2
-    # run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+    run_qsub_analysis_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
 
     # GATK_DepthOfCoverage_custom
     run_qsub_analysis_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
