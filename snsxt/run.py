@@ -65,11 +65,12 @@ sns_config['analysis_output_index'] = analysis_output_index
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def run_qsub_sample_task(analysis, task, *args, **kwargs):
+def run_qsub_sample_task(analysis, task, qsub_wait = True, *args, **kwargs):
     '''
     Run a task that submits qsub jobs on all the samples in the analysis output
     analysis is an SnsWESAnalysisOutput object
     task is a module with a function 'main' that returns a qsub Job object
+    qsub_wait = wait for all qsub jobs to complete
     '''
     # get all the Sample objects for the analysis
     samples = analysis.get_samples()
@@ -82,10 +83,11 @@ def run_qsub_sample_task(analysis, task, *args, **kwargs):
             jobs.append(job)
     logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
     # montitor the qsub jobs until they are all completed
-    qsub.monitor_jobs(jobs = jobs)
+    if qsub_wait:
+        qsub.monitor_jobs(jobs = jobs)
     return()
 
-def run_qsub_analysis_task(analysis, task, *args, **kwargs):
+def run_qsub_analysis_task(analysis, task, qsub_wait = True, *args, **kwargs):
     '''
     Run a task that submits one qsub job for the analysis
     analysis is an SnsWESAnalysisOutput object
@@ -98,8 +100,10 @@ def run_qsub_analysis_task(analysis, task, *args, **kwargs):
     if job:
         jobs.append(job)
         logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
-        # montitor the qsub jobs until they are all completed
-        qsub.monitor_jobs(jobs = jobs)
+
+        if qsub_wait:
+            # montitor the qsub jobs until they are all completed
+            qsub.monitor_jobs(jobs = jobs)
     else:
         logger.info("No jobs were submitted for task {0}".format(task.__name__))
     return()
@@ -126,7 +130,7 @@ def main(analysis_dir, analysis_id = None, results_id = None):
 
     # run the per-sample tasks; each sample in the analysis is run individually
     # Delly2
-    run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers)
+    run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
 
     # GATK_DepthOfCoverage_custom
     run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
