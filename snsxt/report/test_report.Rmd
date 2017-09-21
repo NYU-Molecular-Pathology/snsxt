@@ -1,0 +1,14 @@
+---
+output: html_document
+params:
+  input_dir: bar
+---
+
+```{r}
+if( ! exists('input_dir')){
+    print('input dir doesnt exist in the test chunk')
+} else {
+    print(input_dir)
+}
+
+```

@@ -1,0 +1,130 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+params:
+  input_dir: .
+---
+
+# Depth of Coverage
+
+```{r GATK_DepthOfCoverage_custom_setup}
+library("reshape2")
+library("ggplot2")
+
+# ~~~~~ FUNCTIONS ~~~~~ # 
+get_sample_summary_files <- function(input_dir){
+    # get the GATK DepthOfCoverage summary files present in the dir
+    sample_summary_files <- dir(input_dir, pattern = "*.sample_summary$", full.names = TRUE)
+    return(sample_summary_files)
+}
+
+read_sample_summary_file <- function(x, rmTotal = TRUE){
+    # read a GATK .csv formatted DepthOfCoverage sample_summary file into a dataframe
+    df <- read.delim(file = x, header = TRUE, sep = ',', row.names = 1, check.names = FALSE)
+    
+    # add 'sample' column from rownames
+    df[['sample']] <- rownames(df)
+    
+    # reorder columns
+    df <- df[c("sample", colnames(df)[which(colnames(df) != 'sample')])]
+    
+    # remove the 'Total' row
+    if(isTRUE(rmTotal)) df <- df[which(rownames(df) != 'Total'), ]
+    return(df)
+}
+
+
+make_sample_summary_df <- function(sample_summary_files){
+    # make a dataframe for printing in the report from the cutoff files
+    
+    # make a list of dataframes from every file
+    sample_summary_list <- lapply(X = sample_summary_files, FUN = read_sample_summary_file)
+    
+    # convert to a single dataframe
+    sample_summary_df <- do.call("rbind", sample_summary_list)
+    
+    return(sample_summary_df)
+}
+
+make_coverage_cutoff_table <- function(sample_summary_df){
+    # make a final dataframe for plotting from the cutoff files
+    
+    # get the columns that have the coverage cutoff values e.g. '%_bases_above_10'
+    bases_above_colnames <- grep(pattern = '%_bases_above_', x = colnames(sample_summary_df), value = TRUE)
+    
+    # make long table for just coverage cutoffs
+    coverage_cutoff_table <- reshape2::melt(sample_summary_df[c("sample", bases_above_colnames)], id.vars="sample", variable.name="coverage_cutoff", value.name="percent")
+    
+    # remove %_bases_above_ from 'coverage_cutoff' columns, convert to ordered factor
+    coverage_cutoffs <- sort(as.numeric(unique(gsub(pattern = '%_bases_above_', replacement = '', x = as.character(coverage_cutoff_table[["coverage_cutoff"]])))))
+    coverage_cutoff_table[["coverage_cutoff"]] <- factor(x = gsub(pattern = '%_bases_above_', replacement = '', x = as.character(coverage_cutoff_table[["coverage_cutoff"]])), levels = coverage_cutoffs)
+    return(coverage_cutoff_table)
+}
+
+make_boxplot <- function(coverage_cutoff_table){
+    coverage_cutoff_boxplot <- ggplot(data = coverage_cutoff_table, 
+                                      aes(x = coverage_cutoff, y = percent, fill = coverage_cutoff)) + 
+        geom_boxplot() + 
+        ggtitle("Percent of Bases Above Coverage Cutoff") + 
+        theme(legend.position="none")
+    return(coverage_cutoff_boxplot)
+}
+
+make_barplot <- function(coverage_cutoff_table){
+    coverage_cutoff_barplot <- ggplot(data = coverage_cutoff_table, aes(x = sample, y = percent, fill = coverage_cutoff)) +
+        geom_bar(stat="identity", position = "dodge") + 
+        ggtitle("Percent of Bases Above Coverage Cutoff") + 
+        coord_flip()
+    return(coverage_cutoff_barplot)
+}
+
+# ~~~~~ PARAMS ~~~~~ # 
+# try to get the input_dir if doesn't already exist
+if(! exists('input_dir')) input_dir <- params[["input_dir"]]
+
+```
+
+```{r}
+
+# ~~~~~ RUN ~~~~~ #
+# get the data files
+sample_summary_files <- get_sample_summary_files(input_dir)
+
+# wide table for report
+sample_summary_df <- make_sample_summary_df(sample_summary_files)
+
+# print(head(sample_summary_df))
+
+# long table for plot
+coverage_cutoff_table <- make_coverage_cutoff_table(sample_summary_df)
+
+# make plots
+coverage_cutoff_boxplot <- make_boxplot(coverage_cutoff_table)
+coverage_cutoff_barplot <- make_barplot(coverage_cutoff_table)
+
+# pack items to return in a list
+# do we still need this??
+report_data <- list(
+    coverage_cutoff_boxplot = coverage_cutoff_boxplot, 
+    coverage_cutoff_barplot = coverage_cutoff_barplot
+)
+
+```
+
+
+```{r, rownames.print = TRUE}
+sample_summary_df
+```
+
+```{r, fig.height=12, fig.width=8}
+if("coverage_cutoff_barplot" %in% names(report_data)) print(report_data[["coverage_cutoff_barplot"]])
+
+if("coverage_cutoff_boxplot" %in% names(report_data)) print(report_data[["coverage_cutoff_boxplot"]])
+```
+
+

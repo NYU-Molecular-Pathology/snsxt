@@ -1,0 +1,158 @@
+---
+title: "Report"
+author: "Stephen Kelly"
+date: "9/20/2017"
+output: 
+  html_document: 
+    css: report_styles.css 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+# Tabbed Sections {.tabset .tabset-fade .tabset-pills}
+library("knitr")
+library("yaml")
+
+knitr::opts_chunk$set(echo = FALSE)
+
+# load external config file
+report_config <- yaml.load_file('report_config.yml')
+
+# get a copy of the global environment
+report_global_env <- as.environment(1)
+
+```
+
+```{r find_child_docs}
+# search for child report documents to add to this report
+all_child_docs <- dir(pattern = '*_report.Rmd$', full.names = TRUE)
+
+# find any items in the excluded dirs
+remove_childs <- c()
+for(i in seq_along(all_child_docs)){
+    ichild <- all_child_docs[i]
+    
+    for(q in seq_along(report_config[["report_exclude_dirs"]])){
+        qpattern <- report_config[["report_exclude_dirs"]][q]
+        
+        # check if patter matches any dirnames
+        if(grepl(pattern = qpattern, x = dirname(ichild))){
+            remove_child <- grep(pattern = qpattern, x = dirname(ichild), value = TRUE)
+            remove_childs <- c(remove_childs, remove_child)
+        }
+    }
+}
+
+# remove items found to be in excluded dirs
+if(! is.null(remove_childs)) all_child_docs <- all_child_docs[which(! all_child_docs %in% remove_childs)]
+
+# empty vectors to hold expected vs. unexpected found docs
+known_child_docs <- c()
+unknown_child_docs <- c()
+
+for(i in seq_along(all_child_docs)){
+    ichild <- all_child_docs[i]
+    
+    # if the discovered child doc is listed in the config
+    if(basename(ichild) %in% names(report_config[["report_input_dirs"]])){
+        known_child_docs <- c(known_child_docs, ichild)
+    } else {
+        unknown_child_docs <- c(unknown_child_docs, ichild)
+    }
+}
+
+```
+
+|  ```{r, child = unknown_child_docs}
+| # knit unknown child docs normally
+| ``` 
+
+```{r knit_known_children, results='asis'}
+# if a child doc is in the report config, pass it special params when compiling
+
+# ~~~~~ FUNCTIONS ~~~~~ #
+knit_isolated_child <- function(input, parent_env, ...) {
+    # knit a child document in an isolated state, only inheriting the passed env
+    # this way, we can control which env the children inherit without them getting
+    # polluted with each others' envs (default action)
+    evaluationEnv <- list2env(x = list(...), parent = parent_env)
+    cat(asis_output(knit_child(input = input, envir = evaluationEnv, quiet = TRUE)))
+    # return(evaluationEnv)
+}
+
+# get_input_dir <- function(report_name, report_config){
+#     # get the matching input dir for a report from the config
+#     input_dir <- report_config[["report_input_dirs"]][[report_name]]
+#     return(input_dir)
+# }
+
+
+
+# ~~~~~ RUN ~~~~~ #
+# include known child docs, in the order listed in the config
+for(i in seq(length(report_config[["report_input_dirs"]]))){
+    # known report data from configs
+    report_name <- names(report_config[["report_input_dirs"]])[i]
+    input_dir <- report_config[["report_input_dirs"]][[i]]
+    
+    # skip if no known reports were found
+    if(is.null(known_child_docs)) break()
+    
+    # find matching discovered known reports
+    if(report_name %in% basename(known_child_docs)){
+        known_child_doc <- known_child_docs[which(basename(known_child_docs) == report_name)]
+        
+        # knit it
+        knit_isolated_child(input = known_child_doc, parent_env = report_global_env, input_dir = input_dir)
+        
+        # remove it from the vector of discovered reports
+        known_child_docs <- known_child_docs[ ! which(basename(known_child_docs) == report_name)]
+    }
+}
+
+# include each discovered known child doc in the order they were found (maybe not a good idea)
+# for(i in seq_along(known_child_docs)){
+#     ikchild <- known_child_docs[i]
+#     message(ikchild)
+#     input_dir <- get_input_dir(report_name = basename(known_child_docs[1]), report_config = report_config)
+#     message(input_dir)
+#     knit_isolated_child(input = ikchild, parent_env = report_global_env, input_dir = input_dir)
+# }
+
+```
+
+
+```{r, child = unknown_child_docs}
+``` 
+
+# System Information 
+
+```{r}
+# {.tabset .tabset-pills}
+
+## Hide
+
+## Show
+# system info
+cat(sprintf("System:\n%s\n%s", system("hostname", intern = TRUE), system("uname -srv", intern = TRUE)))
+cat(sprintf("System user:\n%s", system("whoami", intern = TRUE)))
+# dir
+cat(sprintf("System location:\n%s", system('pwd',intern=T)))
+
+# repo info
+cat(sprintf("Git Remote:\n%s\n", system('git remote -v',intern=T)))
+cat(sprintf("Git branch and commit\n%s", system('printf "%s: %s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)"',intern=T)))
+
+# date time
+cat(sprintf("Time and Date of report creation:\n%s", system("date", intern = TRUE)))
+
+# R system info, packages, etc
+sessionInfo()
+
+# save current session
+save.image(file="final_report_data.Rdata",compress = TRUE)
+```

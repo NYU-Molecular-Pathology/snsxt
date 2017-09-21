@@ -1,0 +1,9 @@
+# directories where each report should look for its input files
+# put these in the order which they should appear in the report
+report_input_dirs:
+  GATK_DepthOfCoverage_custom_report.Rmd: QC-Coverage-Custom
+  # GATK_DepthOfCoverage_custom_report.Rmd: example_custom_output2
+
+# patterns of dirs to exclude from inclusion in the report
+report_exclude_dirs: 
+  - 'snsxt*'
