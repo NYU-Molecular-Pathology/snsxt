@@ -147,8 +147,13 @@ def run():
     '''
     # ~~~~ GET SCRIPT ARGS ~~~~~~ #
     parser = argparse.ArgumentParser(description='snsxt: sns bioinformatics pipeline extension program')
+
     # required positional args
-    parser.add_argument("analysis_dir", help="Path to the analysis output directory used for the sns pipeline") # nargs=1,
+    parser.add_argument("analysis_dir",
+        # default analysis dir location is two levels above the 'snsxt/snsxt/run.py' dir
+         # /ifs/data/molecpathlab/scripts/snsxt/snsxt/run.py -> /ifs/data/molecpathlab/scripts
+        default = os.path.realpath(os.path.join(os.path.realpath(__file__), "../../../")),
+        help = "Path to the analysis output directory used for the sns pipeline", nargs="?") # ,
 
     # optional flags
     parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
@@ -163,6 +168,7 @@ def run():
     run_demo = args.run_demo
 
     logger.debug(args)
+
 
     if run_demo:
         demo()
