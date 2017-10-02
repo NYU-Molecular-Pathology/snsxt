@@ -216,7 +216,7 @@ def main(analysis_dir, analysis_id = None, results_id = None, report_only = Fals
 
         # run the per-sample tasks; each sample in the analysis is run individually
         # Delly2
-        # run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
+        run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
 
         # GATK_DepthOfCoverage_custom
         run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
