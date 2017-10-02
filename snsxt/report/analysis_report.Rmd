@@ -83,14 +83,9 @@ unknown_child_docs <- c()
 for(i in seq_along(report_config[["report_input_dirs"]])){
     report_input_dir <- report_config[["report_input_dirs"]][[i]]
     report_file <- names(report_config[["report_input_dirs"]])[i]
-    
-    cat(report_input_dir, file = 'mesages.txt')
-    cat(getwd(), file = 'mesages.txt', append = TRUE)
-    cat(report_file, file = 'mesages.txt', append = TRUE)
-    
+
     report_path <- normalizePath(file.path(report_input_dir, report_file))
-    cat(report_path, file = 'mesages.txt', append = TRUE)
-    
+
     # check if the expected dir exists
     if(dir.exists(report_input_dir)){
         # check if the report file exists

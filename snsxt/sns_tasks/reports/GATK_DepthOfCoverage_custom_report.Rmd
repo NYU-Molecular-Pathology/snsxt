@@ -90,6 +90,8 @@ make_barplot <- function(coverage_cutoff_table){
 if(! exists('input_dir')) input_dir <- params[["input_dir"]]
 
 # forget the passed input_dir params search the cwd instead I think that will actually work
+# because the cwd of the child doc appears to be the child doc file's dir
+# so '.' evaludates to whatever dir this child doc is in
 input_dir = '.'
 
 ```
