@@ -1,7 +1,7 @@
 ---
 title: "Report"
 author: "Stephen Kelly"
-date: "9/20/2017"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document: 
     css: report_styles.css 
@@ -24,6 +24,25 @@ report_config <- yaml.load_file('report_config.yml')
 
 # get a copy of the global environment
 report_global_env <- as.environment(1)
+
+# ~~~~~ FUNCTIONS ~~~~~ # 
+tsprintf <- function(fmt, ...){
+    # print a formatted message with timestamp
+    m <- sprintf(fmt, ...)
+    # message(sprintf('[%s] %s', format(Sys.time(), "%H:%M:%S"), m))
+    m <- sprintf('[%s] %s', format(Sys.time(), "%H:%M:%S"), m)
+    return(m)
+}
+
+# ~~~~~ FUNCTIONS ~~~~~ #
+knit_isolated_child <- function(input, parent_env, ...) {
+    # knit a child document in an isolated state, only inheriting the passed env
+    # this way, we can control which env the children inherit without them getting
+    # polluted with each others' envs (default action)
+    evaluationEnv <- list2env(x = list(...), parent = parent_env)
+    cat(asis_output(knit_child(input = input, envir = evaluationEnv, quiet = TRUE)))
+    # return(evaluationEnv)
+}
 
 ```
 
@@ -71,7 +90,7 @@ for(i in seq_along(all_child_docs)){
 
 ```
 
-```{r, find_known_child_docs}
+```{r, find_knit_known_child_docs, results='asis'}
 
 # only search for the known child docs instead
 
@@ -85,30 +104,31 @@ for(i in seq_along(report_config[["report_input_dirs"]])){
     report_file <- names(report_config[["report_input_dirs"]])[i]
 
     report_path <- normalizePath(file.path(report_input_dir, report_file))
+    
+    # cat(tsprintf('[%s] %s %s %s\n', getwd(), report_input_dir, report_file, report_path), file = "mesages.txt", append = TRUE)
 
     # check if the expected dir exists
     if(dir.exists(report_input_dir)){
         # check if the report file exists
         if(file.exists(report_path)){
-            known_child_docs <- c(known_child_docs, report_path)
+            # known_child_docs <- c(known_child_docs, report_path)
+            knit_isolated_child(input = report_path, parent_env = report_global_env, input_dir = report_input_dir)
         }
     }
 }
-
+# cat(tsprintf('%s\n', known_child_docs), file = "mesages.txt", append = TRUE)
 ```
 
-```{r knit_known_children, results='asis'}
+```{r knit_known_children, eval=FALSE, results='asis'}
+
+
+# something is screwed up here ditch this !! 
+# there is something broken in the loop, it only makes one iteration then dies halfway through the second
+
+
+
 # if a child doc is in the report config, pass it special params when compiling
 
-# ~~~~~ FUNCTIONS ~~~~~ #
-knit_isolated_child <- function(input, parent_env, ...) {
-    # knit a child document in an isolated state, only inheriting the passed env
-    # this way, we can control which env the children inherit without them getting
-    # polluted with each others' envs (default action)
-    evaluationEnv <- list2env(x = list(...), parent = parent_env)
-    cat(asis_output(knit_child(input = input, envir = evaluationEnv, quiet = TRUE)))
-    # return(evaluationEnv)
-}
 
 # get_input_dir <- function(report_name, report_config){
 #     # get the matching input dir for a report from the config
@@ -120,22 +140,35 @@ knit_isolated_child <- function(input, parent_env, ...) {
 
 # ~~~~~ RUN ~~~~~ #
 # include known child docs, in the order listed in the config
+cat(tsprintf('Knitting child docs...\n'), file = "mesages.txt", append = TRUE)
 for(i in seq(length(report_config[["report_input_dirs"]]))){
     # known report data from configs
     report_name <- names(report_config[["report_input_dirs"]])[i]
     input_dir <- report_config[["report_input_dirs"]][[i]]
     
+    cat(tsprintf('Now processing: %s %s\n', report_name, input_dir), file = "mesages.txt", append = TRUE)
+    cat(tsprintf('is.null(known_child_docs): %s \n', is.null(known_child_docs)), file = "mesages.txt", append = TRUE)
+    
     # skip if no known reports were found
-    if(is.null(known_child_docs)) break()
+    if(is.null(known_child_docs)){
+        cat(tsprintf('no items left in known_child_docs: %s\n', known_child_docs), file = "mesages.txt", append = TRUE)
+        break()
+    }
     
     # find matching discovered known reports
+    cat(tsprintf('known_child_docs %s \n', known_child_docs), file = "mesages.txt", append = TRUE)
+    cat(tsprintf('basename(known_child_docs) %s \n', basename(known_child_docs)), file = "mesages.txt", append = TRUE)
     if(report_name %in% basename(known_child_docs)){
         known_child_doc <- known_child_docs[which(basename(known_child_docs) == report_name)]
         
         # knit it
+        cat(tsprintf('Knitting: %s\n', known_child_doc), file = "mesages.txt", append = TRUE)
         knit_isolated_child(input = known_child_doc, parent_env = report_global_env, input_dir = input_dir)
         
         # remove it from the vector of discovered reports
+        cat(tsprintf('known_child_docs[ ! which(basename(known_child_docs) == report_name)]: %s\n', known_child_docs[ ! which(basename(known_child_docs) == report_name)]), file = "mesages.txt", append = TRUE)
+        cat(tsprintf('known_child_docs[ which(basename(known_child_docs) == report_name)]: %s\n', known_child_docs[ ! which(basename(known_child_docs) == report_name)]), file = "mesages.txt", append = TRUE)
+        
         known_child_docs <- known_child_docs[ ! which(basename(known_child_docs) == report_name)]
     }
 }
@@ -160,7 +193,7 @@ for(i in seq(length(report_config[["report_input_dirs"]]))){
 
 ```{r}
 # {.tabset .tabset-pills}
-
+# cat(tsprintf('printing system info \n'), file = "mesages.txt", append = TRUE)
 ## Hide
 
 ## Show

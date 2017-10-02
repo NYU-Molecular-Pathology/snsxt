@@ -1,0 +1,65 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+params:
+  input_dir: .
+---
+```{r report_summary_setup}
+library("knitr")
+# ~~~~~ FUNCTIONS ~~~~~ #
+file_scan <- function(my_file){
+    # function for reading info from a text file
+    file_contents <- scan(my_file, what="", sep="\n")
+    return(file_contents)
+}
+
+get_file_content <- function(my_file){
+    # function to return file contents or NA if file doesn't exit
+    file_contents <- "NA"
+    if (file.exists(my_file)) {
+        if (! identical(file_scan(my_file), character(0))) {
+            file_contents <- file_scan(my_file)
+        }
+    }
+    return(file_contents)
+}
+
+
+# ~~~~~ PARAMS ~~~~~ # 
+analysis_ID_file <- "analysis_id.txt"
+results_ID_file <- "results_id.txt"
+samples_fastq_raw_file <- "samples.fastq-raw.csv"
+
+analysis_ID <- get_file_content(analysis_ID_file)
+results_ID <- get_file_content(results_ID_file)
+
+
+samples_fastq_df <- read.delim(file = samples_fastq_raw_file, sep = ',', header = FALSE)
+colnames(samples_fastq_df) <- c("sample", "R1", "R2")
+samples_df <- as.data.frame(unique(as.character(samples_fastq_df[["sample"]])))
+colnames(samples_df) <- "sample"
+```
+
+# Summary
+
+This is the run summary
+
+Analysis ID:
+
+`r analysis_ID`
+
+Results ID:
+
+`r results_ID`
+
+## Samples
+
+```{r, results='asis'}
+kable(samples_df, row.names = TRUE, caption = "Samples included in the analysis") # , align = c("c")
+# datatable(samples_df, caption = "Samples included in the analysis")
+```

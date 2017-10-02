@@ -1,9 +1,13 @@
+# directories for the 'known' expected child documents
 # directories where each report should look for its input files
 # put these in the order which they should appear in the report
+# input_dir is relative to the top level of the analysis directory
 report_input_dirs:
   # key: value
   # report_file.Rmd: input_dir
-  GATK_DepthOfCoverage_custom_report.Rmd: QC-Coverage-Custom
+  summary_report.Rmd: "."
+  GATK_DepthOfCoverage_custom_report.Rmd: "QC-Coverage-Custom"
+  
   
 
 # patterns of dirs to exclude from inclusion in the report

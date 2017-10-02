@@ -68,6 +68,8 @@ sns_config['report_dir'] = config.snsxt['report_dir']
 sns_config['report_files'] = config.snsxt['report_files']
 sns_config['main_report'] = config.snsxt['main_report']
 sns_config['report_compile_script'] = config.snsxt['report_compile_script']
+sns_config['analysis_id_file'] = config.snsxt['analysis_id_file']
+sns_config['results_id_file'] = config.snsxt['results_id_file']
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -125,6 +127,17 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     setup the main analysis report in the analysis directory
     by copying over every associated file for the report to the output dir
     '''
+    # write the analysis_id and results_id to files for the report
+    analysis_id_file = sns_config['analysis_id_file']
+    analysis_id_filepath = os.path.join(output_dir, analysis_id_file)
+    with open(analysis_id_filepath, 'w') as f:
+        f.write(str(analysis_id))
+
+    results_id_file = sns_config['results_id_file']
+    results_id_filepath = os.path.join(output_dir, results_id_file)
+    with open(results_id_filepath, 'w') as f:
+        f.write(str(results_id))
+
     # set the main report output filename
     main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), sns_config['main_report'])
 

@@ -13,7 +13,12 @@ main_report: analysis_report.Rmd
 report_files: 
   - report_config.yml
   - report_styles.css
+  - summary_report.Rmd
 
 # script to use to compile the RMD reports
 report_compile_script: compile_RMD_report.R
 # ^ i.e. snsxt/snsxt/compile_RMD_report.R
+
+# files to write run meta data to for the report later
+analysis_id_file: analysis_id.txt
+results_id_file: results_id.txt
