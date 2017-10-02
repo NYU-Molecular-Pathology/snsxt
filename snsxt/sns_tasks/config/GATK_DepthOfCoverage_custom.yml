@@ -1,4 +1,5 @@
-# REQUIRED TASK ITEMS
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'BAM-GATK-RA-RC'
 
@@ -7,12 +8,20 @@ input_pattern: '*.dd.ra.rc.bam'
 
 # name of the parent directory to use for the program output
 output_dir_name: QC-Coverage-Custom
+# i.e. analysis_dir/QC-Coverage-Custom will be used
 
-# report file basename
-report_files: GATK_DepthOfCoverage_custom_report.Rmd
+# path to the `reports` directory relative to the `sns_tasks` dir
+# dont change this!
+report_dir: reports
+# ^ i.e. same as sns_tasks/reports
+
+# files in the `report_dir` associated with this sns_task
+report_files: 
+  - GATK_DepthOfCoverage_custom_report.Rmd
 
 
-# TASK SPECIFIC CUSTOM ITEMS
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # https://software.broadinstitute.org/gatk/documentation/tooldocs/current/org_broadinstitute_gatk_tools_walkers_coverage_DepthOfCoverage.php
 # path to the GATK binary
 bin: /ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar

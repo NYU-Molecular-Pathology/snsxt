@@ -58,7 +58,9 @@ make_coverage_cutoff_table <- function(sample_summary_df){
     bases_above_colnames <- grep(pattern = '%_bases_above_', x = colnames(sample_summary_df), value = TRUE)
     
     # make long table for just coverage cutoffs
-    coverage_cutoff_table <- reshape2::melt(sample_summary_df[c("sample", bases_above_colnames)], id.vars="sample", variable.name="coverage_cutoff", value.name="percent")
+    coverage_cutoff_table <- reshape2::melt(sample_summary_df[c("sample", bases_above_colnames)], 
+                                            id.vars="sample", 
+                                            variable.name="coverage_cutoff", value.name="percent")
     
     # remove %_bases_above_ from 'coverage_cutoff' columns, convert to ordered factor
     coverage_cutoffs <- sort(as.numeric(unique(gsub(pattern = '%_bases_above_', replacement = '', x = as.character(coverage_cutoff_table[["coverage_cutoff"]])))))
@@ -87,10 +89,12 @@ make_barplot <- function(coverage_cutoff_table){
 # try to get the input_dir if doesn't already exist
 if(! exists('input_dir')) input_dir <- params[["input_dir"]]
 
+# forget the passed input_dir params search the cwd instead I think that will actually work
+input_dir = '.'
+
 ```
 
 ```{r}
-
 # ~~~~~ RUN ~~~~~ #
 # get the data files
 sample_summary_files <- get_sample_summary_files(input_dir)

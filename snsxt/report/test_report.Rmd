@@ -4,7 +4,7 @@ params:
   input_dir: bar
 ---
 
-```{r}
+```{r test_report_setup}
 if( ! exists('input_dir')){
     print('input dir doesnt exist in the test chunk')
 } else {

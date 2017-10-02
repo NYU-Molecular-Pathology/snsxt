@@ -38,6 +38,7 @@ logger.debug("loading {0} module".format(task_name))
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
 import sys
 import csv
+import shutil
 # this program's modules
 import config
 
@@ -57,10 +58,13 @@ configs['stop'] = config.GATK_DepthOfCoverage_custom['stop']
 configs['outputFormat'] = config.GATK_DepthOfCoverage_custom['outputFormat']
 configs['readFilter'] = config.GATK_DepthOfCoverage_custom['readFilter']
 configs['downsampling_type'] = config.GATK_DepthOfCoverage_custom['downsampling_type']
+
 # analysis input/output locations
 configs['input_dir'] = config.GATK_DepthOfCoverage_custom['input_dir']
 configs['input_pattern'] = config.GATK_DepthOfCoverage_custom['input_pattern']
 configs['output_dir_name'] = config.GATK_DepthOfCoverage_custom['output_dir_name']
+configs['report_dir'] = config.GATK_DepthOfCoverage_custom['report_dir']
+configs['report_files'] = config.GATK_DepthOfCoverage_custom['report_files']
 
 
 
@@ -140,6 +144,29 @@ output_summary_file
 )
     return(gatk_cmd)
 
+def get_report_files():
+    '''
+    Get the files for the report based on the configs, return a list
+    '''
+    report_files = []
+    report_dir = os.path.join(scriptdir, configs['report_dir'])
+    for item in configs['report_files']:
+        file_path = os.path.join(report_dir, item)
+        report_files.append(file_path)
+    return(report_files)
+
+def setup_report(output_dir):
+    '''
+    Set up the report files output for the pipeline step
+    by copying over every associated file for the report to the output dir
+    '''
+    report_files = get_report_files()
+    logger.debug("Report files are: {0}".format(report_files))
+    for item in report_files:
+        output_file = os.path.join(output_dir, os.path.basename(item))
+        logger.debug("Copying report file '{0}' to '{1}' ".format(item, output_file))
+        shutil.copy2(item, output_file)
+
 
 def main(sample, extra_handlers = None):
     '''
@@ -164,6 +191,10 @@ def main(sample, extra_handlers = None):
     output_dir = t.mkdirs(path = os.path.join(sample.analysis_dir, configs['output_dir_name']), return_path = True)
     logger.debug('output_dir: {0}'.format(output_dir))
 
+    # setup the report output
+    setup_report(output_dir = output_dir)
+
+    # get the dir for the qsub logs
     qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
     logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 

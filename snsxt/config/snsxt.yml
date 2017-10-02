@@ -2,3 +2,18 @@
 
 # email addresses to send results to; format is 'email1@server.com,email2@server.com'
 email_recipients: '#MolecularPathology@nyumc.org'
+
+# path to the `report` directory relative to the `snsxt` dir
+# dont change this!
+report_dir: report
+# ^ i.e. same as snsxt/snsxt/report
+
+# files in the `report_dir` associated with this sns_task
+main_report: analysis_report.Rmd
+report_files: 
+  - report_config.yml
+  - report_styles.css
+
+# script to use to compile the RMD reports
+report_compile_script: compile_RMD_report.R
+# ^ i.e. snsxt/snsxt/compile_RMD_report.R
