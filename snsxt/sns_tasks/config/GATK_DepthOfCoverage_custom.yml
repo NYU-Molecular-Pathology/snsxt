@@ -8,7 +8,8 @@ input_pattern: '*.dd.ra.rc.bam'
 # name of the parent directory to use for the program output
 output_dir_name: QC-Coverage-Custom
 
-
+# report file basename
+report_files: GATK_DepthOfCoverage_custom_report.Rmd
 
 
 # TASK SPECIFIC CUSTOM ITEMS
@@ -19,6 +20,7 @@ bin: /ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar
 # path to reference genome file to use
 ref_fasta: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
 
+# coverage thresholds to measure
 thresholds:
   - 10
   - 50
@@ -28,6 +30,7 @@ thresholds:
   - 400
   - 500
 
+# params for the GATK DepthOfCoverage program
 minBaseQuality: 20
 minMappingQuality: 20
 nBins: 999

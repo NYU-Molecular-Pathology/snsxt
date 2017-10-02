@@ -54,7 +54,7 @@ from sns_tasks import GATK_DepthOfCoverage_custom
 
 # ~~~~ GET EXTERNAL CONFIGS ~~~~~~ #
 import config
-email_recipients = config.sns['email_recipients']
+email_recipients = config.snsxt['email_recipients']
 analysis_output_index = config.sns['analysis_output_index']
 
 
@@ -167,7 +167,7 @@ def run():
     results_id = args.results_id
     run_demo = args.run_demo
 
-    logger.debug(args)
+    # logger.debug(args)
 
 
     if run_demo:

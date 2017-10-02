@@ -8,7 +8,7 @@ Developed and tested with Python 2.7
 # ~~~~~ LOGGING ~~~~~~ #
 import logging
 logger = logging.getLogger("config")
-logger.debug("loading config module")
+logger.debug("loading sns_tasks config module")
 
 # ~~~~~ SETUP ~~~~~~ #
 import yaml
@@ -25,5 +25,5 @@ with open(os.path.join(scriptdir, 'GATK_DepthOfCoverage_custom.yml'), "r") as f:
     GATK_DepthOfCoverage_custom = yaml.load(f)
 
 
-logger.debug(Delly2)
-logger.debug(GATK_DepthOfCoverage_custom)
+# logger.debug(Delly2)
+# logger.debug(GATK_DepthOfCoverage_custom)
