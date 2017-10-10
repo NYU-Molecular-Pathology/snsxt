@@ -52,6 +52,8 @@ from sns_classes.classes import SnsWESAnalysisOutput
 # ~~~~ LOAD sns_tasks MODULES ~~~~~~ #
 from sns_tasks import Delly2
 from sns_tasks import GATK_DepthOfCoverage_custom
+from sns_tasks import Summary_Avg_Coverage
+
 
 # ~~~~ GET EXTERNAL CONFIGS ~~~~~~ #
 import config
@@ -192,6 +194,7 @@ def run_qsub_analysis_task(analysis, task, qsub_wait = True, *args, **kwargs):
     Run a task that submits one qsub job for the analysis
     analysis is an SnsWESAnalysisOutput object
     task is a module with a function 'main' that returns a qsub Job object
+    qsub_wait = wait for all qsub jobs to complete
     '''
     # empty list to hold the qsub jobs
     jobs = []
@@ -206,6 +209,15 @@ def run_qsub_analysis_task(analysis, task, qsub_wait = True, *args, **kwargs):
             qsub.monitor_jobs(jobs = jobs)
     else:
         logger.info("No jobs were submitted for task {0}".format(task.__name__))
+    return()
+
+def run_analysis_task(analysis, task, *args, **kwargs):
+    '''
+    Run a task that operates an analysis (not per-sample)
+    analysis is an SnsWESAnalysisOutput object
+    task is a module with a function 'main' that returns a qsub Job object
+    '''
+    task.main(analysis = analysis, *args, **kwargs)
     return()
 
 def demo():
@@ -229,10 +241,12 @@ def main(analysis_dir, analysis_id = None, results_id = None, report_only = Fals
 
         # run the per-sample tasks; each sample in the analysis is run individually
         # Delly2
-        run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
+        # run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
 
         # GATK_DepthOfCoverage_custom
-        run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
+        # run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
+
+        run_analysis_task(analysis = x, task = Summary_Avg_Coverage, extra_handlers = extra_handlers)
 
         logger.info('All tasks completed')
     logger.debug("Starting report setup")

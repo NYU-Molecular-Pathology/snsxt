@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Module for running custom thresholds GATK DepthOfCoverage with the sns pipeline
+Module for creating summaries of the average coverages for the analysis from GATK DepthOfCoverage output
 '''
 # ~~~~~ LOGGING ~~~~~~ #
 import logging
@@ -9,7 +9,7 @@ import os
 import sys
 
 # name for this task to use with logging, and elsewhere in the script
-task_name = "GATK_DepthOfCoverage_custom"
+task_name = "Summary_Avg_Coverage"
 
 # add parent dir to sys.path to import util
 scriptdir = os.path.dirname(os.path.realpath(__file__))
@@ -39,185 +39,84 @@ logger.debug("loading {0} module".format(task_name))
 import sys
 import csv
 import shutil
-# this program's modules
 import config
-
+import task_utils
 
 # ~~~~ SETUP CONFIGS ~~~~~~ #
 # get external configs, make internal configs
 configs = {}
-# GATK_DepthOfCoverage_custom program configs
-configs['bin'] = config.GATK_DepthOfCoverage_custom['bin']
-configs['ref_fasta'] = config.GATK_DepthOfCoverage_custom['ref_fasta']
-configs['thresholds'] = config.GATK_DepthOfCoverage_custom['thresholds']
-configs['minBaseQuality'] = config.GATK_DepthOfCoverage_custom['minBaseQuality']
-configs['minMappingQuality'] = config.GATK_DepthOfCoverage_custom['minMappingQuality']
-configs['nBins'] = config.GATK_DepthOfCoverage_custom['nBins']
-configs['start'] = config.GATK_DepthOfCoverage_custom['start']
-configs['stop'] = config.GATK_DepthOfCoverage_custom['stop']
-configs['outputFormat'] = config.GATK_DepthOfCoverage_custom['outputFormat']
-configs['readFilter'] = config.GATK_DepthOfCoverage_custom['readFilter']
-configs['downsampling_type'] = config.GATK_DepthOfCoverage_custom['downsampling_type']
+# from the script
+configs['this_script_timestamp'] = script_timestamp # 2017-10-10-16-44-52
+configs['this_scriptdir'] = scriptdir # /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks
+configs['this_scriptname'] = scriptname # Summary_Avg_Coverage.py
+configs['logdir'] = logdir # /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/logs
+configs['log_file'] = log_file
+# from global config
+configs['script_dir'] = config.sns_tasks['script_dir']
+configs['report_dir'] = config.sns_tasks['report_dir']
+# from this module config
+configs['input_dir'] = config.Summary_Avg_Coverage['input_dir']
+configs['input_pattern'] = config.Summary_Avg_Coverage['input_pattern']
+configs['output_dir_name'] = config.Summary_Avg_Coverage['output_dir_name']
+configs['report_files'] = config.Summary_Avg_Coverage['report_files']
+configs['script_files'] = config.Summary_Avg_Coverage['script_files']
+configs['run_script'] = config.Summary_Avg_Coverage['run_script']
 
-# analysis input/output locations
-configs['input_dir'] = config.GATK_DepthOfCoverage_custom['input_dir']
-configs['input_pattern'] = config.GATK_DepthOfCoverage_custom['input_pattern']
-configs['output_dir_name'] = config.GATK_DepthOfCoverage_custom['output_dir_name']
-configs['report_dir'] = config.GATK_DepthOfCoverage_custom['report_dir']
-configs['report_files'] = config.GATK_DepthOfCoverage_custom['report_files']
-
-
-
+configs['run_script_path'] = os.path.join(configs['this_scriptdir'], configs['script_dir'], configs['run_script'])
+# /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/calculate_average_coverages.R
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def make_tresholds_arg():
+def make_run_script_cmd(input_dir, output_dir, run_script):
     '''
-    Make the command line arg for the thresholds to use
-    ex: -ct 10 -ct 50 -ct 100 -ct 500
-
-    d = {'thresholds': [10, 50, 100, 200, 500]}
+    Make the shell command to run the run_script
     '''
-    thresholds = configs['thresholds']
-    return(' '.join(['-ct ' + str(x) for x in thresholds]))
-
-def gatk_DepthOfCoverage_cmd(sampleID, bam_file, intervals_bed_file, output_dir):
-    '''
-    Build the terminal commands to run GATK DepthOfCoverage on a single sample
-
-    ex:
-    $gatk_cmd -T DepthOfCoverage -dt NONE $gatk_log_level_arg \
-    -rf BadCigar \
-    --reference_sequence $ref_fasta \
-    --intervals $bed \
-    --omitDepthOutputAtEachBase \
-    -ct 10 -ct 50 -ct 100 -ct 500 -mbq 20 -mmq 20 --nBins 999 --start 1 --stop 1000 \
-    --input_file $bam \
-    --outputFormat csv \
-    --out $out_prefix
-    '''
-    # get params from config
-    GATK_bin = configs['bin']
-    ref_fasta = configs['ref_fasta']
-    minBaseQuality = configs['minBaseQuality']
-    minMappingQuality = configs['minMappingQuality']
-    nBins = configs['nBins']
-    start = configs['start']
-    stop = configs['stop']
-    outputFormat = configs['outputFormat']
-    readFilter = configs['readFilter']
-    downsampling_type = configs['downsampling_type']
-    thresholds_arg = make_tresholds_arg()
-    output_summary_file = os.path.join(output_dir, '{0}'.format(sampleID))
-
-    gatk_cmd = '''
-java -Xms16G -Xmx16G -jar {0} -T DepthOfCoverage \
---logging_level ERROR \
---downsampling_type {1} \
---read_filter {2} \
---reference_sequence {3} \
---omitDepthOutputAtEachBase \
-{4} \
---intervals {5} \
---minBaseQuality {6} \
---minMappingQuality {7} \
---nBins {8} \
---start {9} \
---stop {10} \
---input_file {11} \
---outputFormat {12} \
---out {13}
+    command = '''
+{0} -d {1} -o {2}
 '''.format(
-GATK_bin,
-downsampling_type,
-readFilter,
-ref_fasta,
-thresholds_arg,
-intervals_bed_file,
-minBaseQuality,
-minMappingQuality,
-nBins,
-start,
-stop,
-bam_file,
-outputFormat,
-output_summary_file
+run_script, # 0
+input_dir, # 1
+output_dir # 2
 )
-    return(gatk_cmd)
-
-def get_report_files():
-    '''
-    Get the files for the report based on the configs, return a list
-    '''
-    report_files = []
-    report_dir = os.path.join(scriptdir, configs['report_dir'])
-    for item in configs['report_files']:
-        file_path = os.path.join(report_dir, item)
-        report_files.append(file_path)
-    return(report_files)
-
-def setup_report(output_dir):
-    '''
-    Set up the report files output for the pipeline step
-    by copying over every associated file for the report to the output dir
-    '''
-    report_files = get_report_files()
-    logger.debug("Report files are: {0}".format(report_files))
-    for item in report_files:
-        output_file = os.path.join(output_dir, os.path.basename(item))
-        logger.debug("Copying report file '{0}' to '{1}' ".format(item, output_file))
-        shutil.copy2(item, output_file)
+    return(command)
 
 
-def main(sample, extra_handlers = None):
+def main(analysis, extra_handlers = None):
     '''
     Main control function for the program
-    Runs GATK DepthOfCoverage on a single sample from an sns analysis
-    sample is an SnsAnalysisSample object
-    return the qsub job for the sample
+    Creates summary coverage files for all samples in the analysis
     '''
-    # logger.debug(configs)
-    # sys.exit()
 
     # check for extra logger handlers that might have been passed
     if extra_handlers != None:
         for h in extra_handlers:
             logger.addHandler(h)
 
-    logger.debug('Sample is: {0}'.format(sample))
-    logger.debug(sample.static_files)
+    logger.debug('Analysis is: {0}'.format(analysis))
+    # logger.debug(sample.static_files)
     log.print_filehandler_filepaths_to_log(logger = logger)
 
     # setup the output locations
-    output_dir = t.mkdirs(path = os.path.join(sample.analysis_dir, configs['output_dir_name']), return_path = True)
+    output_dir = t.mkdirs(path = os.path.join(analysis.dir, configs['output_dir_name']), return_path = True)
     logger.debug('output_dir: {0}'.format(output_dir))
 
-    # setup the report output
-    setup_report(output_dir = output_dir)
+    logger.debug(os.getcwd())
+    logger.debug(configs['run_script_path'])
 
-    # get the dir for the qsub logs
-    qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
-    logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
+    input_dir = os.path.join(analysis.dir, configs['input_dir'])
 
-    sample_bam = sample.list_none(sample.get_output_files(analysis_step = configs['input_dir'], pattern = configs['input_pattern']))
-    targets_bed = sample.list_none(sample.get_files('targets_bed'))
+    # shell command to run
+    command = make_run_script_cmd(input_dir = input_dir, output_dir = output_dir, run_script = configs['run_script_path'])
+    logger.debug(command)
 
-    # logger.debug(make_tresholds_arg())
+    # need to change cwd for R commands to source the external tools file
+    with t.DirHop(os.path.dirname(configs['run_script_path'])) as d:
+        run_cmd = t.SubprocessCmd(command = command).run()
+        logger.debug(run_cmd.proc_stdout)
 
-    if sample_bam and output_dir and qsub_log_dir:
-        logger.debug('sample_bam: {0}'.format(sample_bam))
+    # sys.exit()
+    # set up the report
+    # task_utils.setup_report(output_dir, configs)
 
-        # make the shell command to run
-        command = gatk_DepthOfCoverage_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir, intervals_bed_file = targets_bed)
-        logger.debug(command)
-
-        # submit the command as a qsub job on the HPC
-        # commands to create debug jobs
-        # command = 'sleep 60'
-        # qsub_log_dir = qsub_log_dir[:-1]
-        job = qsub.submit(command = command, name = task_name + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
-        return(job)
-    else:
-        logger.error('A required item does not exist')
 
 def run():
     '''

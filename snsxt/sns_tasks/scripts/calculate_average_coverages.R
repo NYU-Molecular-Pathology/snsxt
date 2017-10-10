@@ -81,7 +81,7 @@ run_annotation_script <- function (bed_files) {
 option_list <- list(
     make_option(c("-d", "--dir"), action="store_true", default=FALSE, dest="dir_mode", 
                 help="Treat input items as directories to be searched for 'sample_interval_summary' files from GATK DepthOfCoverage output"),
-    make_option(c("--out_dir"), type="character", default='.', dest="out_dir", 
+    make_option(c("-o", "--out_dir"), type="character", default='.', dest="out_dir", 
                 help="Path to the output directory. Will be created and appended to the input item's file path"),
     make_option(c("--output_file_prefix"), type="character", default='', dest="output_file_prefix", 
                 help="File prefix for output files")
@@ -128,7 +128,7 @@ cat(coverage_files, sep = '\n')
 # ~~~~~~~ IMPORT AVERAGE COVERAGE PER REGION PER SAMPLE ~~~~~~~ #
 all_coverages_df <- build_all_coverages_df(coverage_files)
 
-avg_file <- make_output_filename(output_file_prefix, 'average_coverage_per_sample.tsv')
+avg_file <- file.path(out_dir, make_output_filename(output_file_prefix, 'average_coverage_per_sample.tsv'))
 
 tsprintf("Writing sample averages to file: %s", avg_file)
 write.table(x = all_coverages_df, sep = '\t', quote = FALSE, row.names = TRUE, col.names = NA, 
@@ -139,7 +139,7 @@ write.table(x = all_coverages_df, sep = '\t', quote = FALSE, row.names = TRUE, c
 region_coverages_df <- as.data.frame(rowMeans(all_coverages_df))
 colnames(region_coverages_df) <- "average_coverage"
 
-region_avg_file <- make_output_filename(output_file_prefix, 'average_coverage_per_region.tsv')
+region_avg_file <- file.path(out_dir, make_output_filename(output_file_prefix, 'average_coverage_per_region.tsv'))
 tsprintf("Writing region averages to file: %s", region_avg_file)
 write.table(x = region_coverages_df, sep = '\t', quote = FALSE, row.names = TRUE, col.names = FALSE, file = region_avg_file)
 
@@ -154,7 +154,7 @@ low_regions <- region_coverages_df[region_coverages_df["average_coverage"] < low
 tsprintf("Number of regions found: %s", nrow(low_regions))
 
 
-low_BED_file <- make_output_filename(output_file_prefix, sprintf('regions_coverage_below_%s.bed', low_cutoff))
+low_BED_file <- file.path(out_dir, make_output_filename(output_file_prefix, sprintf('regions_coverage_below_%s.bed', low_cutoff)))
 try_to_save_BED(df = low_regions, output_file = low_BED_file)
 
 save.image("calculate_average_coverages.Rdata")
@@ -163,7 +163,7 @@ tsprintf("Finding regions with coverage below 0")
 zero_regions <- region_coverages_df[region_coverages_df["average_coverage"] == 0, , drop = FALSE]
 tsprintf("Number of regions found: %s", nrow(zero_regions))
 
-zero_BED_file <- make_output_filename(output_file_prefix, "regions_with_coverage_0.bed")
+zero_BED_file <- file.path(out_dir, make_output_filename(output_file_prefix, "regions_with_coverage_0.bed"))
 
 try_to_save_BED(df = zero_regions, output_file = zero_BED_file)
 save.image("calculate_average_coverages.Rdata")

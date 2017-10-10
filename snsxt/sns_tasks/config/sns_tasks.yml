@@ -1,0 +1,11 @@
+# global settings for all sns_task submodules
+
+# path to the `scripts` directory relative to the `sns_tasks` dir
+# dont change this!
+script_dir: scripts
+# ^ i.e. same as sns_tasks/scripts
+
+# path to the `reports` directory relative to the `sns_tasks` dir
+# dont change this!
+report_dir: reports
+# ^ i.e. same as sns_tasks/reports

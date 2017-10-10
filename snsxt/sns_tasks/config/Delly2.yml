@@ -2,7 +2,7 @@
 # every sns_task should have these items
 
 # name of the parent Python module
-module_name: Delly2
+task_name: Delly2
 
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'BAM-GATK-RA-RC'
