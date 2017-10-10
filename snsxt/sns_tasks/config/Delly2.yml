@@ -1,4 +1,9 @@
-# REQUIRED TASK ITEMS
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+module_name: Delly2
+
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'BAM-GATK-RA-RC'
 
@@ -11,7 +16,7 @@ output_dir_name: VCF-SNV-Delly2
 
 
 
-# TASK SPECIFIC CUSTOM ITEMS
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # path to the Delly2 program binary
 bin: /ifs/home/kellys04/software/delly/src/delly
 

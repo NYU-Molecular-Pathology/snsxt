@@ -1,5 +1,9 @@
 # ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
 # every sns_task should have these items
+
+# name of the parent Python module
+module_name: GATK_DepthOfCoverage_custom
+
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'BAM-GATK-RA-RC'
 
@@ -15,7 +19,7 @@ output_dir_name: QC-Coverage-Custom
 report_dir: reports
 # ^ i.e. same as sns_tasks/reports
 
-# files in the `report_dir` associated with this sns_task
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
   - GATK_DepthOfCoverage_custom_report.Rmd
 
