@@ -33,9 +33,37 @@ cd snsxt
 snsxt/run.py ../ --analysis_id "<analysis_id>" --results_id "<results_id>" 
 ```
 
+# Program Components
+
+_Names and locations of these items may change with development_
+
+Starting at the parent `snsxt` (this repo's parent dir):
+
+- `snsxt`: main directory containing all code for the program
+
+- `snsxt/config`: configuration module for the main program
+
+- `snsxt/fixtures`: dummy analysis output files and directories for unit testing
+
+- `snsxt/logs/`: default program log output directory
+
+- [`snsxt/sns_classes`](https://github.com/NYU-Molecular-Pathology/sns_classes): submodule with Python classes for interacting with `sns` pipeline output
+
+- `snsxt/sns_tasks`: submodule containing additional analysis tasks to be performed in the program
+
+- [`snsxt/util`](https://github.com/NYU-Molecular-Pathology/util): submodule with utility functions and classes for usage in the program
+
+- `snsxt/log.py`: custom logging package for the program
+
+- `snsxt/logging.yml`: configurations for program logging
+
+- `snsxt/test.py`: script to run all unit tests in the program and its submodules
+
+- `snsxt/run.py`: main script used to run the program
+
 # Adding Modules
 
-This is a quick placeholder workflow for adding new analysis task modules to `snsxt`
+You can add new analysis task modules to `snsxt` by following this workflow:
 
 - enter the `sns_tasks` subdirectory and choose a pre-existing module to be the template:
 
@@ -43,7 +71,7 @@ This is a quick placeholder workflow for adding new analysis task modules to `sn
 cd snsxt/sns_tasks
 ```
 
-- make a copy of the selected template Python module with the new name you wish to use for the new module
+- make a copy of the selected template Python module with the new name you wish to use for the new module (e.g. `Summary_Avg_Coverage.py`)
 
 ```bash
 cp GATK_DepthOfCoverage_custom.py Summary_Avg_Coverage.py
