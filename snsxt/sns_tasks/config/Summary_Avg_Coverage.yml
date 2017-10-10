@@ -1,0 +1,64 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+module_name: Summary_Avg_Coverage
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'QC-coverage'
+
+# filename pattern to use for input file
+input_pattern: '*.sample_interval_summary'
+
+# name of the parent directory to use for the program output
+output_dir_name: Summary-Avg-Coverage
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# path to the `reports` directory relative to the `sns_tasks` dir
+# dont change this!
+report_dir: reports
+# ^ i.e. same as sns_tasks/reports
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+  - Summary_Avg_Coverage_report.Rmd
+
+# path to the `scripts` directory relative to the `sns_tasks` dir
+# dont change this!
+script_dir: scripts
+# ^ i.e. same as sns_tasks/scripts
+
+# files in the `scripts_dir` associated with this sns_task
+script_files: 
+  - calculate_average_coverages.R
+  - snsxt_tools.R
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+# https://software.broadinstitute.org/gatk/documentation/tooldocs/current/org_broadinstitute_gatk_tools_walkers_coverage_DepthOfCoverage.php
+# path to the GATK binary
+bin: /ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar
+
+# path to reference genome file to use
+ref_fasta: /local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
+
+# coverage thresholds to measure
+thresholds:
+  - 10
+  - 50
+  - 100
+  - 200
+  - 300
+  - 400
+  - 500
+
+# params for the GATK DepthOfCoverage program
+minBaseQuality: 20
+minMappingQuality: 20
+nBins: 999
+start: 1
+stop: 1000
+outputFormat: csv
+readFilter: BadCigar
+downsampling_type: NONE
+
