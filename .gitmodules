@@ -12,4 +12,4 @@
 	url = https://github.com/NYU-Molecular-Pathology/sns_classes.git
 [submodule "snsxt/sns_tasks/scripts/annotate-peaks"]
 	path = snsxt/sns_tasks/scripts/annotate-peaks
-	url = git@github.com:stevekm/annotate-peaks.git
+	url = https://github.com/stevekm/annotate-peaks.git
