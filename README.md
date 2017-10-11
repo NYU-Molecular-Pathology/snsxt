@@ -4,7 +4,7 @@ Extension to the sns pipeline
 
 # Overview
 
-This program is meant to be an extension to the [sns](https://github.com/NYU-Molecular-Pathology/sns) WES pipeline for whole/target exome sequencing data analysis. 
+This program is meant to be an extension to the [`sns wes`) pipeline](https://github.com/NYU-Molecular-Pathology/sns) for whole/target exome sequencing data analysis. 
 
 `snsxt` is a BYOC framework (Bring Your Own Code) for running downstream analysis tasks on sns-wes pipeline output. 
 
