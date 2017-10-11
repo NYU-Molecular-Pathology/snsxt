@@ -28,5 +28,10 @@ with open(os.path.join(scriptdir, 'GATK_DepthOfCoverage_custom.yml'), "r") as f:
 with open(os.path.join(scriptdir, 'Summary_Avg_Coverage.yml'), "r") as f:
     Summary_Avg_Coverage = yaml.load(f)
 
+with open(os.path.join(scriptdir, 'Annotation_inplace.yml'), "r") as f:
+    Annotation_inplace = yaml.load(f)
+
+
+
 # logger.debug(Delly2)
 # logger.debug(GATK_DepthOfCoverage_custom)

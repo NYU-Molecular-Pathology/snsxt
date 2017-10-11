@@ -1,0 +1,65 @@
+# config file for the task_utils function 'Annotation_inplace'
+# this is not a full task module but instead an ad hoc extra
+# function to be included in other modules
+
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: Annotation_inplace
+
+# name of the sns output subdirectory from which to take input files 
+# input_dir: ''
+
+# filename pattern to use for input file
+# input_pattern: '*'
+
+# name of the parent directory to use for the program output
+# output_dir_name: ''
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+# report_files: 
+#   - ''
+
+# files in the `scripts_dir` associated with this sns_task
+script_files: 
+  - annotate-peaks # parent dir for the collection of scripts
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+
+# the directory tree of the annotation scripts package for reference:
+# $ tree annotate-peaks
+# annotate-peaks
+# |-- ANNOVAR
+# |   |-- README.md
+# |   |-- annotate.R
+# |   `-- install.sh
+# |-- ChIPseeker
+# |   |-- README.md
+# |   `-- annotate.R
+# |-- README.md
+# |-- biomaRt_ChIPpeakAnno
+# |   |-- README.md
+# |   |-- annotate.R
+# |   |-- data
+# |   |   `-- hg19
+# |   |       `-- biomart_data.RData
+# `-- example-qsub-run.sh
+
+scripts_dir_name: annotate-peaks
+
+# different methods available for annotation in the package
+# each 'method' corresponds to the subdir with that name
+# method: script name
+annotation_methods:
+  ANNOVAR: "annotate.R"
+  ChIPseeker: "annotate.R"
+  biomaRt_ChIPpeakAnno: "annotate.R"
+
+# locations set from the 'annotate-peaks/ANNOVAR/install.sh' script
+ANNOVAR_bin_dir: "/ifs/data/molecpathlab/bin/annovar_annotate"
+ANNOVAR_db_dir: "/ifs/data/molecpathlab/bin/annovar_annotate/db"
+ANNOVAR_genome: "hg19"

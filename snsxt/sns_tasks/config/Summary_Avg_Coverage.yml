@@ -37,3 +37,5 @@ script_files:
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # script to run for the task
 run_script: calculate_average_coverages.R
+# annotation method to use with 'Annotation_inplace'
+annotation_method: "ANNOVAR"

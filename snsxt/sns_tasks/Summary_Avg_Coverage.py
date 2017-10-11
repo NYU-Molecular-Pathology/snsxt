@@ -36,11 +36,11 @@ main_filehandler_path = log.logger_filepath(logger = logger, handler_name = task
 logger.debug("loading {0} module".format(task_name))
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
-import sys
 import csv
 import shutil
 import config
 import task_utils
+from task_utils import Annotation_inplace
 
 # ~~~~ SETUP CONFIGS ~~~~~~ #
 # get external configs, make internal configs
@@ -61,6 +61,7 @@ configs['output_dir_name'] = config.Summary_Avg_Coverage['output_dir_name']
 configs['report_files'] = config.Summary_Avg_Coverage['report_files']
 configs['script_files'] = config.Summary_Avg_Coverage['script_files']
 configs['run_script'] = config.Summary_Avg_Coverage['run_script']
+configs['annotation_method'] = config.Summary_Avg_Coverage['annotation_method']
 
 configs['run_script_path'] = os.path.join(configs['this_scriptdir'], configs['script_dir'], configs['run_script'])
 # /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/calculate_average_coverages.R
@@ -91,6 +92,8 @@ def main(analysis, extra_handlers = None):
         for h in extra_handlers:
             logger.addHandler(h)
 
+
+
     logger.debug('Analysis is: {0}'.format(analysis))
     # logger.debug(sample.static_files)
     log.print_filehandler_filepaths_to_log(logger = logger)
@@ -111,9 +114,16 @@ def main(analysis, extra_handlers = None):
     # need to change cwd for R commands to source the external tools file
     with t.DirHop(os.path.dirname(configs['run_script_path'])) as d:
         run_cmd = t.SubprocessCmd(command = command).run()
-        logger.debug(run_cmd.proc_stdout)
+        logger.debug(run_cmd.proc_stderr)
 
-    # sys.exit()
+    logger.debug('task_utils.configs: {0}'.format(task_utils.configs))
+    logger.debug('task_utils.configs["Annotation_inplace"]: {0}'.format(task_utils.configs['Annotation_inplace']))
+
+    # reset the list of extra file handlers to pass to the annotation function
+    extra_handlers = [h for h in log.get_all_handlers(logger)]
+    Annotation_inplace(input_dir = output_dir, annotation_method = configs['annotation_method'], extra_handlers = extra_handlers)
+
+    sys.exit()
     # set up the report
     # task_utils.setup_report(output_dir, configs)
 
