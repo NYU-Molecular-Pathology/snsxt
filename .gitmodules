@@ -13,3 +13,6 @@
 [submodule "snsxt/sns_tasks/scripts/annotate-peaks"]
 	path = snsxt/sns_tasks/scripts/annotate-peaks
 	url = https://github.com/stevekm/annotate-peaks.git
+[submodule "snsxt/sns"]
+	path = snsxt/sns
+	url = https://github.com/igordot/sns.git
