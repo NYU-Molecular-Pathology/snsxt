@@ -53,6 +53,8 @@ Starting at the parent `snsxt` (this repo's parent dir):
 
 - [`snsxt/util`](https://github.com/NYU-Molecular-Pathology/util): submodule with utility functions and classes for usage in the program
 
+- `snsxt/report`: directory containing files and configuration for the parent analysis report
+
 - `snsxt/log.py`: custom logging package for the program
 
 - `snsxt/logging.yml`: configurations for program logging
@@ -108,6 +110,18 @@ open run.py
 
 # import your new module and add it to the `main` function to be run
 ```
+
+## Adding module reports
+
+Analysis task modules can have associated report files. These should be R Markdown formatted documents designed to be imported as child-documents to the parent report included in `snsxt/report`. A module specific report can be added like this:
+
+- set the names of all report file(s) in the [config for your task module](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/config/GATK_DepthOfCoverage_custom.yml#L23). 
+
+- include a [`setup_report`](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/GATK_DepthOfCoverage_custom.py#L158) function in your module, and [call it within your module's `main` function](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/GATK_DepthOfCoverage_custom.py#L195). This will make sure a copy of the report gets copied to the analysis output directory when the program runs.
+
+- add an entry for your new report in the [`snsxt/report` config file](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/report/report_config.yml#L9). 
+
+The new report should now be detected by the parent reporting R Markdown document and included in the final report output. 
 
 # Tests
 
