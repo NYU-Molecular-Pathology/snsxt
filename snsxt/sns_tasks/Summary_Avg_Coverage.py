@@ -62,6 +62,7 @@ configs['report_files'] = config.Summary_Avg_Coverage['report_files']
 configs['script_files'] = config.Summary_Avg_Coverage['script_files']
 configs['run_script'] = config.Summary_Avg_Coverage['run_script']
 configs['annotation_method'] = config.Summary_Avg_Coverage['annotation_method']
+configs['task_name'] = config.Summary_Avg_Coverage['task_name']
 
 configs['run_script_path'] = os.path.join(configs['this_scriptdir'], configs['script_dir'], configs['run_script'])
 # /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/calculate_average_coverages.R
@@ -123,10 +124,9 @@ def main(analysis, extra_handlers = None):
     extra_handlers = [h for h in log.get_all_handlers(logger)]
     Annotation_inplace(input_dir = output_dir, annotation_method = configs['annotation_method'], extra_handlers = extra_handlers)
 
-    sys.exit()
-    # set up the report
-    # task_utils.setup_report(output_dir, configs)
 
+    # set up the report
+    task_utils.setup_report(output_dir = output_dir, configs = configs)
 
 def run():
     '''

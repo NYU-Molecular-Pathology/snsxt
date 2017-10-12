@@ -60,9 +60,20 @@ configs['run_script_dir'] = os.path.join(configs['this_scriptdir'], configs['scr
 def get_report_files(configs):
     '''
     Get the files for the report based on the configs, return a list
+
+    configs['this_scriptdir'] = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts'
+    full path to the 'sns_tasks/scripts' dir
+
+    configs['report_dir'] = 'reports'
+
+    configs['task_name'] = 'name_of_sns_task'
+
+    configs['report_files'] = list of files in the report_dir to get
     '''
     report_files = []
-    report_dir = os.path.join(configs['script_dir'], configs['report_dir'])
+    logger.debug('Getting report files for task: {0}'.format(configs['task_name']))
+    # logger.debug('configs are: {0}'.format(configs))
+    report_dir = os.path.join(configs['this_scriptdir'], configs['report_dir'])
     for item in configs['report_files']:
         file_path = os.path.join(report_dir, item)
         report_files.append(file_path)
@@ -94,7 +105,10 @@ def Annotation_inplace(input_dir, annotation_method, extra_handlers = None):
     based on the external configs which are based on the subdirs in the annotation
     package
 
-    TODO: add testing to this function
+    TODO: add testing to this function... somehow...
+
+    example command output:
+    annotation_command = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/annotate-peaks/ANNOVAR/annotate.R -d /ifs/data/molecpathlab/scripts/snsxt/example_sns_analysis2/Summary-Avg-Coverage --bin-dir /ifs/data/molecpathlab/bin/annovar_annotate --db-dir /ifs/data/molecpathlab/bin/annovar_annotate/db --genome hg19'
     '''
     # check for extra logger handlers that might have been passed
     if extra_handlers != None:
@@ -140,8 +154,5 @@ genome # 4
     if annotation_command:
         run_cmd = t.SubprocessCmd(command = annotation_command).run()
         logger.debug(run_cmd.proc_stderr)
-
-
-
 
     return()

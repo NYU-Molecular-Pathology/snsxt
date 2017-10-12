@@ -1,0 +1,215 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+params:
+  input_dir: .
+---
+```{r Summary-Avg-Coverage_setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("reshape2")
+library("ggplot2")
+library("DT")
+library("data.table")
+
+# ~~~~~ FUNCTIONS ~~~~~ # 
+mycat <- function(text){
+    # function for formatting text in the report
+    cat(gsub(pattern = "\n", replacement = "  \n", x = text))
+}
+
+# ~~~~~ PARAMS ~~~~~ # 
+# try to get the input_dir if doesn't already exist
+if(! exists('input_dir')) input_dir <- params[["input_dir"]]
+
+# forget the passed input_dir params search the cwd instead I think that will actually work
+# because the cwd of the child doc appears to be the child doc file's dir
+# so '.' evaludates to whatever dir this child doc is in
+input_dir = '.'
+
+# files with the coverage per sample per region values
+coverage_per_sample_file <- 'average_coverage_per_sample.tsv'
+coverage_per_region_file <- 'average_coverage_per_region.tsv'
+
+coverage_per_sample_path <- file.path(input_dir, coverage_per_sample_file)
+coverage_per_region_path <- file.path(input_dir, coverage_per_region_file)
+
+
+# files with the annotations of regions that had low coverages
+regions_coverage_below_50_file <- "regions_coverage_below_50.hg19_multianno.txt"
+regions_with_coverage_0_file <- "regions_with_coverage_0.hg19_multianno.txt"
+
+regions_coverage_below_50_path <- file.path(input_dir, regions_coverage_below_50_file)
+regions_with_coverage_0_path <- file.path(input_dir, regions_with_coverage_0_file)
+
+# the coverages extend >10,000, need to cut off the plot for just entries <1,000
+y_lim <- 750
+
+```
+
+```{r coverage_per_sample}
+# ~~~~~ RUN ~~~~~ #
+# load data
+# coverage_per_region <- read.delim(file = coverage_per_region_path, header = FALSE, sep = '\t', check.names = FALSE)
+# colnames(coverage_per_region) <- c("region", "avg_cov")
+
+coverage_per_sample <- read.delim(file = coverage_per_sample_path, header = TRUE, sep = '\t', check.names = FALSE)
+colnames(coverage_per_sample)[1] <- "region"
+
+# calculate some stats for later
+coverage_per_sample[["mean"]] <- apply(X = coverage_per_sample[, which(! colnames(coverage_per_sample) %in% c("region"))], MARGIN = 1, FUN = mean)
+coverage_per_sample[["median"]] <- apply(X = coverage_per_sample[, which(! colnames(coverage_per_sample) %in% c("region"))], MARGIN = 1, FUN = median)
+coverage_per_sample[["sd"]] <- apply(X = coverage_per_sample[, which(! colnames(coverage_per_sample) %in% c("region"))], MARGIN = 1, FUN = sd)
+calc_cols <- c("mean", "median", "sd")
+
+# melt to long format for plot
+coverage_per_sample_long <- reshape2::melt(coverage_per_sample[, which(! colnames(coverage_per_sample) %in%  calc_cols)], 
+                                           id.vars="region", variable.name="sample", value.name="coverage")
+
+coverage_per_sample_long_lim <- coverage_per_sample_long[which(coverage_per_sample_long[["coverage"]] < y_lim), ]
+
+plot_title <- sprintf("Coverage Per Sample\n(for regions <%s coverage)", y_lim)
+
+coverage_per_sample_boxplot <- ggplot(data = coverage_per_sample_long_lim, 
+                                      aes(x = sample, y = coverage, fill = sample)) +
+    geom_abline(intercept = 200, slope = 0, color = "red")  + 
+    geom_boxplot() +
+    coord_flip(ylim = c(0, y_lim)) + 
+    ggtitle(plot_title) + 
+    scale_y_continuous(breaks = seq(from = 0, to = y_lim, by = 100)) + 
+    theme_bw() +
+    theme(legend.position="none", panel.grid.minor = element_blank())
+
+```
+
+```{r sample_mean_coverages}
+# calculate the mean and median coverages across all targets per sample
+meta_cols <- colnames(coverage_per_sample)[which(colnames(coverage_per_sample) %in% c("region", calc_cols))]
+# [1] "region" "mean"   "median" "sd"   
+sample_cols <- colnames(coverage_per_sample)[which(! colnames(coverage_per_sample) %in% meta_cols)]
+
+# avg_coverages <- as.data.frame(colMeans(coverage_per_sample[, sample_cols]))
+avg_coverages <- as.data.frame(cbind(
+    apply(X = coverage_per_sample[, sample_cols], MARGIN = 2, FUN = mean), 
+    apply(X = coverage_per_sample[, sample_cols], MARGIN = 2, FUN = median),
+    apply(X = coverage_per_sample[, sample_cols], MARGIN = 2, FUN = sd)
+))
+colnames(avg_coverages) <- c("mean", "median", "sd")
+avg_coverages[["sample"]] <- rownames(avg_coverages)
+
+avg_coverages_long <- reshape2::melt(avg_coverages, 
+                                     id.vars="sample", 
+                                     variable.name="value", 
+                                     value.name="coverage")
+
+# make bar plot of the mean and median coverages
+mean_coverages_barplot <- ggplot(data = avg_coverages_long, 
+                              aes(x = sample, y = coverage, fill = value)) + 
+    geom_abline(intercept = 200, slope = 0, color = "red")  + 
+    geom_bar(stat="identity", position = "dodge") + #  position = position_dodge(width = 2)# 
+    ggtitle("Coverage Per Sample Across All Regions") + 
+    scale_y_continuous(breaks = seq(from = 0, to = max(avg_coverages_long[["coverage"]]), by = 100)) +
+    coord_flip() +
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+
+```
+
+```{r coverage_per_region}
+coverage_per_region_hist <- ggplot(data=coverage_per_sample[, "mean", drop = FALSE], 
+                                   aes(x = mean)) +
+    # geom_vline(xintercept = 200, color = "red")  + # too hard to make the axis tick mark to match
+    geom_histogram(binwidth = 50, alpha = 0.9) + 
+    ggtitle("Average Coverage per Region Histogram") + 
+    ylab("number of regions") + 
+    xlab("average coverage value") +
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+
+# https://stackoverflow.com/questions/29824773/annotate-ggplot-with-an-extra-tick-and-label
+```
+
+```{r low_coverage_regions_ANNOVAR}
+# columns names expected from ANNOVAR
+ANNOVAR_cols_old <- c("Chr", "Start", "End", "Ref", "Alt", "cytoBand", 
+                      "Func.refGene", "Gene.refGene", "GeneDetail.refGene", 
+                      "ExonicFunc.refGene", "AAChange.refGene")
+
+# rename a few columns
+ANNOVAR_cols_new <- c("Chr", "Start", "End", "Ref", "Alt", "cytoBand", 
+                      "Function", "Gene", "GeneDetail", 
+                      "ExonicFunction", "AAChange")
+
+# columns to show in the report table
+cols_to_print <- c("Gene", "Chr", "Start", "End", "Function")
+
+# input_file = regions_coverage_below_50_path
+print_low_coverage_file <- function(input_file){
+    # need a special function to load and print these files
+    # because their contents or existence may not be guaranteed!
+    # this should be ANNOVAR formatted .hg19_multianno.txt
+    
+    # make sure file exists
+    if(! file.exists(input_file)){
+        mycat("No regions file found.")
+        return()
+    }
+    
+    # make sure file has >0 entries; skip the header line
+    num_lines <-  length(readLines(input_file)[-1])
+    if(num_lines < 1){
+        mycat("No regions found in file.")
+        return()
+    }
+    
+    # load the data
+    df <- read.delim(file = input_file, header = TRUE, sep = '\t', check.names = FALSE)
+    
+    # cleanup colnames
+    setnames(x = df, old = ANNOVAR_cols_old, new = ANNOVAR_cols_new)
+    
+    mycat(sprintf("%s total regions.\n\n", nrow(df)))
+    
+    # print the df to the report; requires code chunk 'asis' !!
+    datatable(df[cols_to_print])
+}
+
+```
+
+# Coverage Summary
+
+## Per Sample
+
+```{r print_mean_coverages_barplot}
+mean_coverages_barplot
+```
+
+```{r print_coverage_per_sample_boxplot}
+coverage_per_sample_boxplot
+```
+
+## Per Target Region
+
+```{r print_coverage_per_region_hist}
+coverage_per_region_hist
+```
+
+## Low Coverage Regions
+
+### Regions with Coverage <50
+
+```{r print_print_low_coverage_file_50, results='asis'}
+print_low_coverage_file(regions_coverage_below_50_path)
+```
+
+### Regions with 0 Coverage
+
+```{r print_print_low_coverage_file_0, results='asis'}
+print_low_coverage_file(regions_with_coverage_0_path)
+```
+
+
