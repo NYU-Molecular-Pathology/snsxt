@@ -70,18 +70,26 @@ make_coverage_cutoff_table <- function(sample_summary_df){
 
 make_boxplot <- function(coverage_cutoff_table){
     coverage_cutoff_boxplot <- ggplot(data = coverage_cutoff_table, 
-                                      aes(x = coverage_cutoff, y = percent, fill = coverage_cutoff)) + 
+                                      aes(x = coverage_cutoff, 
+                                          y = percent, 
+                                          fill = coverage_cutoff)) + 
         geom_boxplot() + 
         ggtitle("Percent of Bases Above Coverage Cutoff") + 
-        theme(legend.position="none")
+        theme_bw() +
+        theme(legend.position="none", panel.grid.minor = element_blank())
     return(coverage_cutoff_boxplot)
 }
 
 make_barplot <- function(coverage_cutoff_table){
-    coverage_cutoff_barplot <- ggplot(data = coverage_cutoff_table, aes(x = sample, y = percent, fill = coverage_cutoff)) +
+    coverage_cutoff_barplot <- ggplot(data = coverage_cutoff_table, 
+                                      aes(x = sample, 
+                                          y = percent, 
+                                          fill = coverage_cutoff)) +
         geom_bar(stat="identity", position = "dodge") + 
         ggtitle("Percent of Bases Above Coverage Cutoff") + 
-        coord_flip()
+        coord_flip() + 
+        theme_bw() +
+        theme(panel.grid.minor = element_blank())
     return(coverage_cutoff_barplot)
 }
 
