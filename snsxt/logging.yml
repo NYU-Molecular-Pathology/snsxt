@@ -46,3 +46,11 @@ loggers:
     level: DEBUG
     handlers: [console, main]
     propagate: true
+  task_func:
+    level: DEBUG
+    handlers: [console, main]
+    propagate: true
+  setup_report:
+    level: DEBUG
+    handlers: [console, main]
+    propagate: true

@@ -42,14 +42,18 @@ import csv
 import shutil
 from time import sleep
 import argparse
+import importlib
 
 # this program's modules
 from util import tools as t
 from util import find
 from util import qsub
 from sns_classes.classes import SnsWESAnalysisOutput
+import task_lists
+import task_func
 
 # ~~~~ LOAD sns_tasks MODULES ~~~~~~ #
+import sns_tasks
 from sns_tasks import Delly2
 from sns_tasks import GATK_DepthOfCoverage_custom
 from sns_tasks import Summary_Avg_Coverage
@@ -167,59 +171,6 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     logger.debug("Compiling report...")
     compile_RMD_report(input_file = main_report_path)
 
-def run_qsub_sample_task(analysis, task, qsub_wait = True, *args, **kwargs):
-    '''
-    Run a task that submits qsub jobs on all the samples in the analysis output
-    analysis is an SnsWESAnalysisOutput object
-    task is a module with a function 'main' that returns a qsub Job object
-    qsub_wait = wait for all qsub jobs to complete
-    '''
-    # get all the Sample objects for the analysis
-    samples = analysis.get_samples()
-    # empty list to hold the qsub jobs
-    jobs = []
-    for sample in samples:
-        # run the task on each sample; should return a qsub Job object
-        job = task.main(sample = sample, *args, **kwargs)
-        if job:
-            jobs.append(job)
-    logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
-    # montitor the qsub jobs until they are all completed
-    if qsub_wait:
-        qsub.monitor_jobs(jobs = jobs)
-    return()
-
-def run_qsub_analysis_task(analysis, task, qsub_wait = True, *args, **kwargs):
-    '''
-    Run a task that submits one qsub job for the analysis
-    analysis is an SnsWESAnalysisOutput object
-    task is a module with a function 'main' that returns a qsub Job object
-    qsub_wait = wait for all qsub jobs to complete
-    '''
-    # empty list to hold the qsub jobs
-    jobs = []
-    # run the task on each sample; should return a qsub Job object
-    job = task.main(sample = sample, *args, **kwargs)
-    if job:
-        jobs.append(job)
-        logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
-
-        if qsub_wait:
-            # montitor the qsub jobs until they are all completed
-            qsub.monitor_jobs(jobs = jobs)
-    else:
-        logger.info("No jobs were submitted for task {0}".format(task.__name__))
-    return()
-
-def run_analysis_task(analysis, task, *args, **kwargs):
-    '''
-    Run a task that operates an analysis (not per-sample)
-    analysis is an SnsWESAnalysisOutput object
-    task is a module with a function 'main' that returns a qsub Job object
-    '''
-    task.main(analysis = analysis, *args, **kwargs)
-    return()
-
 def demo():
     '''
     Demo of the script run for testing
@@ -230,27 +181,90 @@ def demo():
     main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
 
-def main(analysis_dir, analysis_id = None, results_id = None, report_only = False):
+def main(analysis_dir, task_list_file, analysis_id = None, results_id = None, report_only = False):
     '''
     Main control function for the program
     '''
-    if not report_only:
+    logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
+    # get the list of tasks to run
+    if task_list_file:
+        task_list = task_lists.get_tasks(input_file = task_list_file)
+    else:
+        task_list = {}
+
+    logger.debug('task_list config: {0}'.format(task_list))
+
+    # 'tasks' is an empty dict
+    if not task_list or not task_list.get('tasks', None):
+        logger.warning("No tasks were loaded from task_list_file: {0}".format(task_list_file))
+        # sys.exit()
+    # run the steps included in the config
+    else:
+        # load the analysis
         extra_handlers = [main_filehandler]
+        logger.debug('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, analysis_dir))
         x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
         logger.debug(x)
 
+        # run the tasks
+        # for key, value in t['tasks'].items(): print((key, value))
+        for task_name, task_params in task_list['tasks'].items():
+            # example
+            # get the run_func value if present in the config
+            run_func = None
+            if 'run_func' in task_params.keys():
+                run_func = task_params.pop('run_func')
+
+            # make sure that the task is present
+            logger.debug("Checking task '{0}' and function {1}".format(task_name, run_func))
+            if not task_name in dir(sns_tasks):
+                logger.debug("Task '{0}' is not a valid sns_task".format(task_name))
+                continue
+            # make sure the run function is present
+            if not run_func in dir(task_func) or not run_func:
+                logger.debug("run_func '{0}' is not a valid task function".format(run_func))
+                continue
+
+            # get the task module, e.g. sns_tasks.Delly2
+            task_modulename = 'sns_tasks.{0}'.format(task_name)
+            logger.debug("Loading task '{0}' from package '{1}'".format(task_name, 'sns_tasks'))
+            task_module = importlib.import_module(task_modulename)
+
+            # get the run function e.g. task_func.run_qsub_sample_task
+            # run_func_modulename = 'task_func.{0}'.format(run_func)
+            logger.debug("Loading run function '{0}' from package '{1}'".format(run_func, 'task_func'))
+            # run_func_module = importlib.import_module(run_func_modulename)
+            # method_to_call = getattr(foo, 'bar')
+            run_func_module = getattr(task_func, run_func)
+
+            # run the task
+            logger.debug('Running task {0} as module {1}, with params: {2}'.format(task_name, task_module, task_params))
+            run_func_module(analysis = x, task = task_module, extra_handlers = extra_handlers, **task_params)
+
+
+
+
+
+    # check if reporting was included in config
+    if task_list and task_list.get('setup_report', None):
+        logger.debug('Starting report setup')
+        setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
+
+    # if not report_only:
+        # extra_handlers = [main_filehandler]
+        # get the list of tasks to perform
         # run the per-sample tasks; each sample in the analysis is run individually
         # Delly2
         # run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
 
         # GATK_DepthOfCoverage_custom
-        run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
+        # run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
 
-        run_analysis_task(analysis = x, task = Summary_Avg_Coverage, extra_handlers = extra_handlers)
+        # run_analysis_task(analysis = x, task = Summary_Avg_Coverage, extra_handlers = extra_handlers)
 
-        logger.info('All tasks completed')
-    logger.debug("Starting report setup")
-    setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
+    logger.info('All tasks completed')
+
+
 
 
 
@@ -276,6 +290,7 @@ def run():
     parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
     parser.add_argument("--demo", default = False, action='store_true', dest = 'run_demo', help="Run the demo of the script instead of processing args")
     parser.add_argument("--report-only", default = False, action='store_true', dest = 'report_only', help="Only run the reporting steps of the program on the specified analysis directory")
+    parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
 
     args = parser.parse_args()
 
@@ -284,6 +299,7 @@ def run():
     results_id = args.results_id
     run_demo = args.run_demo
     report_only = args.report_only
+    task_list_file = args.task_list_file
 
     # logger.debug(args)
 
@@ -291,7 +307,7 @@ def run():
     if run_demo:
         demo()
     else:
-        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, report_only = report_only)
+        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, report_only = report_only, task_list_file = task_list_file)
 
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":

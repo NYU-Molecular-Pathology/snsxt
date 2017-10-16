@@ -1,0 +1,11 @@
+tasks:
+  # task_module_name: run_task_function
+  Delly2: 
+    run_func: run_qsub_sample_task
+    qsub_wait: False
+  GATK_DepthOfCoverage_custom: 
+    run_func: run_qsub_sample_task
+  Summary_Avg_Coverage: 
+    run_func: run_analysis_task
+
+setup_report: True
