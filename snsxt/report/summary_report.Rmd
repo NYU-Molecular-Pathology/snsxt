@@ -9,6 +9,7 @@ output:
 params:
   input_dir: .
 ---
+<!-- Report with sample table and read mapping info -->
 ```{r report_summary_setup, include=FALSE}
 library("knitr")
 library("yaml")

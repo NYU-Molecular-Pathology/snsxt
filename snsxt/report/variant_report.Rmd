@@ -1,0 +1,125 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+params:
+  input_dir: .
+---
+<!-- Report with GATK Haplotype Caller and LoFreq variant calling stats -->
+```{r variant_report_setup, include=FALSE}
+library("knitr")
+library("yaml")
+library("tools")
+library("data.table")
+library("reshape2")
+library("ggplot2")
+library("DT")
+
+# ~~~~~ FUNCTIONS ~~~~~ #
+get_firstline <- function(my_file){
+    if(length(readLines(my_file)) >= 1){
+        file_contents <- readLines(my_file)[1]
+    } else {
+        file_contents <- NA
+    }
+    return(file_contents)
+}
+
+
+# ~~~~~ PARAMS ~~~~~ # 
+report_config <- yaml.load_file("report_config.yml")
+
+analysis_ID_file <- tools::file_path_as_absolute(report_config[["analysis_id_file"]])
+results_ID_file <- tools::file_path_as_absolute(report_config[["results_id_file"]])
+samples_fastq_raw_file <- tools::file_path_as_absolute(report_config[["samples_fastq_raw_file"]])
+summary_combined_file <- tools::file_path_as_absolute(report_config[["summary_combined_file"]])
+
+GATK_HC_annot_file <- tools::file_path_as_absolute(report_config[["GATK_HC_annot_file"]])
+LoFreq_annot_file <- tools::file_path_as_absolute(report_config[["LoFreq_annot_file"]])
+GATK_summary_file <- tools::file_path_as_absolute(report_config[["GATK_summary_file"]])
+LoFreq_summary_file <- tools::file_path_as_absolute(report_config[["LoFreq_summary_file"]])
+```
+
+```{r load_variant_calls}
+# ~~~~~ LOAD DATA ~~~~~ # 
+
+# GATK HaplotypeCaller
+haplotype_caller_table_og <- read.delim(GATK_HC_annot_file, sep = ',')
+setnames(x = haplotype_caller_table_og, old = c("X.SAMPLE"), new = c("sample"))
+haplotype_caller_table <- haplotype_caller_table_og
+haplotype_caller_table <- reshape2::melt(haplotype_caller_table, id.vars="sample",variable.name="type",value.name="mutations")
+haplotype_caller_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(haplotype_caller_table[["type"]]))
+haplotype_caller_plot <- ggplot(data = haplotype_caller_table, aes(x = sample, y = mutations, fill = type)) + 
+    geom_bar(stat="identity", position = "dodge") + 
+    ggtitle("Number of Mutations per Sample") + 
+    coord_flip() + 
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+
+
+GATK_summary_plot <- ggplot(read.delim(file = GATK_summary_file, header = TRUE, sep = '\t'), 
+                            aes(x=SAMPLE, y=QUAL, fill=SAMPLE)) + 
+    geom_boxplot() + 
+    guides(fill=FALSE) + 
+    coord_flip() + 
+    ggtitle("GATK Variant Quality Scores") + 
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+
+# LoFreq
+lo_freq_table_og <- read.delim(LoFreq_annot_file, sep = ',')
+setnames(x = lo_freq_table_og, old = c("X.SAMPLE"), new = c("sample"))
+lo_freq_table <- lo_freq_table_og
+lo_freq_table <- reshape2::melt(lo_freq_table, id.vars="sample",variable.name="type",value.name="mutations")
+lo_freq_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(lo_freq_table[["type"]]))
+lo_freq_plot <- ggplot(data = lo_freq_table, aes(x = sample, y = mutations, fill = type)) + 
+    geom_bar(stat="identity", position = "dodge") + 
+    ggtitle("Number of Mutations per Sample") + 
+    coord_flip() +
+    theme_bw() +
+    theme(panel.grid.minor = element_blank()) 
+
+LoFreq_summary_plot <- ggplot(read.delim(file = LoFreq_summary_file, header = TRUE, sep = '\t'), 
+                              aes(x=SAMPLE, y=QUAL, fill=SAMPLE)) + 
+    geom_boxplot() + 
+    guides(fill=FALSE) + 
+    coord_flip() + 
+    ggtitle("LoFreq Variant Quality Scores") + 
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+
+```
+
+# Unpaired Variant Calling 
+
+## GATK HaplotypeCaller
+
+Number of mutations
+
+```{r}
+print(haplotype_caller_plot)
+```
+
+Quality scores 
+
+```{r}
+print(GATK_summary_plot)
+```
+
+## LoFreq 
+
+Number of mutations
+
+```{r}
+print(lo_freq_plot)
+```
+
+Quality scores 
+
+```{r}
+print(LoFreq_summary_plot)
+```

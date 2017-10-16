@@ -25,6 +25,7 @@ report_files:
   - report_config.yml
   - report_styles.css
   - summary_report.Rmd
+  - variant_report.Rmd
 
 # script to use to compile the RMD reports
 report_compile_script: compile_RMD_report.R
@@ -36,3 +37,7 @@ analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
 samples_fastq_raw_file: samples.fastq-raw.csv
 summary_combined_file: summary-combined.wes.csv
+GATK_HC_annot_file: "summary.VCF-GATK-HC-annot.csv"
+GATK_summary_file: "VCF-GATK-HC-annot.all.txt"
+LoFreq_annot_file: "summary.VCF-LoFreq-annot.csv"
+LoFreq_summary_file: "VCF-LoFreq-annot.all.txt"

@@ -8,6 +8,7 @@ report_input_dirs:
   # key: value
   # report_file.Rmd: input_dir
   summary_report.Rmd: "."
+  variant_report.Rmd: "."
   Summary_Avg_Coverage_report.Rmd: "Summary-Avg-Coverage"
   GATK_DepthOfCoverage_custom_report.Rmd: "QC-Coverage-Custom"
   
@@ -23,3 +24,7 @@ analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
 samples_fastq_raw_file: samples.fastq-raw.csv
 summary_combined_file: summary-combined.wes.csv
+GATK_HC_annot_file: "summary.VCF-GATK-HC-annot.csv"
+GATK_summary_file: "VCF-GATK-HC-annot.all.txt"
+LoFreq_annot_file: "summary.VCF-LoFreq-annot.csv"
+LoFreq_summary_file: "VCF-LoFreq-annot.all.txt"

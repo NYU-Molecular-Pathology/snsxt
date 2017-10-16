@@ -118,7 +118,6 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     logger.debug("Compiling report...")
     run_cmd = compile_RMD_report(input_file = main_report_path)
     if int(run_cmd.process.returncode) != 0:
-        logger.warning("Report compilation process finished with exit status {0}".format(run_cmd.process.returncode))
+        logger.warning("Report compilation process finished with exit status {0}; errors may have occured!".format(run_cmd.process.returncode))
     else:
         logger.debug("Finished compiling the report")
-        
