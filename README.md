@@ -102,6 +102,8 @@ open Summary_Avg_Coverage.py
 # edit the file with code for your task
 ```
 
+- import the module inside the [`sns_tasks/__init__.py` ](https://github.com/NYU-Molecular-Pathology/snsxt/blob/46bdb96fec023aa13727c3fac8ee0bd33de8503d/snsxt/sns_tasks/__init__.py#L8)
+
 - add the new module to the `run.py` file the same way other tasks are loaded & run, as appropriate
 
 ```bash
