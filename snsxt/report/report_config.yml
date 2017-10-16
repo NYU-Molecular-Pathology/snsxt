@@ -1,3 +1,5 @@
+# settings used by the R Markdown reports
+
 # directories for the 'known' expected child documents
 # directories where each report should look for its input files
 # put these in the order which they should appear in the report
@@ -14,3 +16,10 @@ report_input_dirs:
 # patterns of dirs to exclude from inclusion in the report
 report_exclude_dirs: 
   - 'snsxt*'
+
+# files to read run meta data from 
+# !! This also needs to be set in snsxt/config/snsxt.yml !! 
+analysis_id_file: analysis_id.txt
+results_id_file: results_id.txt
+samples_fastq_raw_file: samples.fastq-raw.csv
+summary_combined_file: summary-combined.wes.csv

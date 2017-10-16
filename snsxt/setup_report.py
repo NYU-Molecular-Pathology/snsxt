@@ -72,6 +72,8 @@ str(input_file) # 2
         logger.debug('Compiling the report...')
         run_cmd = t.SubprocessCmd(command = command).run()
         logger.debug(run_cmd.proc_stdout)
+        logger.debug(run_cmd.proc_stderr)
+        return(run_cmd)
 
 def setup_report(output_dir, analysis_id = None, results_id = None):
     '''
@@ -82,12 +84,12 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     analysis_id_file = sns_config['analysis_id_file']
     analysis_id_filepath = os.path.join(output_dir, analysis_id_file)
     with open(analysis_id_filepath, 'w') as f:
-        f.write(str(analysis_id))
+        f.write(str(analysis_id) + '\n')
 
     results_id_file = sns_config['results_id_file']
     results_id_filepath = os.path.join(output_dir, results_id_file)
     with open(results_id_filepath, 'w') as f:
-        f.write(str(results_id))
+        f.write(str(results_id) + '\n')
 
     # set the main report output filename
     main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), sns_config['main_report'])
@@ -114,4 +116,9 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
 
     # compile the report
     logger.debug("Compiling report...")
-    compile_RMD_report(input_file = main_report_path)
+    run_cmd = compile_RMD_report(input_file = main_report_path)
+    if int(run_cmd.process.returncode) != 0:
+        logger.warning("Report compilation process finished with exit status {0}".format(run_cmd.process.returncode))
+    else:
+        logger.debug("Finished compiling the report")
+        

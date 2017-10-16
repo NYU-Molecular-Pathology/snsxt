@@ -1,5 +1,5 @@
 ---
-title: "Report"
+title: "NGS580 Analysis Report"
 author: "Stephen Kelly"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 

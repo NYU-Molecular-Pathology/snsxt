@@ -1,4 +1,4 @@
+# only compile the reports for the sns pipeline output
 tasks:
-
 
 setup_report: True

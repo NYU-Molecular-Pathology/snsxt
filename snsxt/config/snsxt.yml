@@ -1,7 +1,16 @@
 # settings to use globally across the 'snsxt' program
 
+
+# ~~~~~ MAIL ~~~~~ # 
+# settings to use when sending email from the pipeline
 # email addresses to send results to; format is 'email1@server.com,email2@server.com'
 email_recipients: '#MolecularPathology@nyumc.org'
+
+
+
+
+# ~~~~~ REPORT ~~~~~ #
+# settings to use when setting up the reports for the pipeline
 
 # path to the `report` directory relative to the `snsxt` dir
 # dont change this!
@@ -9,7 +18,9 @@ report_dir: report
 # ^ i.e. same as snsxt/snsxt/report
 
 # files in the `report_dir` associated with this sns_task
+# parent report file
 main_report: analysis_report.Rmd
+# supporting report files
 report_files: 
   - report_config.yml
   - report_styles.css
@@ -20,5 +31,8 @@ report_compile_script: compile_RMD_report.R
 # ^ i.e. snsxt/snsxt/compile_RMD_report.R
 
 # files to write run meta data to for the report later
+# !! This also needs to be set in snsxt/report/report_config.yml !!
 analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
+samples_fastq_raw_file: samples.fastq-raw.csv
+summary_combined_file: summary-combined.wes.csv

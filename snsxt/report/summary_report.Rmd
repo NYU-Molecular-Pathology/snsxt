@@ -9,8 +9,14 @@ output:
 params:
   input_dir: .
 ---
-```{r report_summary_setup}
+```{r report_summary_setup, include=FALSE}
 library("knitr")
+library("yaml")
+library("tools")
+library("data.table")
+library("reshape2")
+library("ggplot2")
+
 # ~~~~~ FUNCTIONS ~~~~~ #
 file_scan <- function(my_file){
     # function for reading info from a text file
@@ -20,46 +26,96 @@ file_scan <- function(my_file){
 
 get_file_content <- function(my_file){
     # function to return file contents or NA if file doesn't exit
-    file_contents <- "NA"
-    if (file.exists(my_file)) {
-        if (! identical(file_scan(my_file), character(0))) {
-            file_contents <- file_scan(my_file)
-        }
+    # file_contents <- "NA"
+    # if (file.exists(my_file)) {
+    #     if (! identical(file_scan(my_file), character(0))) {
+    #         file_contents <- file_scan(my_file)
+    #     }
+    # }
+    # return(file_contents)
+    if(length(readLines(my_file)) > 1){
+        file_contents <- readLines(my_file)[1]
+    } else {
+        file_contents <- NA
+    }
+    
+}
+
+get_firstline <- function(my_file){
+    if(length(readLines(my_file)) >= 1){
+        file_contents <- readLines(my_file)[1]
+    } else {
+        file_contents <- NA
     }
     return(file_contents)
 }
 
 
 # ~~~~~ PARAMS ~~~~~ # 
-analysis_ID_file <- "analysis_id.txt"
-results_ID_file <- "results_id.txt"
-samples_fastq_raw_file <- "samples.fastq-raw.csv"
+# setwd("~/projects/Clinical_580_gene_panel/molecpathlab/scripts/snsxt/snsxt/report")
+report_config <- yaml.load_file("report_config.yml")
 
-analysis_ID <- get_file_content(analysis_ID_file)
-results_ID <- get_file_content(results_ID_file)
+analysis_ID_file <- tools::file_path_as_absolute(report_config[["analysis_id_file"]])
+results_ID_file <- tools::file_path_as_absolute(report_config[["results_id_file"]])
+samples_fastq_raw_file <- tools::file_path_as_absolute(report_config[["samples_fastq_raw_file"]])
+summary_combined_file <- tools::file_path_as_absolute(report_config[["summary_combined_file"]])
+save.image(file = 'load_summary_params.Rdata')
 
+# ~~~~~ LOAD DATA ~~~~~ # 
+# setwd("~/projects/Clinical_580_gene_panel/molecpathlab/scripts/snsxt/example_sns_analysis2")
+analysis_ID <- get_firstline(analysis_ID_file)
+results_ID <- get_firstline(results_ID_file)
 
+# load the samples table
 samples_fastq_df <- read.delim(file = samples_fastq_raw_file, sep = ',', header = FALSE)
 colnames(samples_fastq_df) <- c("sample", "R1", "R2")
 samples_df <- as.data.frame(unique(as.character(samples_fastq_df[["sample"]])))
 colnames(samples_df) <- "sample"
+
+# load the summary combined file
+summary_combined_table <- read.delim(file = summary_combined_file, sep = ',')
+setnames(x = summary_combined_table, old = c("X.SAMPLE"), new = c("sample"))
+
 ```
+
+```{r, mapping_table}
+# make the mapping table and plots
+mapping_table <- summary_combined_table[, "sample", drop = FALSE]
+mapping_table["mapped"] <- summary_combined_table[["MAPPED.READS"]]
+mapping_table["deduplicated"] <- summary_combined_table[["DEDUPLICATED.READS"]]
+
+mapping_table <- reshape2::melt(mapping_table,id.vars="sample",variable.name="type",value.name="reads")
+
+mapping_table[["reads"]] <- as.numeric(mapping_table[["reads"]]) / 1e6
+
+mapping_table[["type"]] <- factor(x = mapping_table[["type"]], levels = sort(unique(as.character(mapping_table[["type"]]), decreasing = TRUE)))
+
+mapping_plot <- ggplot(data = mapping_table, aes(x = sample, y = reads, fill = type)) + 
+    geom_bar(stat="identity", position = "dodge") + 
+    ggtitle("Sample Read Mapping") + 
+    coord_flip() + 
+    ylab("reads (millions)") + 
+    theme_bw() +
+    theme(panel.grid.minor = element_blank())
+```
+
 
 # Summary
 
-This is the run summary
+Analysis ID: __`r as.character(analysis_ID)`__
 
-Analysis ID:
-
-`r analysis_ID`
-
-Results ID:
-
-`r results_ID`
+Results ID: __`r as.character(results_ID)`__
 
 ## Samples
 
-```{r, results='asis'}
+```{r print_samples_df, results='asis'}
 kable(samples_df, row.names = TRUE, caption = "Samples included in the analysis") # , align = c("c")
 # datatable(samples_df, caption = "Samples included in the analysis")
+```
+
+
+## Mapping
+
+```{r print_mapping_plot, fig.height=12, fig.width=8}
+print(mapping_plot)
 ```

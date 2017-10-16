@@ -82,7 +82,6 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
         logger.debug(x)
 
         # run the tasks
-        # for key, value in t['tasks'].items(): print((key, value))
         for task_name, task_params in task_list['tasks'].items():
             # example
             # get the run_func value if present in the config
@@ -106,10 +105,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
             task_module = importlib.import_module(task_modulename)
 
             # get the run function e.g. task_func.run_qsub_sample_task
-            # run_func_modulename = 'task_func.{0}'.format(run_func)
             logger.debug("Loading run function '{0}' from package '{1}'".format(run_func, 'task_func'))
-            # run_func_module = importlib.import_module(run_func_modulename)
-            # method_to_call = getattr(foo, 'bar')
             run_func_module = getattr(task_func, run_func)
 
             # run the task

@@ -1,5 +1,5 @@
+# the standard tasks to perform on an sns wes pipeline output
 tasks:
-  # task_module_name: run_task_function
   Delly2: 
     run_func: run_qsub_sample_task
     qsub_wait: False
