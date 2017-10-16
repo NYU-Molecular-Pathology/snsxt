@@ -181,23 +181,14 @@ def demo():
     main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
 
-def main(analysis_dir, task_list_file, analysis_id = None, results_id = None, report_only = False):
+def main(analysis_dir, task_list, analysis_id = None, results_id = None):
     '''
     Main control function for the program
     '''
-    logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
-    # get the list of tasks to run
-    if task_list_file:
-        task_list = task_lists.get_tasks(input_file = task_list_file)
-    else:
-        task_list = {}
-
-    logger.debug('task_list config: {0}'.format(task_list))
-
-    # 'tasks' is an empty dict
+    # run the tasks in the task list
+    #  check if 'tasks' is an empty dict
     if not task_list or not task_list.get('tasks', None):
-        logger.warning("No tasks were loaded from task_list_file: {0}".format(task_list_file))
-        # sys.exit()
+        logger.warning("No tasks were loaded")
     # run the steps included in the config
     else:
         # load the analysis
@@ -242,32 +233,12 @@ def main(analysis_dir, task_list_file, analysis_id = None, results_id = None, re
             run_func_module(analysis = x, task = task_module, extra_handlers = extra_handlers, **task_params)
 
 
-
-
-
     # check if reporting was included in config
     if task_list and task_list.get('setup_report', None):
         logger.debug('Starting report setup')
         setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
-    # if not report_only:
-        # extra_handlers = [main_filehandler]
-        # get the list of tasks to perform
-        # run the per-sample tasks; each sample in the analysis is run individually
-        # Delly2
-        # run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
-
-        # GATK_DepthOfCoverage_custom
-        # run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
-
-        # run_analysis_task(analysis = x, task = Summary_Avg_Coverage, extra_handlers = extra_handlers)
-
     logger.info('All tasks completed')
-
-
-
-
-
 
 
 def run():
@@ -289,7 +260,6 @@ def run():
     parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
     parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
     parser.add_argument("--demo", default = False, action='store_true', dest = 'run_demo', help="Run the demo of the script instead of processing args")
-    parser.add_argument("--report-only", default = False, action='store_true', dest = 'report_only', help="Only run the reporting steps of the program on the specified analysis directory")
     parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
 
     args = parser.parse_args()
@@ -298,16 +268,21 @@ def run():
     analysis_id = args.analysis_id
     results_id = args.results_id
     run_demo = args.run_demo
-    report_only = args.report_only
     task_list_file = args.task_list_file
-
     # logger.debug(args)
 
+    logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
+    # get the list of tasks to run
+    if task_list_file:
+        task_list = task_lists.get_tasks(input_file = task_list_file)
+    else:
+        task_list = {}
+    logger.debug('task_list config loaded: {0}'.format(task_list))
 
     if run_demo:
         demo()
     else:
-        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, report_only = report_only, task_list_file = task_list_file)
+        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list)
 
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":
