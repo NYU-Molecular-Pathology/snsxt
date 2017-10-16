@@ -14,6 +14,7 @@ scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
 # set a timestamped log file for debug log
 log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.log'.format(scriptname, script_timestamp))
+email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scriptname, script_timestamp))
 
 def logpath():
     '''
@@ -22,6 +23,12 @@ def logpath():
     '''
     global log_file
     return(log.logpath(logfile = log_file))
+
+def email_logpath():
+    '''
+    Return the path for the email log output
+    '''
+    return(log.logpath(logfile = email_log_file))
 
 # load the logging config
 config_yaml = os.path.join(scriptdir, 'logging.yml')
@@ -118,6 +125,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
         setup_report.setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
     logger.info('All tasks completed')
+    log.log_all_handler_filepaths(logger)
 
 
 def run():

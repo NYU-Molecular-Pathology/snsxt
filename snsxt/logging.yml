@@ -20,37 +20,45 @@ handlers:
     () : __main__.logpath
     level: DEBUG   
     formatter: default
+  email:
+    () : __main__.email_logpath
+    level: INFO   
+    formatter: email
 
 loggers:
   run:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   config:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   tools:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   find:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   git:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   qsub:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   task_func:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
     propagate: true
   setup_report:
     level: DEBUG
-    handlers: [console, main]
+    handlers: [console, main, email]
+    propagate: true
+  mail:
+    level: DEBUG
+    handlers: [console, main, email]
     propagate: true
