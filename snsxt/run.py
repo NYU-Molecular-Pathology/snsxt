@@ -83,7 +83,6 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
 
         # run the tasks
         for task_name, task_params in task_list['tasks'].items():
-            # example
             # get the run_func value if present in the config
             run_func = None
             if 'run_func' in task_params.keys():
@@ -139,7 +138,6 @@ def run():
     # optional flags
     parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
     parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
-    parser.add_argument("--demo", default = False, action='store_true', dest = 'run_demo', help="Run the demo of the script instead of processing args")
     parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
 
     args = parser.parse_args()
@@ -147,7 +145,6 @@ def run():
     analysis_dir = args.analysis_dir
     analysis_id = args.analysis_id
     results_id = args.results_id
-    run_demo = args.run_demo
     task_list_file = args.task_list_file
     # logger.debug(args)
 
@@ -159,10 +156,7 @@ def run():
         task_list = {}
     logger.debug('task_list config loaded: {0}'.format(task_list))
 
-    if run_demo:
-        demo()
-    else:
-        main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list)
+    main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list)
 
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":

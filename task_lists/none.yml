@@ -1,0 +1,4 @@
+# dont perform any tasks
+tasks:
+
+setup_report: False
