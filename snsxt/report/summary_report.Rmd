@@ -18,29 +18,6 @@ library("reshape2")
 library("ggplot2")
 
 # ~~~~~ FUNCTIONS ~~~~~ #
-file_scan <- function(my_file){
-    # function for reading info from a text file
-    file_contents <- scan(my_file, what="", sep="\n")
-    return(file_contents)
-}
-
-get_file_content <- function(my_file){
-    # function to return file contents or NA if file doesn't exit
-    # file_contents <- "NA"
-    # if (file.exists(my_file)) {
-    #     if (! identical(file_scan(my_file), character(0))) {
-    #         file_contents <- file_scan(my_file)
-    #     }
-    # }
-    # return(file_contents)
-    if(length(readLines(my_file)) > 1){
-        file_contents <- readLines(my_file)[1]
-    } else {
-        file_contents <- NA
-    }
-    
-}
-
 get_firstline <- function(my_file){
     if(length(readLines(my_file)) >= 1){
         file_contents <- readLines(my_file)[1]
@@ -52,7 +29,6 @@ get_firstline <- function(my_file){
 
 
 # ~~~~~ PARAMS ~~~~~ # 
-# setwd("~/projects/Clinical_580_gene_panel/molecpathlab/scripts/snsxt/snsxt/report")
 report_config <- yaml.load_file("report_config.yml")
 
 analysis_ID_file <- tools::file_path_as_absolute(report_config[["analysis_id_file"]])
@@ -62,7 +38,6 @@ summary_combined_file <- tools::file_path_as_absolute(report_config[["summary_co
 save.image(file = 'load_summary_params.Rdata')
 
 # ~~~~~ LOAD DATA ~~~~~ # 
-# setwd("~/projects/Clinical_580_gene_panel/molecpathlab/scripts/snsxt/example_sns_analysis2")
 analysis_ID <- get_firstline(analysis_ID_file)
 results_ID <- get_firstline(results_ID_file)
 
