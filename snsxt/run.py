@@ -244,7 +244,7 @@ def main(analysis_dir, analysis_id = None, results_id = None, report_only = Fals
         # run_qsub_sample_task(analysis = x, task = Delly2, extra_handlers = extra_handlers, qsub_wait = False)
 
         # GATK_DepthOfCoverage_custom
-        # run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
+        run_qsub_sample_task(analysis = x, task = GATK_DepthOfCoverage_custom, extra_handlers = extra_handlers)
 
         run_analysis_task(analysis = x, task = Summary_Avg_Coverage, extra_handlers = extra_handlers)
 
