@@ -78,7 +78,8 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
     Main control function for the program
     '''
     # load the analysis
-    extra_handlers = [main_filehandler]
+    # extra_handlers = [main_filehandler]
+    extra_handlers = [h for h in log.get_all_handlers(logger)]
     logger.debug('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, analysis_dir))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
     logger.debug(analysis)
