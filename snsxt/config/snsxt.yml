@@ -6,6 +6,11 @@
 # email addresses to send results to; format is 'email1@server.com,email2@server.com'
 email_recipients: '#MolecularPathology@nyumc.org'
 
+# files to include in the email output from the parent analysis dir
+mail_files:
+  - "RunParameters.xml"
+  - "RunParameters.txt"
+  - "summary-combined.wes.csv"
 
 
 

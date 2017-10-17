@@ -52,13 +52,13 @@ import argparse
 import importlib
 
 # this program's modules
+import config
 from util import tools as t
 from util import find
 from util import qsub
 from sns_classes.classes import SnsWESAnalysisOutput
 import task_lists
 import task_func
-import run_config
 import setup_report
 
 # ~~~~ LOAD sns_tasks MODULES ~~~~~~ #
@@ -69,7 +69,7 @@ from sns_tasks import Summary_Avg_Coverage
 
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
-sns_config = run_config.sns_config
+configs = config.config
 
 
 def main(analysis_dir, task_list, analysis_id = None, results_id = None):
@@ -85,7 +85,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
         # load the analysis
         extra_handlers = [main_filehandler]
         logger.debug('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, analysis_dir))
-        x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = sns_config, extra_handlers = extra_handlers)
+        x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
         logger.debug(x)
 
         # run the tasks

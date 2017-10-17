@@ -8,7 +8,7 @@ import os
 import shutil
 from util import log
 import logging
-import run_config
+import config
 from util import tools as t
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
-sns_config = run_config.sns_config
+configs = config.config
 
 
 
@@ -29,8 +29,8 @@ def get_report_files():
     Get the files for the report based on the configs, return a list
     '''
     report_files = []
-    report_dir = os.path.join(scriptdir, sns_config['report_dir'])
-    for item in sns_config['report_files']:
+    report_dir = os.path.join(scriptdir, configs['report_dir'])
+    for item in configs['report_files']:
         file_path = os.path.join(report_dir, item)
         report_files.append(file_path)
     return(report_files)
@@ -39,8 +39,8 @@ def get_main_report_file():
     '''
     get the path to the main report file
     '''
-    report_dir = os.path.join(scriptdir, sns_config['report_dir'])
-    main_report_file = os.path.join(report_dir, sns_config['main_report'])
+    report_dir = os.path.join(scriptdir, configs['report_dir'])
+    main_report_file = os.path.join(report_dir, configs['main_report'])
     return(main_report_file)
 
 def compile_RMD_report(input_file):
@@ -48,7 +48,7 @@ def compile_RMD_report(input_file):
     Compile an RMD report using the script set in the configs
     '''
     # path to the script that does the document compiling
-    compile_script = os.path.join(scriptdir, sns_config['report_compile_script'])
+    compile_script = os.path.join(scriptdir, configs['report_compile_script'])
 
     # shell command to run before running the script to make sure the environment is set right
     setup_command = 'module load pandoc/1.13.1'
@@ -81,18 +81,18 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     by copying over every associated file for the report to the output dir
     '''
     # write the analysis_id and results_id to files for the report
-    analysis_id_file = sns_config['analysis_id_file']
+    analysis_id_file = configs['analysis_id_file']
     analysis_id_filepath = os.path.join(output_dir, analysis_id_file)
     with open(analysis_id_filepath, 'w') as f:
         f.write(str(analysis_id) + '\n')
 
-    results_id_file = sns_config['results_id_file']
+    results_id_file = configs['results_id_file']
     results_id_filepath = os.path.join(output_dir, results_id_file)
     with open(results_id_filepath, 'w') as f:
         f.write(str(results_id) + '\n')
 
     # set the main report output filename
-    main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), sns_config['main_report'])
+    main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), configs['main_report'])
 
     # copy over the main report
     main_report_path = os.path.join(output_dir, main_report_filename)
