@@ -16,3 +16,4 @@ foo
 *.Rdata
 example_sns_analysis3
 snsxt/sns/*
+example_sns_analysis4/

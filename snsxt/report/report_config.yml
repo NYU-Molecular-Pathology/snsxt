@@ -9,6 +9,7 @@ report_input_dirs:
   # report_file.Rmd: input_dir
   summary_report.Rmd: "."
   variant_report.Rmd: "."
+  paired_variant_report.Rmd: "." # special input_dir handling inside report
   Summary_Avg_Coverage_report.Rmd: "Summary-Avg-Coverage"
   GATK_DepthOfCoverage_custom_report.Rmd: "QC-Coverage-Custom"
   
@@ -24,7 +25,19 @@ analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
 samples_fastq_raw_file: samples.fastq-raw.csv
 summary_combined_file: summary-combined.wes.csv
+samples_pairs_file: "samples.pairs.csv"
 GATK_HC_annot_file: "summary.VCF-GATK-HC-annot.csv"
 GATK_summary_file: "VCF-GATK-HC-annot.all.txt"
 LoFreq_annot_file: "summary.VCF-LoFreq-annot.csv"
 LoFreq_summary_file: "VCF-LoFreq-annot.all.txt"
+# dirs for the tumor-normal paired variant calling output;
+# these may or may not exist depending how sns was run
+# MuTect2_vcf_dir: "VCF-MuTect2-test"
+# MuTect2_annot_dir: "VCF-MuTect2-annot-test"
+# Strelka_vcf_dir: "VCF-Strelka-test"
+# Strelka_annot_dir: "VCF-Strelka-annot-test"
+MuTect2_annot_file: "VCF-MuTect2-annot.all.txt"
+MuTect2_summary_file: "summary.VCF-MuTect2-annot.csv"
+Strelka_annot_file: "VCF-Strelka-annot.all.txt"
+Strelka_summary_file: "summary.VCF-Strelka-annot.csv"
+

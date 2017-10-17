@@ -19,15 +19,17 @@ library("reshape2")
 library("ggplot2")
 library("DT")
 
+source("report_tools.R")
+
 # ~~~~~ FUNCTIONS ~~~~~ #
-get_firstline <- function(my_file){
-    if(length(readLines(my_file)) >= 1){
-        file_contents <- readLines(my_file)[1]
-    } else {
-        file_contents <- NA
-    }
-    return(file_contents)
-}
+# get_firstline <- function(my_file){
+#     if(length(readLines(my_file)) >= 1){
+#         file_contents <- readLines(my_file)[1]
+#     } else {
+#         file_contents <- NA
+#     }
+#     return(file_contents)
+# }
 
 
 # ~~~~~ PARAMS ~~~~~ # 
@@ -55,7 +57,7 @@ haplotype_caller_table <- reshape2::melt(haplotype_caller_table, id.vars="sample
 haplotype_caller_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(haplotype_caller_table[["type"]]))
 haplotype_caller_plot <- ggplot(data = haplotype_caller_table, aes(x = sample, y = mutations, fill = type)) + 
     geom_bar(stat="identity", position = "dodge") + 
-    ggtitle("Number of Mutations per Sample") + 
+    ggtitle("GATK HaplotypeCaller\nNumber of Mutations per Sample") + 
     coord_flip() + 
     theme_bw() +
     theme(panel.grid.minor = element_blank())
@@ -66,7 +68,7 @@ GATK_summary_plot <- ggplot(read.delim(file = GATK_summary_file, header = TRUE, 
     geom_boxplot() + 
     guides(fill=FALSE) + 
     coord_flip() + 
-    ggtitle("GATK Variant Quality Scores") + 
+    ggtitle("GATK HaplotypeCaller\nVariant Quality Scores") + 
     theme_bw() +
     theme(panel.grid.minor = element_blank())
 
@@ -78,7 +80,7 @@ lo_freq_table <- reshape2::melt(lo_freq_table, id.vars="sample",variable.name="t
 lo_freq_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(lo_freq_table[["type"]]))
 lo_freq_plot <- ggplot(data = lo_freq_table, aes(x = sample, y = mutations, fill = type)) + 
     geom_bar(stat="identity", position = "dodge") + 
-    ggtitle("Number of Mutations per Sample") + 
+    ggtitle("LoFreq\nNumber of Mutations per Sample") + 
     coord_flip() +
     theme_bw() +
     theme(panel.grid.minor = element_blank()) 
@@ -88,7 +90,7 @@ LoFreq_summary_plot <- ggplot(read.delim(file = LoFreq_summary_file, header = TR
     geom_boxplot() + 
     guides(fill=FALSE) + 
     coord_flip() + 
-    ggtitle("LoFreq Variant Quality Scores") + 
+    ggtitle("LoFreq\nVariant Quality Scores") + 
     theme_bw() +
     theme(panel.grid.minor = element_blank())
 
@@ -100,13 +102,13 @@ LoFreq_summary_plot <- ggplot(read.delim(file = LoFreq_summary_file, header = TR
 
 Number of mutations
 
-```{r}
+```{r, fig.height=8}
 print(haplotype_caller_plot)
 ```
 
 Quality scores 
 
-```{r}
+```{r, fig.height=8}
 print(GATK_summary_plot)
 ```
 
@@ -114,12 +116,12 @@ print(GATK_summary_plot)
 
 Number of mutations
 
-```{r}
+```{r, fig.height=8}
 print(lo_freq_plot)
 ```
 
 Quality scores 
 
-```{r}
+```{r, fig.height=8}
 print(LoFreq_summary_plot)
 ```

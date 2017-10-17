@@ -184,18 +184,18 @@ print_low_coverage_file <- function(input_file){
 
 ## Per Sample
 
-```{r print_mean_coverages_barplot}
-mean_coverages_barplot
+```{r print_mean_coverages_barplot, fig.height=8}
+print(mean_coverages_barplot)
 ```
 
-```{r print_coverage_per_sample_boxplot}
-coverage_per_sample_boxplot
+```{r print_coverage_per_sample_boxplot, fig.height=8}
+print(coverage_per_sample_boxplot)
 ```
 
 ## Per Target Region
 
-```{r print_coverage_per_region_hist}
-coverage_per_region_hist
+```{r print_coverage_per_region_hist, fig.height=8}
+print(coverage_per_region_hist)
 ```
 
 ## Low Coverage Regions

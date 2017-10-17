@@ -18,16 +18,7 @@ library("data.table")
 library("reshape2")
 library("ggplot2")
 
-# ~~~~~ FUNCTIONS ~~~~~ #
-get_firstline <- function(my_file){
-    if(length(readLines(my_file)) >= 1){
-        file_contents <- readLines(my_file)[1]
-    } else {
-        file_contents <- NA
-    }
-    return(file_contents)
-}
-
+source("report_tools.R")
 
 # ~~~~~ PARAMS ~~~~~ # 
 report_config <- yaml.load_file("report_config.yml")
@@ -92,6 +83,6 @@ kable(samples_df, row.names = TRUE, caption = "Samples included in the analysis"
 
 ## Mapping
 
-```{r print_mapping_plot, fig.height=12, fig.width=8}
+```{r print_mapping_plot, fig.height=11.5, fig.width=8}
 print(mapping_plot)
 ```

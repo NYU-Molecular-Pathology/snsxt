@@ -137,7 +137,9 @@ sample_summary_df
 
 ```{r, fig.height=12, fig.width=8}
 if("coverage_cutoff_barplot" %in% names(report_data)) print(report_data[["coverage_cutoff_barplot"]])
+```
 
+```{r, fig.height=8, fig.width=8}
 if("coverage_cutoff_boxplot" %in% names(report_data)) print(report_data[["coverage_cutoff_boxplot"]])
 ```
 

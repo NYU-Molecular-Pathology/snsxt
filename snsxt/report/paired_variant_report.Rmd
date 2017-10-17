@@ -1,0 +1,204 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+---
+<!-- Report with GATK MuTect2 other paired tumor-normal variant calling stats -->
+```{r paired_variant_report_setup, include=FALSE}
+library("knitr")
+library("yaml")
+library("tools")
+library("data.table")
+library("reshape2")
+library("ggplot2")
+library("DT")
+
+source("report_tools.R")
+
+# ~~~~~ PARAMS ~~~~~ # 
+report_config <- yaml.load_file("report_config.yml")
+
+analysis_ID_file <- report_config[["analysis_id_file"]]
+results_ID_file <- report_config[["results_id_file"]]
+samples_fastq_raw_file <- report_config[["samples_fastq_raw_file"]]
+summary_combined_file <- report_config[["summary_combined_file"]]
+samples_pairs_file <- report_config[["samples_pairs_file"]]
+
+MuTect2_annot_file <- report_config[["MuTect2_annot_file"]]
+MuTect2_summary_file <- report_config[["MuTect2_summary_file"]]
+Strelka_annot_file <- report_config[["Strelka_annot_file"]]
+Strelka_summary_file <- report_config[["Strelka_summary_file"]]
+```
+
+```{r load_paired_variant_calls}
+# ~~~~~ LOAD DATA ~~~~~ # 
+print_MuTect2_info <- function(MuTect2_annot_file){
+    # print a statement if the file does not exist
+    if(! file.exists(MuTect2_annot_file)){
+        mycat('MuTect2 paired tumor-normal variant calling output was not found for this analysis.')
+    }
+}
+
+print_MuTect2_qual_plot <- function(MuTect2_annot_file){
+    if(file.exists(MuTect2_annot_file)){
+        annot_df <- read.delim(file = MuTect2_annot_file, header = TRUE, sep = '\t', check.names = FALSE)
+        annot_df[["SamplePair"]] <- paste(sprintf('%s (T)', annot_df[["SAMPLE T"]]), 
+                                          sprintf('%s (N)', annot_df[["SAMPLE N"]]),
+                                          sep = '\n')
+        MuTect2_qual_plot <- ggplot(data = annot_df, 
+                                    aes(x=SamplePair, y=QUAL, fill=SamplePair)) + 
+            geom_boxplot() + 
+            guides(fill=FALSE) + 
+            coord_flip() + 
+            ggtitle("GATK MuTect2\nVariant Quality Scores") + 
+            theme_bw() +
+            theme(panel.grid.minor = element_blank())
+        print(MuTect2_qual_plot)
+    }
+}
+
+
+print_MuTect2_summ_plot <- function(MuTect2_summary_file, samples_pairs_file){
+    if(file.exists(MuTect2_summary_file)){
+        
+        samples_pairs_df <- read.delim(file = samples_pairs_file, header = TRUE, sep = ',', check.names = FALSE)
+        tumor_sampleIDs <- as.character(samples_pairs_df[["#SAMPLE-T"]])
+        normal_sampleIDs <- as.character(samples_pairs_df[["#SAMPLE-N"]])
+        
+        
+        
+        summary_df_og <- read.delim(file = MuTect2_summary_file, header = TRUE, sep = ',', check.names = FALSE)
+        
+        # fix colnames
+        setnames(x = summary_df_og, old = c("#SAMPLE"), new = c("SamplePair"))
+        
+        # fix the normal sample IDs
+        for(i in seq_along(normal_sampleIDs)){
+            normal_sampleID <- normal_sampleIDs[i]
+            new_ID <- paste0(normal_sampleID, ' (N)')
+            search_pattern <- sprintf('%s$', normal_sampleID)
+            summary_df_og[["SamplePair"]] <- gsub(pattern = search_pattern, replacement = new_ID, x = as.character(summary_df_og[["SamplePair"]]))
+        }
+        
+        # match the tumor sample ID's in the table and append a \n after them
+        for(i in seq_along(tumor_sampleIDs)){
+            tumor_sampleID <- tumor_sampleIDs[i]
+            new_ID <- paste0(tumor_sampleID, ' (T)\n')
+            search_pattern <- sprintf('^%s-', tumor_sampleID)
+            summary_df_og[["SamplePair"]] <- gsub(pattern = search_pattern, replacement = new_ID, x = as.character(summary_df_og[["SamplePair"]]))
+        }
+        
+        
+        
+        # make a copy
+        summary_table <- summary_df_og
+        
+        # melt to long format for plot
+        summary_table <- reshape2::melt(summary_table, 
+                                        id.vars="SamplePair",
+                                        variable.name="type",
+                                        value.name="mutations")
+        
+        # fix the labels in the mutation types
+        summary_table[["type"]] <- gsub(pattern = '.muts', 
+                                        replacement = '', 
+                                        x = as.character(summary_table[["type"]]))
+        
+        
+        
+        # make plot
+        MuTect2_summ_plot <- ggplot(data = summary_table, aes(x = SamplePair, y = mutations, fill = type)) + 
+            geom_bar(stat="identity", position = "dodge") +
+            ggtitle("GATK MuTect2\nNumber of Mutations per Sample Pair") +
+            coord_flip() +
+            theme_bw() +
+            theme(panel.grid.minor = element_blank())
+        print(MuTect2_summ_plot)
+    }
+}
+
+
+
+# haplotype_caller_table_og <- read.delim(GATK_HC_annot_file, sep = ',')
+# setnames(x = haplotype_caller_table_og, old = c("X.SAMPLE"), new = c("sample"))
+# haplotype_caller_table <- haplotype_caller_table_og
+# haplotype_caller_table <- reshape2::melt(haplotype_caller_table, id.vars="sample",variable.name="type",value.name="mutations")
+# haplotype_caller_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(haplotype_caller_table[["type"]]))
+# haplotype_caller_plot <- ggplot(data = haplotype_caller_table, aes(x = sample, y = mutations, fill = type)) + 
+#     geom_bar(stat="identity", position = "dodge") + 
+#     ggtitle("GATK HaplotypeCaller\nNumber of Mutations per Sample") + 
+#     coord_flip() + 
+#     theme_bw() +
+#     theme(panel.grid.minor = element_blank())
+
+
+# dput(colnames(annot_df))
+# c("#MUT", "SAMPLE T", "SAMPLE N", "CHR", "POS", "QUAL", "T DEPTH", 
+# "T FREQ", "N DEPTH", "N FREQ", "Ref", "Alt", "Func.refGene", 
+# "Gene.refGene", "GeneDetail.refGene", "ExonicFunc.refGene", "AAChange.refGene", 
+# "snp138", "snp138NonFlagged", "ExAC_ALL", "esp6500siv2_all", 
+# "1000g2015aug_all", "cosmic80", "CADD13_PHRED", "FATHMM_noncoding", 
+# "FATHMM_coding")
+
+# MuTect2_annot_files <- dir(MuTect2_annot_dir, pattern = ".hg19_multianno.txt$", full.names = TRUE)
+# MuTect2_vcf_files <- dir(MuTect2_vcf_dir, pattern = '.vcf$', full.names = TRUE)
+# MuTect2_vcf_files <- MuTect2_vcf_files[ ! grepl(pattern = '.original.vcf', x = MuTect2_vcf_files) ]
+# 
+# 
+# annot_df <- do.call(rbind, lapply(X = MuTect2_annot_files, FUN = read_ANNOVAR))
+# vcf_df <- do.call(rbind, lapply(X = MuTect2_vcf_files, FUN = read_og_vcf))
+# 
+# 
+# setnames(x = vcf_df, old = c("#CHROM", "POS", "REF", "ALT"), new = c("Chr", "Start","Ref", "Alt"))
+# 
+# head(annot_df)
+# 1	chr1	3301721	3301721	C	T	exonic	PRDM16	NA	
+# 2	chr1	6533393	6533393	G	C	exonic	PLEKHG5	NA	
+# 3	chr1	6551692	6551692	C	T	splicing	PLEKHG5	NM_020631:exon1:UTR5	
+# 4	chr1	9780812	9780812	-	TGA	exonic	PIK3CD	NA	
+# 5	chr1	9784423	9784423	C	T	exonic	PIK3CD	NA	
+# 6	chr1	11199641	11199641	-	AAGACATGAGAACC	exonic
+
+# head(vcf_df)
+# 1	chr1	3301721	rs2282198	C	T	.	PASS	
+# 2	chr1	6533393	rs61741379	G	C	.	PASS	
+# 3	chr1	6551692	rs3007429	C	T	.	PASS	
+# 4	chr1	9780812	.	C	CTGA	.	PASS	
+# 5	chr1	9784423	rs11121484	C	T	.	PASS	
+# 6	chr1	11199641	.	G	GAAGACATGAGAACC	.
+
+
+# dput(colnames(vcf_df))
+# c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", 
+# "FORMAT", "TUMOR", "NORMAL", "Sample")
+
+
+# dput(colnames(annot_df))
+# c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene", "Gene.refGene", 
+# "GeneDetail.refGene", "ExonicFunc.refGene", "AAChange.refGene", 
+# "snp138", "snp138NonFlagged", "ExAC_ALL", "ExAC_AFR", "ExAC_AMR", 
+# "ExAC_EAS", "ExAC_FIN", "ExAC_NFE", "ExAC_OTH", "ExAC_SAS", "esp6500siv2_all", 
+# "1000g2015aug_all", "cosmic80", "CADD13_RawScore", "CADD13_PHRED", 
+# "FATHMM_noncoding", "FATHMM_coding")
+
+```
+
+# Paired Variant Calling
+
+## GATK MuTect2
+
+```{r print_print_MuTect2_info, results='asis'}
+print_MuTect2_info(MuTect2_annot_file)
+```
+
+```{r print_print_MuTect2_summ_plot, fig.height=8.5}
+print_MuTect2_summ_plot(MuTect2_summary_file, samples_pairs_file) # "summary.VCF-MuTect2-annot.csv"
+```
+
+```{r print_print_MuTect2_qual_plot, fig.height=8}
+print_MuTect2_qual_plot(MuTect2_annot_file) # "VCF-MuTect2-annot.all.txt"
+```

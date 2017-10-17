@@ -27,17 +27,19 @@ report_dir: report
 main_report: analysis_report.Rmd
 # supporting report files
 report_files: 
+  - report_tools.R
   - report_config.yml
   - report_styles.css
   - summary_report.Rmd
   - variant_report.Rmd
+  - paired_variant_report.Rmd
 
 # script to use to compile the RMD reports
 report_compile_script: compile_RMD_report.R
 # ^ i.e. snsxt/snsxt/compile_RMD_report.R
 
-# files to write run meta data to for the report later
-# !! This also needs to be set in snsxt/report/report_config.yml !!
+# files to read run meta data from 
+# !! This also needs to be set in snsxt/config/snsxt.yml !! 
 analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
 samples_fastq_raw_file: samples.fastq-raw.csv
@@ -46,3 +48,14 @@ GATK_HC_annot_file: "summary.VCF-GATK-HC-annot.csv"
 GATK_summary_file: "VCF-GATK-HC-annot.all.txt"
 LoFreq_annot_file: "summary.VCF-LoFreq-annot.csv"
 LoFreq_summary_file: "VCF-LoFreq-annot.all.txt"
+# dirs for the tumor-normal paired variant calling output;
+# these may or may not exist depending how sns was run
+# MuTect2_vcf_dir: "VCF-MuTect2-test"
+# MuTect2_annot_dir: "VCF-MuTect2-annot-test"
+# Strelka_vcf_dir: "VCF-Strelka-test"
+# Strelka_annot_dir: "VCF-Strelka-annot-test"
+MuTect2_annot_file: "VCF-MuTect2-annot.all.txt"
+MuTect2_summary_file: "summary.VCF-MuTect2-annot.csv"
+Strelka_annot_file: "VCF-Strelka-annot.all.txt"
+Strelka_summary_file: "summary.VCF-Strelka-annot.csv"
+
