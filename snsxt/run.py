@@ -72,22 +72,23 @@ from sns_tasks import Summary_Avg_Coverage
 configs = config.config
 
 
+# ~~~~~ FUNCTIONS ~~~~~~ #
 def main(analysis_dir, task_list, analysis_id = None, results_id = None):
     '''
     Main control function for the program
     '''
+    # load the analysis
+    extra_handlers = [main_filehandler]
+    logger.debug('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, analysis_dir))
+    analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
+    logger.debug(analysis)
+
     # run the tasks in the task list
     #  check if 'tasks' is an empty dict
     if not task_list or not task_list.get('tasks', None):
         logger.warning("No tasks were loaded")
     # run the steps included in the config
     else:
-        # load the analysis
-        extra_handlers = [main_filehandler]
-        logger.debug('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, analysis_dir))
-        x = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
-        logger.debug(x)
-
         # run the tasks
         for task_name, task_params in task_list['tasks'].items():
             # get the run_func value if present in the config
@@ -116,7 +117,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
 
             # run the task
             logger.debug('Running task {0} as module {1}, with params: {2}'.format(task_name, task_module, task_params))
-            run_func_module(analysis = x, task = task_module, extra_handlers = extra_handlers, **task_params)
+            run_func_module(analysis = analysis, task = task_module, extra_handlers = extra_handlers, **task_params)
 
 
     # check if reporting was included in config

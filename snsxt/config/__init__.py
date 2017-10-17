@@ -38,7 +38,12 @@ config = {}
 
 config['analysis_output_index'] = sns['analysis_output_index']
 
+# email
 config['email_recipients'] = snsxt['email_recipients']
+config['mail_files'] = snsxt['mail_files']
+
+
+# report
 config['report_dir'] = snsxt['report_dir']
 config['report_files'] = snsxt['report_files']
 config['main_report'] = snsxt['main_report']
