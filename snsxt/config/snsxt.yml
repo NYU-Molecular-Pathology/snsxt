@@ -44,6 +44,7 @@ analysis_id_file: analysis_id.txt
 results_id_file: results_id.txt
 samples_fastq_raw_file: samples.fastq-raw.csv
 summary_combined_file: summary-combined.wes.csv
+samples_pairs_file: "samples.pairs.csv"
 GATK_HC_annot_file: "summary.VCF-GATK-HC-annot.csv"
 GATK_summary_file: "VCF-GATK-HC-annot.all.txt"
 LoFreq_annot_file: "summary.VCF-LoFreq-annot.csv"
