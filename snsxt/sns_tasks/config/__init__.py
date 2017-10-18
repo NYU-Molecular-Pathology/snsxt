@@ -31,6 +31,9 @@ with open(os.path.join(scriptdir, 'Summary_Avg_Coverage.yml'), "r") as f:
 with open(os.path.join(scriptdir, 'Annotation_inplace.yml'), "r") as f:
     Annotation_inplace = yaml.load(f)
 
+with open(os.path.join(scriptdir, 'HapMap_variant_ref.yml'), "r") as f:
+    HapMap_variant_ref = yaml.load(f)
+
 
 
 # logger.debug(Delly2)

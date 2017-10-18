@@ -1,0 +1,29 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: HapMap_variant_ref
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'VCF-GATK-HC-annot'
+
+# filename pattern to use for input file
+input_pattern: '*.combined.txt'
+
+# name of the parent directory to use for the program output
+output_dir_name: QC-HapMap-Reference
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+  # - GATK_DepthOfCoverage_custom_report.Rmd
+
+# other files needed by the task
+task_files:
+  - 'HapMap_GATKHC_variants.tsv'
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+# file with the HapMap pooled variants for reference to check against
+# located in the 'files' subdir
+hapmap_variant_file: 'HapMap_GATKHC_variants.tsv'

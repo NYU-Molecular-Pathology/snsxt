@@ -8,3 +8,4 @@ Initialize the sns_tasks module and import submodules
 import Delly2
 import GATK_DepthOfCoverage_custom
 import Summary_Avg_Coverage
+import HapMap_variant_ref
