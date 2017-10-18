@@ -41,7 +41,7 @@ import csv
 import shutil
 # this program's modules
 import config
-
+import task_utils
 
 # ~~~~ SETUP CONFIGS ~~~~~~ #
 # get external configs, make internal configs
@@ -175,6 +175,7 @@ def main(sample, extra_handlers = None):
     sample is an SnsAnalysisSample object
     return the qsub job for the sample
     '''
+    # ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
     # logger.debug(configs)
     # sys.exit()
 
@@ -183,13 +184,14 @@ def main(sample, extra_handlers = None):
         for h in extra_handlers:
             logger.addHandler(h)
 
-    logger.debug('Sample is: {0}'.format(sample))
-    logger.debug(sample.static_files)
-    log.print_filehandler_filepaths_to_log(logger = logger)
-
     # setup the output locations
     output_dir = t.mkdirs(path = os.path.join(sample.analysis_dir, configs['output_dir_name']), return_path = True)
     logger.debug('output_dir: {0}'.format(output_dir))
+
+    # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+    logger.debug('Sample is: {0}'.format(sample))
+    logger.debug(sample.static_files)
+    log.print_filehandler_filepaths_to_log(logger = logger)
 
     # setup the report output
     setup_report(output_dir = output_dir)
@@ -200,8 +202,6 @@ def main(sample, extra_handlers = None):
 
     sample_bam = sample.list_none(sample.get_output_files(analysis_step = configs['input_dir'], pattern = configs['input_pattern']))
     targets_bed = sample.list_none(sample.get_files('targets_bed'))
-
-    # logger.debug(make_tresholds_arg())
 
     if sample_bam and output_dir and qsub_log_dir:
         logger.debug('sample_bam: {0}'.format(sample_bam))

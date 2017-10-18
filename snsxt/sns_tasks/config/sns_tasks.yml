@@ -9,3 +9,8 @@ script_dir: scripts
 # dont change this!
 report_dir: reports
 # ^ i.e. same as sns_tasks/reports
+
+# path to the `files` directory relative to the `sns_tasks` dir
+# dont change this!
+files_dir: files
+# ^ i.e. same as sns_tasks/files

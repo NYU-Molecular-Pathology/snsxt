@@ -41,6 +41,18 @@ def run_qsub_sample_task(analysis, task, qsub_wait = True, *args, **kwargs):
         qsub.monitor_jobs(jobs = jobs)
     return()
 
+def run_sample_task(analysis, task, *args, **kwargs):
+    '''
+    Run a task that operates on every sample in the analysis individually
+    '''
+    # get all the Sample objects for the analysis
+    samples = analysis.get_samples()
+    for sample in samples:
+        logger.debug('Running task {0} on sample {1}'.format(task.task_name, sample.id))
+        task.main(sample = sample, *args, **kwargs)
+    return()
+
+
 def run_qsub_analysis_task(analysis, task, qsub_wait = True, *args, **kwargs):
     '''
     Run a task that submits one qsub job for the analysis

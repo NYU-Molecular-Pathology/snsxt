@@ -91,6 +91,19 @@ def setup_report(output_dir, configs):
         logger.debug("Copying report file '{0}' to '{1}' ".format(item, output_file))
         shutil.copy2(item, output_file)
 
+def setup_task_file(task_file, output_dir, configs):
+    '''
+    Copy a single task file to the output location and return the file path
+    task_file is file basename
+    configs['files_dir'] is task_file dirname
+    '''
+    task_file_path = os.path.join(configs['this_scriptdir'], configs['files_dir'], task_file)
+    output_path = os.path.join(output_dir, task_file)
+    logger.debug("Copying task file '{0}' to '{1}' ".format(task_file_path, output_path))
+    shutil.copy2(task_file_path, output_path)
+    return(output_path)
+
+
 def Annotation_inplace(input_dir, annotation_method, extra_handlers = None):
     '''
     Function for annotating genomic regions and variants output by other pipeline steps in-place
