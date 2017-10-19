@@ -28,3 +28,5 @@ task_files:
 # located in the 'files' subdir
 hapmap_variant_file: 'HapMap_GATKHC_variants.tsv'
 
+# file inside the output dir to hold stats about the HapMap samples
+hapmap_sample_stats_file: 'hapmap_sample_stats.json'
