@@ -27,3 +27,4 @@ task_files:
 # file with the HapMap pooled variants for reference to check against
 # located in the 'files' subdir
 hapmap_variant_file: 'HapMap_GATKHC_variants.tsv'
+
