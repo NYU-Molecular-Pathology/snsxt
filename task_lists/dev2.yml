@@ -1,0 +1,8 @@
+# tasks I am working on testing and developing for the pipeline
+tasks:
+  Delly2: 
+  GATKDepthOfCoverageCustom: 
+  SummaryAvgCoverage: 
+  HapMapVariantRef:
+
+setup_report: False
