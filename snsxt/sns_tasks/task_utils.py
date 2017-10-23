@@ -86,10 +86,16 @@ def setup_report(output_dir, configs):
     '''
     report_files = get_report_files(configs)
     logger.debug("Report files are: {0}".format(report_files))
+    # copy over the report files from the config
     for item in report_files:
         output_file = os.path.join(output_dir, os.path.basename(item))
         logger.debug("Copying report file '{0}' to '{1}' ".format(item, output_file))
         shutil.copy2(item, output_file)
+    # copy over the config file itself as well if present
+    if configs.get('config_file', None):
+        output_file = os.path.join(output_dir, 'config.yml')
+        logger.debug("Copying cofig file '{0}' to '{1}' ".format(configs['config_file'], output_file))
+        shutil.copy2(configs['config_file'], output_file)
 
 def setup_task_file(task_file, output_dir, configs):
     '''
