@@ -83,6 +83,9 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
     logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
     logger.debug(analysis)
+    if not analysis.is_valid:
+        logger.error('The analysis did not pass validations, exiting...')
+        sys.exit()
 
     # run the tasks in the task list
     #  check if 'tasks' is an empty dict
