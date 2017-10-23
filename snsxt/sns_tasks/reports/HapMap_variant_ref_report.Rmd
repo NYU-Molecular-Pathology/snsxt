@@ -1,0 +1,28 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+---
+```{r HapMap_variant_ref_setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("reshape2")
+library("ggplot2")
+library("DT")
+library("data.table")
+library('yaml')
+# install.packages("RJSONIO")
+# library("RJSONIO")
+
+# ~~~~~ FUNCTIONS ~~~~~ # 
+
+# ~~~~~ PARAMS ~~~~~ # 
+input_dir <- '.'
+config_file <- file.path(input_dir, 'config.yml')
+config <- yaml.load_file(config_file)
+
+
+```

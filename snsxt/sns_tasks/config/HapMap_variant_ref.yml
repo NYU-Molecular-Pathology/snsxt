@@ -16,7 +16,7 @@ output_dir_name: QC-HapMap-Reference
 
 # files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
-  # - GATK_DepthOfCoverage_custom_report.Rmd
+  - HapMap_variant_ref_report.Rmd
 
 # other files needed by the task
 task_files:
@@ -25,8 +25,10 @@ task_files:
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # file with the HapMap pooled variants for reference to check against
-# located in the 'files' subdir
+# located in the 'files' subdir, will be copied to output dir
 hapmap_variant_file: 'HapMap_GATKHC_variants.tsv'
 
 # file inside the output dir to hold stats about the HapMap samples
 hapmap_sample_stats_file: 'hapmap_sample_stats.json'
+
+output_pattern: '.combined.txt'
