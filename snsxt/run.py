@@ -70,16 +70,31 @@ from sns_tasks import Summary_Avg_Coverage
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 configs = config.config
-
+extra_handlers = [h for h in log.get_all_handlers(logger)]
 
 # ~~~~~ FUNCTIONS ~~~~~~ #
 def main(analysis_dir, task_list, analysis_id = None, results_id = None):
     '''
     Main control function for the program
+
+
+    from sns_classes.classes import SnsWESAnalysisOutput
+    import config
+    configs = config.config
+
+    analysis_dir = '../example_sns_analysis5-copy'
+    analysis_id = 'example_sns_analysis5'
+    results_id = 'results1'
+
+    analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = None)
+
+    import sns_tasks
+
+    task = sns_tasks.HapMapVariantRef(analysis = analysis)
+    task.run()
     '''
     # load the analysis
     # extra_handlers = [main_filehandler]
-    extra_handlers = [h for h in log.get_all_handlers(logger)]
     logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
     logger.debug(analysis)
