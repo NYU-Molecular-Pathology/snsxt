@@ -16,22 +16,28 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 
 logger.debug("loading configurations...")
 
-with open(os.path.join(scriptdir, 'sns_tasks.yml'), "r") as f:
+sns_tasks_file = os.path.join(scriptdir, 'sns_tasks.yml')
+with open(sns_tasks_file, "r") as f:
     sns_tasks = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'Delly2.yml'), "r") as f:
+Delly2_file = os.path.join(scriptdir, 'Delly2.yml')
+with open(Delly2_file, "r") as f:
     Delly2 = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'GATK_DepthOfCoverage_custom.yml'), "r") as f:
+GATK_DepthOfCoverage_custom_file = os.path.join(scriptdir, 'GATK_DepthOfCoverage_custom.yml')
+with open(GATK_DepthOfCoverage_custom_file, "r") as f:
     GATK_DepthOfCoverage_custom = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'Summary_Avg_Coverage.yml'), "r") as f:
+Summary_Avg_Coverage_file = os.path.join(scriptdir, 'Summary_Avg_Coverage.yml')
+with open(Summary_Avg_Coverage_file, "r") as f:
     Summary_Avg_Coverage = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'Annotation_inplace.yml'), "r") as f:
+Annotation_inplace_file = os.path.join(scriptdir, 'Annotation_inplace.yml')
+with open(Annotation_inplace_file, "r") as f:
     Annotation_inplace = yaml.load(f)
 
-with open(os.path.join(scriptdir, 'HapMap_variant_ref.yml'), "r") as f:
+HapMap_variant_ref_file = os.path.join(scriptdir, 'HapMap_variant_ref.yml')
+with open(HapMap_variant_ref_file, "r") as f:
     HapMap_variant_ref = yaml.load(f)
 
 
