@@ -14,6 +14,37 @@ Use this framework to run any extra analysis tasks you like after an `sns` pipel
 
 __NOTE:__ Usage may change as development progresses
 
+## New Analysis
+
+__Requirements__: Directory of .fastq.gz files, and a valid `samples.pairs.csv` samplesheet file.
+
+- Create a new directory for your analysis
+
+```bash
+mkdir /path/to/analysis
+cd /path/to/analysis
+```
+
+- Clone this repository and navigate to its directory
+
+```bash
+git clone --recursive https://github.com/NYU-Molecular-Pathology/snsxt.git
+cd snsxt
+```
+
+- Run the `run.py` script with the `new` subcommand (new analysis).
+
+```bash
+snsxt/run.py --analysis_id example_analysis --results_id results1 new /path/to/fastq_dir -o ../ --pairs_sheet samples.pairs.csv
+```
+
+The program will start a new analysis in the given output directory (e.g. `../`), and automatically run downstream `snsxt` analysis tasks upon completion.
+
+
+## Existing `sns wes` Pipeline Output
+
+__Requirements__: Directory with output from the `sns wes` pipeline.
+
 - Navigate to the directory containing your `sns` analysis output
 
 ```bash
@@ -27,10 +58,10 @@ git clone --recursive https://github.com/NYU-Molecular-Pathology/snsxt.git
 cd snsxt
 ```
 
-- Run the `run.py` script
+- Run the `run.py` script with the `d` subcommand (downstream analysis).
 
 ```bash
-snsxt/run.py ../ --analysis_id "<analysis_id>" --results_id "<results_id>" 
+snsxt/run.py --analysis_id example_analysis --results_id results1 d -i /path/to/sns_output_dir
 ```
 
 # Program Components
