@@ -62,3 +62,12 @@ loggers:
     level: DEBUG
     handlers: [console, main, email]
     propagate: true
+  _start_sns:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  _snsxt:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  

@@ -52,11 +52,18 @@ from sns_classes.classes import SnsWESAnalysisOutput
 import setup_report
 
 from _snsxt import snsxt
-
+from _start_sns import start_sns
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 configs = config.config
+
+# path to parent dir 2 levels above this script
+snsxt_parent_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)) )
+# /ifs/data/molecpathlab/scripts/snsxt/
+configs['snsxt_parent_dir'] = snsxt_parent_dir
+
 extra_handlers = [h for h in log.get_all_handlers(logger)]
+configs['extra_handlers'] = extra_handlers
 
 
 
@@ -73,6 +80,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_m
     # 'extra_handlers': extra_handlers
     })
 
+    # run the downstream pipeline analysis tasks
     snsxt(task_list = task_list, configs = configs, *args, **kwargs)
 
     # check if reporting was included in config
@@ -84,35 +92,18 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_m
     log.log_all_handler_filepaths(logger)
 
 
-def run():
+def run_main(args, **kwargs):
     '''
-    Run the program
-    arg parsing goes here, if program was run as a script
+    Parse the args to run the main downstream analysis program
     '''
-    # ~~~~ GET SCRIPT ARGS ~~~~~~ #
-    parser = argparse.ArgumentParser(description='snsxt: sns bioinformatics pipeline extension program')
-
-    # required positional args
-    parser.add_argument("analysis_dir",
-        # default analysis dir location is two levels above the 'snsxt/snsxt/run.py' dir
-         # /ifs/data/molecpathlab/scripts/snsxt/snsxt/run.py -> /ifs/data/molecpathlab/scripts
-        default = os.path.realpath(os.path.join(os.path.realpath(__file__), "../../../")),
-        help = "Path to the analysis output directory used for the sns pipeline", nargs="?")
-
-    # optional flags
-    parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
-    parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
-    parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
-    parser.add_argument("--debug_mode", default = False, action = "store_true", dest = 'debug_mode', help="Skip analysis validation")
-
-    args = parser.parse_args()
-
     analysis_dir = args.analysis_dir
     analysis_id = args.analysis_id
     results_id = args.results_id
     task_list_file = args.task_list_file
     debug_mode = args.debug_mode
-    # logger.debug(args)
+
+    logger.debug(args)
+    logger.debug(dir(args))
 
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
     # get the list of tasks to run
@@ -126,6 +117,104 @@ def run():
 
     main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list, debug_mode = debug_mode)
 
+def run_new(args, **kwargs):
+    '''
+    Parse args to start a new sns analysis
+    '''
+    fastq_dirs = args.fastq_dirs
+    output_dir = args.output_dir
+    logger.debug(args)
+    logger.debug(output_dir)
+    logger.debug(os.path.realpath(os.path.dirname(__file__)))
+
+    kwargs.update({
+    'fastq_dirs': fastq_dirs,
+    'output_dir': output_dir
+    })
+
+    # setup and run the new sns analysis
+    sns_output_dir = start_sns(configs = configs, **kwargs)
+
+
+def parse():
+    '''
+    Run the program
+    arg parsing goes here, if program was run as a script
+    '''
+    # ~~~~ GET SCRIPT ARGS ~~~~~~ #
+    # create the top-level parser
+    parser = argparse.ArgumentParser(description='snsxt: sns bioinformatics pipeline extension program')
+    subparsers = parser.add_subparsers(title='subcommands', description='valid subcommands', help='additional help', dest='subparsers')
+
+    parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
+    parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
+    parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
+    parser.add_argument("--debug_mode", default = False, action = "store_true", dest = 'debug_mode', help="Skip analysis validation")
+
+
+
+    # create the parser for the "new" command
+    parser_new = subparsers.add_parser('new', help = 'Start a new sns wes pipeline analysis from fastq directories')
+    parser_new.set_defaults(func = run_new)
+    parser_new.add_argument("fastq_dirs", help = "Directories containing .fastq files to use in a new sns analysis", nargs="+")
+    parser_new.add_argument('-o', '--output_dir', dest = 'output_dir', help = 'Output directory for the new analysis',
+                            default =  os.path.join(snsxt_parent_dir, 'sns_output', '{0}'.format(t.timestamp())))
+
+
+    # create the parser for the "d" downstream command
+    parser_d = subparsers.add_parser('d', help = 'Run downstream snsxt analysis pipeline tasks on an existing sns pipeline output')
+    parser_d.set_defaults(func = run_main)
+    parser_d.add_argument('-i', '--input_dir', '--analysis_dir', dest = "analysis_dir", help = "Path to the directory containing the existing sns pipeline output", required = True)
+
+
+
+
+    # # required flags
+    # parser.add_argument('-id', '--input_dir', '--analysis_dir',
+    #     dest = "analysis_dir",
+    #     # default analysis dir location is two levels above the 'snsxt/snsxt/run.py' dir
+    #      # /ifs/data/molecpathlab/scripts/snsxt/snsxt/run.py -> /ifs/data/molecpathlab/scripts
+    #     # default = os.path.realpath(os.path.join(os.path.realpath(__file__), "../../../")),
+    #     help = "[New sns analysis]: path to directory to use for the analysis.\n[Existing sns analysis]: path to the directory containing the completed sns analysis") # required = True
+    #
+    # # parser.add_argument('-od', '--output_dir',
+    # #     dest = "output_dir",
+    # #     default = None,
+    # #     help = "New sns analysis: path to directory to use for the analysis. Existing sns analysis: not used", nargs="?")
+    #
+
+    # parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
+    # parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
+    # parser.add_argument("--debug_mode", default = False, action = "store_true", dest = 'debug_mode', help="Skip analysis validation")
+
+
+    args = parser.parse_args()
+    args.func(args)
+
+    # analysis_dir = args.analysis_dir
+    # analysis_id = args.analysis_id
+    # results_id = args.results_id
+    # task_list_file = args.task_list_file
+    # debug_mode = args.debug_mode
+    #
+    #
+    #
+    # logger.debug(args)
+    # logger.debug(dir(args))
+    # sys.exit()
+    #
+    # logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
+    # # get the list of tasks to run
+    # if task_list_file:
+    #     # task_list = task_lists.get_tasks(input_file = task_list_file)
+    #     with open(task_list_file, "r") as f:
+    #         task_list = yaml.load(f)
+    # else:
+    #     task_list = {}
+    # logger.debug('task_list config loaded: {0}'.format(task_list))
+
+    # main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list, debug_mode = debug_mode)
+
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":
-    run()
+    parse()

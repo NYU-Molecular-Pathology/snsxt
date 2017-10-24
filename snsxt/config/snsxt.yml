@@ -1,5 +1,6 @@
 # settings to use globally across the 'snsxt' program
-
+sns_route: "wes"
+sns_pairs_route: "wes-pairs-snv"
 
 # ~~~~~ MAIL ~~~~~ # 
 # settings to use when sending email from the pipeline
