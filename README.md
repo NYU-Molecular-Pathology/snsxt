@@ -64,6 +64,36 @@ cd snsxt
 snsxt/run.py --analysis_id example_analysis --results_id results1 d -i /path/to/sns_output_dir
 ```
 
+## Arguments
+
+Some common program arguments to the `snsxt/run.py` program include:
+
+- `--analysis_id`: An identifier for the analysis
+
+- `--results_id`: A sub-identifier for the analysis
+
+- `--task-list`: A YAML formatted list of downstream analysis tasks for `snsxt`, defaults to `task_lists/default.yml`
+
+### Subcommands
+
+The following subcommands are included in the program:
+
+#### `new`
+
+Starts a new `sns wes` pipeline analysis, along with paired.
+
+- positional arguments represent directories containing .fastq files
+
+- `--output_dir`: output directory for the analysis results
+
+- `--targets`: A .bed file with genomic regions for the analysis, defaults to the included `targets.bed` file
+
+#### `d`
+
+Performs downstream `snsxt` analysis on an existing `sns wes` pipeline output.
+
+- `--input_dir`: Path to the directory containing the `sns wes` pipeline output
+
 # Program Components
 
 _Names and locations of these items may change with development_
