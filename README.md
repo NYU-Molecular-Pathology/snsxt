@@ -55,15 +55,13 @@ Starting at the parent `snsxt` (this repo's parent dir):
 
 - `snsxt/report`: directory containing files and configuration for the parent analysis report
 
-- `snsxt/log.py`: custom logging package for the program
-
 - `snsxt/logging.yml`: configurations for program logging
 
 - `snsxt/test.py`: script to run all unit tests in the program and its submodules
 
 - `snsxt/run.py`: main script used to run the program
 
-# Adding Modules
+# Adding New Tasks
 
 You can add new analysis task modules to `snsxt` by following this workflow:
 
