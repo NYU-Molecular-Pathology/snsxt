@@ -159,6 +159,9 @@ def parse():
     parser_new.add_argument("fastq_dirs", help = "Directories containing .fastq files to use in a new sns analysis", nargs="+")
     parser_new.add_argument('-o', '--output_dir', dest = 'output_dir', help = 'Output directory for the new analysis',
                             default =  os.path.join(snsxt_parent_dir, 'sns_output', '{0}'.format(t.timestamp())))
+    parser_new.add_argument('--targets', dest = 'targets_bed', help = 'Targets .bed file with regions for analysis', default = os.path.join(snsxt_parent_dir, 'targets.bed'))
+    parser_new.add_argument('--pairs_sheet', dest = 'pairs_sheet', help = '"samples.pairs.csv" samplesheet to use for paired analysis', default = None, type = str)
+    parser.add_argument("--no_qsub_wait", default = False, action = "store_true", dest = 'no_qsub_wait', help="Do not wait for the qsub jobs to finish")
 
 
     # create the parser for the "d" downstream command
