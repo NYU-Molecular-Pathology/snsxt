@@ -50,8 +50,8 @@ from util import find
 from util import qsub
 from sns_classes.classes import SnsWESAnalysisOutput
 import setup_report
-import sns_tasks
 
+from _snsxt import snsxt
 
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
@@ -61,48 +61,19 @@ extra_handlers = [h for h in log.get_all_handlers(logger)]
 
 
 # ~~~~~ FUNCTIONS ~~~~~~ #
-def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_mode = False):
+def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_mode = False, *args, **kwargs):
     '''
     Main control function for the program
     '''
-    # load the analysis from the sns output
-    logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
-    analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
+    kwargs.update({
+    'analysis_dir':analysis_dir,
+    'analysis_id': analysis_id,
+    'results_id': results_id,
+    'debug_mode': debug_mode
+    # 'extra_handlers': extra_handlers
+    })
 
-    logger.debug(analysis)
-    logger.debug(task_list)
-
-    # exit if the analysis is invalid, unless debug mode is enabled
-    if not debug_mode:
-        if not analysis.is_valid:
-            logger.error('The analysis did not pass validations, exiting...')
-            sys.exit()
-
-    # run the tasks in the task list
-    #  check if 'tasks' is an empty dict
-    if not task_list or not task_list.get('tasks', None):
-        logger.warning("No tasks were loaded")
-    # run the steps included in the config
-    else:
-        logger.debug(task_list['tasks'].items())
-        logger.debug(dir(sns_tasks))
-        for task_name, task_params in task_list['tasks'].items():
-            # make sure the task is present in sns_tasks
-            if not task_name in dir(sns_tasks):
-                logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
-            else:
-                logger.debug('Loading task {0} '.format(task_name))
-                logger.debug('task_params are {0}'.format(task_params))
-                # load the task class from the module
-                task_class = getattr(sns_tasks, task_name)
-                # logger.debug(task_class)
-                # create the task object with the analysis
-                task = task_class(analysis = analysis, extra_handlers = extra_handlers)
-                # run the task
-                if task_params:
-                    task.run(**task_params)
-                else:
-                    task.run()
+    snsxt(task_list = task_list, configs = configs, *args, **kwargs)
 
     # check if reporting was included in config
     if task_list and task_list.get('setup_report', None):
