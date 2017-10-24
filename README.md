@@ -61,65 +61,62 @@ Starting at the parent `snsxt` (this repo's parent dir):
 
 - `snsxt/run.py`: main script used to run the program
 
-# Adding New Tasks
+# Analysis Tasks
+
+The `sns_tasks` submodule contains code for the various analysis tasks to be run in the program, which are derived from the [`AnalysisTask`](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/task_classes.py#L58) custom class. Examples of other analysis task classes can be seen [here](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/_Delly2.py) and [here](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/_HapMapVariantRef.py), and a [class template](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/_template.py) has also been included. Task classes must be imported into the [`sns_tasks/__init__.py`](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/__init__.py) file in order to be made accessible to the rest of the program. 
+
+## Task Types
+
+Tasks can come in a few flavors:
+
+- tasks that operate on the entire analysis at once
+
+- tasks that operate on a single sample at a time
+
+Additionally, tasks can be run a few different ways:
+
+- run in the current program session
+
+- submitted as a compute job to the HPC cluster with `qsub`
+
+Each combination of task type and run type utilizes a separate ['run' function](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/task_classes.py#L158), which should be wrapped by the task's [`run()` method](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/_GATKDepthOfCoverageCustom.py#L126).
+
+## Task Lists
+
+The `snsxt` program uses a YAML formatted 'task list' file in order to determine which tasks should be run, and in what order. By default, the [`task_lists/default.yml`](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/task_lists/default.yml) file is used. Tasks names listed should correspond to the name of the Python class for each analysis task, and extra parameters to be passed to the task's `run()` function can be included. 
+
+## Adding New Tasks
 
 You can add new analysis task modules to `snsxt` by following this workflow:
 
-- enter the `sns_tasks` subdirectory and choose a pre-existing module to be the template:
+- enter the `sns_tasks` subdirectory and make a copy of the :
 
 ```bash
 cd snsxt/sns_tasks
+cp _template.py _MyNewTask.py
 ```
 
-- make a copy of the selected template Python module with the new name you wish to use for the new module (e.g. `Summary_Avg_Coverage.py`)
-
-```bash
-cp GATK_DepthOfCoverage_custom.py Summary_Avg_Coverage.py
-```
+- edit the new task's custom Python class following the template shown, putting the main logic to run the task in the class's `main()` method, and setting the `run()` method as a wrapper around the required parent run method. 
 
 - make a copy of the config file for the new module:
 
 ```
-cp config/GATK_DepthOfCoverage_custom.yml config/Summary_Avg_Coverage.yml
+cp config/template.yml config/MyNewTask.yml
 ```
 
-- edit the new YAML config file with the corresponding info for the task
+- edit the new YAML config file with the corresponding info for the task (recommended to use Sublime Text or Atom)
 
-- load the new YAML file in the `config/__init__.py` file
+- import the module inside the [`sns_tasks/__init__.py` ](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/__init__.py)
 
-```bash
-open config/__init__.py
-# add a line such as:
-# with open(os.path.join(scriptdir, 'Summary_Avg_Coverage.yml'), "r") as f:
-#     Summary_Avg_Coverage = yaml.load(f)
-```
-- edit the new Python module for the task, being sure to match the programming template provided in the source file
+- add the new module to a task list to be run
 
-```bash
-open Summary_Avg_Coverage.py
-# edit the file with code for your task
-```
-
-- import the module inside the [`sns_tasks/__init__.py` ](https://github.com/NYU-Molecular-Pathology/snsxt/blob/46bdb96fec023aa13727c3fac8ee0bd33de8503d/snsxt/sns_tasks/__init__.py#L8)
-
-- add the new module to the `run.py` file the same way other tasks are loaded & run, as appropriate
-
-```bash
-cd .. # pwd is now snsxt/snsxt
-open run.py
-
-# import your new module and add it to the `main` function to be run
-```
-
-## Adding module reports
+## Adding Task Reports
 
 Analysis task modules can have associated report files. These should be R Markdown formatted documents designed to be imported as child-documents to the parent report included in `snsxt/report`. A module specific report can be added like this:
 
-- set the names of all report file(s) in the [config for your task module](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/config/GATK_DepthOfCoverage_custom.yml#L23). 
+- set the names of all report file(s) in the [config for your task module](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/config/GATK_DepthOfCoverage_custom.yml#L23). 
 
-- include a [`setup_report`](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/GATK_DepthOfCoverage_custom.py#L158) function in your module, and [call it within your module's `main` function](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/sns_tasks/GATK_DepthOfCoverage_custom.py#L195). This will make sure a copy of the report gets copied to the analysis output directory when the program runs.
-
-- add an entry for your new report in the [`snsxt/report` config file](https://github.com/NYU-Molecular-Pathology/snsxt/blob/720e69a1e8fca68bcf982376846329e87aa4df12/snsxt/report/report_config.yml#L9). 
+- add an entry for your new report and its data input directory in the [`snsxt/report` config file](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/report/report_config.yml#L7). 
 
 The new report should now be detected by the parent reporting R Markdown document and included in the final report output. 
 
