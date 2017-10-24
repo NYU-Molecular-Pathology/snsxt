@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Initialize the sns_tasks module and import submodules
+Initialize the sns_tasks module and import task classes
 '''
 
 # task classes
+# from _template import TemplateAnalysisTask
+# from _template import TemplateAnalysisSampleTask
 from _HapMapVariantRef import HapMapVariantRef
 from _GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
 from _SummaryAvgCoverage import SummaryAvgCoverage
