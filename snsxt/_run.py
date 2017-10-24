@@ -91,15 +91,23 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_m
             if not task_name in dir(sns_tasks):
                 logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
             else:
-                logger.error('Loading task {0} '.format(task_name))
+                logger.debug('Loading task {0} '.format(task_name))
+                logger.debug('task_params are {0}'.format(task_params))
                 # load the task class from the module
                 task_class = getattr(sns_tasks, task_name)
                 # logger.debug(task_class)
                 # create the task object with the analysis
                 task = task_class(analysis = analysis, extra_handlers = extra_handlers)
                 # run the task
-                task.run()
-                # logger.debug(dir(task))
+                if task_params:
+                    task.run(**task_params)
+                else:
+                    task.run()
+                    
+    # check if reporting was included in config
+    if task_list and task_list.get('setup_report', None):
+        logger.debug('Starting report setup')
+        setup_report.setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
 
     logger.info('All tasks completed')
     log.log_all_handler_filepaths(logger)

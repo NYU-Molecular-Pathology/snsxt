@@ -107,11 +107,11 @@ class GATKDepthOfCoverageCustom(AnalysisTask):
         sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
         targets_bed = sample.list_none(sample.get_files('targets_bed'))
 
-        if sample_bam and output_dir and qsub_log_dir:
+        if sample_bam and self.output_dir and qsub_log_dir:
             self.logger.debug('sample_bam: {0}'.format(sample_bam))
 
             # make the shell command to run
-            command = self.gatk_DepthOfCoverage_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = output_dir, intervals_bed_file = targets_bed)
+            command = self.gatk_DepthOfCoverage_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = self.output_dir, intervals_bed_file = targets_bed)
             self.logger.debug(command)
 
             # submit the command as a qsub job on the HPC

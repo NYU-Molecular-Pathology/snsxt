@@ -46,12 +46,12 @@ class HapMapVariantRef(AnalysisTask):
             # reference HapMap variants file; copy it over
             self.logger.debug('hapmap_variant_file is: {0}\nand has {1} entries'.format(hapmap_variant_file, self.tools.num_lines(hapmap_variant_file, skip = 1)))
 
-            logger.debug('Output file will be: {0}'.format(output_file))
+            self.logger.debug('Output file will be: {0}'.format(output_file))
 
             # find the new variants
-            logger.debug('Overlapping the sample_annot_file against the hapmap_variant_file...')
+            self.logger.debug('Overlapping the sample_annot_file against the hapmap_variant_file...')
             self.tools.write_tabular_overlap(file1 = sample_annot_file, ref_file = hapmap_variant_file, output_file = output_file, delim = '\t', inverse = True)
-            logger.debug('{0} non-overlapping variants were output'.format(self.tools.num_lines(output_file, skip = 1)))
+            self.logger.debug('{0} non-overlapping variants were output'.format(self.tools.num_lines(output_file, skip = 1)))
         return(hapmap_variant_file)
 
     def run(self, *args, **kwargs):

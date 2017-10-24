@@ -75,7 +75,7 @@ class Delly2(AnalysisTask):
         qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 
-        sample_bam = sample.list_none(sample.get_output_files(analysis_step = configs['input_dir'], pattern = configs['input_pattern']))
+        sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
 
         if sample_bam and self.output_dir and qsub_log_dir:
             self.logger.debug('sample_bam: {0}'.format(sample_bam))
@@ -96,5 +96,5 @@ class Delly2(AnalysisTask):
         '''
         run_qsub_sample_task
         '''
-        self.run_qsub_sample_task(analysis = self.analysis, qsub_wait =  False, *args, **kwargs)
+        self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
         self.setup_report()
