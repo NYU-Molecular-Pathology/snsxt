@@ -1,0 +1,28 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: template_task
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'VCF-GATK-HC-annot'
+
+# filename pattern to use for input file
+input_pattern: '*.combined.txt'
+
+# name of the parent directory to use for the program output
+output_dir_name: Template-Task
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+  - template_task_report.Rmd
+
+# other files needed by the task
+task_files:
+  # - 'HapMap_GATKHC_variants.tsv'
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+# naming pattern for files produced by this task
+output_pattern: '.combined.txt'
