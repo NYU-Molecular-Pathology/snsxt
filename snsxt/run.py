@@ -75,7 +75,6 @@ def get_task_list(task_list_file):
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
     # get the list of tasks to run
     if task_list_file:
-        # task_list = task_lists.get_tasks(input_file = task_list_file)
         with open(task_list_file, "r") as f:
             task_list = yaml.load(f)
     else:
@@ -92,7 +91,6 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_m
     'analysis_id': analysis_id,
     'results_id': results_id,
     'debug_mode': debug_mode
-    # 'extra_handlers': extra_handlers
     })
 
     # run the downstream pipeline analysis tasks
@@ -142,8 +140,8 @@ def run_new(args, **kwargs):
     # setup and run the new sns analysis
     sns_output_dir = start_sns(configs = configs, **kwargs)
 
-    # True = dont run, False = run
-    if not no_downstream:
+    # optionally run the downstream snsxt analysis steps as well
+    if not no_downstream: # True = dont run, False = run
         logger.debug('Running downstream snsxt analysis pipeline')
         task_list = get_task_list(task_list_file)
         main(analysis_dir = sns_output_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list, debug_mode = debug_mode)
@@ -166,7 +164,6 @@ def parse():
     parser.add_argument("--debug_mode", default = False, action = "store_true", dest = 'debug_mode', help="Skip analysis output validation and error checking before running downstream snsxt pipeline steps")
 
 
-
     # create the parser for the "new" command
     parser_new = subparsers.add_parser('new', help = 'Start a new sns wes pipeline analysis from fastq directories')
     parser_new.set_defaults(func = run_new)
@@ -184,7 +181,7 @@ def parse():
     parser_d.set_defaults(func = run_main)
     parser_d.add_argument('-i', '--input_dir', '--analysis_dir', dest = "analysis_dir", help = "Path to the directory containing the existing sns pipeline output", required = True)
 
-
+    # parse the args and run the default parser function
     args = parser.parse_args()
     args.func(args)
 

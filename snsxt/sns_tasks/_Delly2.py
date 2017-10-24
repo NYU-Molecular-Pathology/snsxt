@@ -85,8 +85,6 @@ class Delly2(AnalysisTask):
 
             # submit the command as a qsub job on the HPC
             # commands to create debug jobs
-            # command = 'sleep 60'
-            # qsub_log_dir = qsub_log_dir[:-1]
             job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
 
             return(job)

@@ -231,15 +231,6 @@ class AnalysisTask(LoggedObject):
         return()
 
 
-
-
-
-
-
-
-
-
-
 class AnnotationInplace(AnalysisTask):
     '''
     Class for annotation object to add to other analysis steps

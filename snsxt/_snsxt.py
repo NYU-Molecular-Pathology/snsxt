@@ -21,9 +21,6 @@ def snsxt(task_list, configs, *args, **kwargs):
     analysis = SnsWESAnalysisOutput object
     task_list, analysis = None, analysis_dir = None, analysis_id = None, results_id = None, debug_mode = False, *args, **kwargs
     '''
-    # logger.debug(task_list)
-    # logger.debug(args)
-    # logger.debug(kwargs)
     analysis = kwargs.pop('analysis', None)
     analysis_dir = kwargs.pop('analysis_dir', None)
     analysis_id = kwargs.pop('analysis_id', None)
@@ -66,9 +63,10 @@ def snsxt(task_list, configs, *args, **kwargs):
             else:
                 logger.debug('Loading task {0} '.format(task_name))
                 logger.debug('task_params are {0}'.format(task_params))
+
                 # load the task class from the module
                 task_class = getattr(sns_tasks, task_name)
-                # logger.debug(task_class)
+
                 # create the task object with the analysis
                 task = task_class(analysis = analysis, extra_handlers = extra_handlers)
                 # run the task

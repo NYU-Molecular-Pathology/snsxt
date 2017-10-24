@@ -126,6 +126,7 @@ def start_sns(configs, **kwargs):
         # run paired analysis
         if pairs_sheet:
             logger.debug('Running paired analysis')
+            # TODO: finish adding the paired analysis here
 
 
     return(output_dir)
