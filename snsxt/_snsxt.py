@@ -5,6 +5,7 @@ Module for the main snsxt function to run the downstream analysis
 '''
 # ~~~~~ LOGGING ~~~~~~ #
 import os
+import sys
 from sns_classes.classes import SnsWESAnalysisOutput
 import sns_tasks
 # from util import log

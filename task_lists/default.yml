@@ -1,7 +1,7 @@
 # tasks I am working on testing and developing for the pipeline
 tasks:
   Delly2: 
-    qsub_wait: True
+    qsub_wait: False
   GATKDepthOfCoverageCustom: 
     qsub_wait: True
   SummaryAvgCoverage: 

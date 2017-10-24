@@ -27,8 +27,8 @@ def start_sns(configs, **kwargs):
     snsxt_parent_dir = configs['snsxt_parent_dir']
 
     logger.debug('Starting new sns analysis')
-    logger.debug(configs)
-    logger.debug(kwargs)
+    logger.debug('configs are: {0}'.format(configs))
+    logger.debug('kwargs are: {0}'.format(kwargs))
 
     fastq_dirs = kwargs.pop('fastq_dirs', [])
     output_dir = kwargs.pop('output_dir', None)
@@ -86,6 +86,7 @@ def start_sns(configs, **kwargs):
         logger.debug('old file {0} will be renamed {1}'.format(samples_fastq_raw_filepath, new_filepath))
         os.rename(samples_fastq_raw_filepath, new_filepath)
 
+
     # change to the output directory
     with t.DirHop(output_dir) as d:
         # run 'sns/gather-fastqs' on the fastq dirs
@@ -108,7 +109,7 @@ def start_sns(configs, **kwargs):
         logger.debug(run_cmd.proc_stdout)
         logger.debug(run_cmd.proc_stderr)
 
-        # capture the qsub jobs
+        # capture the qsub jobs and optionally wait for completion
         jobs = []
         for job in [qsub.Job(id = job_id, name = job_name) for job_id, job_name in qsub.find_all_job_id_names(text = run_cmd.proc_stdout)]:
             jobs.append(job)
@@ -118,7 +119,7 @@ def start_sns(configs, **kwargs):
 
         logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
-        if not no_qsub_wait:
+        if not no_qsub_wait: # True = do not wait, False = do wait
             logger.debug('Waiting for jobs to complete...')
             qsub.monitor_jobs(jobs = jobs)
 
