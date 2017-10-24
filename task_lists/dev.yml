@@ -1,6 +1,0 @@
-# tasks I am working on testing and developing for the pipeline
-tasks:
-  HapMap_variant_ref: 
-    run_func: run_sample_task
-
-setup_report: False

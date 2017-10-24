@@ -33,23 +33,15 @@ def email_logpath():
 # load the logging config
 config_yaml = os.path.join(scriptdir, 'logging.yml')
 logger = log.log_setup(config_yaml = config_yaml, logger_name = "run")
-
-# make the 'main' file handler global for use elsewhere
-main_filehandler = log.get_logger_handler(logger = logger, handler_name = 'main')
-console_handler = log.get_logger_handler(logger = logger, handler_name = "console", handler_type = 'StreamHandler')
-
 logger.debug("snsxt program is starting")
-logger.debug("Path to the monitor's log file: {0}".format(log.logger_filepath(logger = logger, handler_name = "main")))
+
 
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
 # system modules
 import sys
-import csv
-import shutil
-from time import sleep
 import argparse
-import importlib
+import yaml
 
 # this program's modules
 import config
@@ -57,50 +49,34 @@ from util import tools as t
 from util import find
 from util import qsub
 from sns_classes.classes import SnsWESAnalysisOutput
-import task_lists
-import task_func
 import setup_report
-
-# ~~~~ LOAD sns_tasks MODULES ~~~~~~ #
 import sns_tasks
-from sns_tasks import Delly2
-from sns_tasks import GATK_DepthOfCoverage_custom
-from sns_tasks import Summary_Avg_Coverage
+
 
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 configs = config.config
 extra_handlers = [h for h in log.get_all_handlers(logger)]
 
+
+
 # ~~~~~ FUNCTIONS ~~~~~~ #
-def main(analysis_dir, task_list, analysis_id = None, results_id = None):
+def main(analysis_dir, task_list, analysis_id = None, results_id = None, debug_mode = False):
     '''
     Main control function for the program
-
-
-    from sns_classes.classes import SnsWESAnalysisOutput
-    import config
-    configs = config.config
-
-    analysis_dir = '../example_sns_analysis5-copy'
-    analysis_id = 'example_sns_analysis5'
-    results_id = 'results1'
-
-    analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = None)
-
-    import sns_tasks
-
-    task = sns_tasks.HapMapVariantRef(analysis = analysis)
-    task.run()
     '''
-    # load the analysis
-    # extra_handlers = [main_filehandler]
+    # load the analysis from the sns output
     logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
+
     logger.debug(analysis)
-    if not analysis.is_valid:
-        logger.error('The analysis did not pass validations, exiting...')
-        sys.exit()
+    logger.debug(task_list)
+
+    # exit if the analysis is invalid, unless debug mode is enabled
+    if not debug_mode:
+        if not analysis.is_valid:
+            logger.error('The analysis did not pass validations, exiting...')
+            sys.exit()
 
     # run the tasks in the task list
     #  check if 'tasks' is an empty dict
@@ -108,36 +84,25 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
         logger.warning("No tasks were loaded")
     # run the steps included in the config
     else:
-        # run the tasks
+        logger.debug(task_list['tasks'].items())
+        logger.debug(dir(sns_tasks))
         for task_name, task_params in task_list['tasks'].items():
-            # get the run_func value if present in the config
-            run_func = None
-            if 'run_func' in task_params.keys():
-                run_func = task_params.pop('run_func')
-
-            # make sure that the task is present
-            logger.debug("Checking task '{0}' and function {1}".format(task_name, run_func))
+            # make sure the task is present in sns_tasks
             if not task_name in dir(sns_tasks):
-                logger.debug("Task '{0}' is not a valid sns_task".format(task_name))
-                continue
-            # make sure the run function is present
-            if not run_func in dir(task_func) or not run_func:
-                logger.debug("run_func '{0}' is not a valid task function".format(run_func))
-                continue
-
-            # get the task module, e.g. sns_tasks.Delly2
-            task_modulename = 'sns_tasks.{0}'.format(task_name)
-            logger.debug("Loading task '{0}' from package '{1}'".format(task_name, 'sns_tasks'))
-            task_module = importlib.import_module(task_modulename)
-
-            # get the run function e.g. task_func.run_qsub_sample_task
-            logger.debug("Loading run function '{0}' from package '{1}'".format(run_func, 'task_func'))
-            run_func_module = getattr(task_func, run_func)
-
-            # run the task
-            logger.debug('Running task {0} as module {1}, with params: {2}'.format(task_name, task_module, task_params))
-            run_func_module(analysis = analysis, task = task_module, extra_handlers = extra_handlers, **task_params)
-
+                logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
+            else:
+                logger.debug('Loading task {0} '.format(task_name))
+                logger.debug('task_params are {0}'.format(task_params))
+                # load the task class from the module
+                task_class = getattr(sns_tasks, task_name)
+                # logger.debug(task_class)
+                # create the task object with the analysis
+                task = task_class(analysis = analysis, extra_handlers = extra_handlers)
+                # run the task
+                if task_params:
+                    task.run(**task_params)
+                else:
+                    task.run()
 
     # check if reporting was included in config
     if task_list and task_list.get('setup_report', None):
@@ -150,7 +115,7 @@ def main(analysis_dir, task_list, analysis_id = None, results_id = None):
 
 def run():
     '''
-    Run the monitoring program
+    Run the program
     arg parsing goes here, if program was run as a script
     '''
     # ~~~~ GET SCRIPT ARGS ~~~~~~ #
@@ -167,6 +132,7 @@ def run():
     parser.add_argument("-ai", "--analysis_id", default = None, type = str, dest = 'analysis_id', metavar = 'analysis_id', help="Identifier for the analysis")
     parser.add_argument("-ri", "--results_id", default = None, type = str, dest = 'results_id', metavar = 'results_id', help="Identifier for the analysis results, e.g. timestamp used to differentiate multiple sns pipeline outputs for the same sequencing run raw analysis input files")
     parser.add_argument("-t", "--task-list", default = os.path.join("task_lists", "default.yml"), dest = 'task_list_file', help="YAML formatted tasks list file to control which analysis tasks get run")
+    parser.add_argument("--debug_mode", default = False, action = "store_true", dest = 'debug_mode', help="Skip analysis validation")
 
     args = parser.parse_args()
 
@@ -174,17 +140,20 @@ def run():
     analysis_id = args.analysis_id
     results_id = args.results_id
     task_list_file = args.task_list_file
+    debug_mode = args.debug_mode
     # logger.debug(args)
 
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
     # get the list of tasks to run
     if task_list_file:
-        task_list = task_lists.get_tasks(input_file = task_list_file)
+        # task_list = task_lists.get_tasks(input_file = task_list_file)
+        with open(task_list_file, "r") as f:
+            task_list = yaml.load(f)
     else:
         task_list = {}
     logger.debug('task_list config loaded: {0}'.format(task_list))
 
-    main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list)
+    main(analysis_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id, task_list = task_list, debug_mode = debug_mode)
 
 # ~~~~ RUN ~~~~~~ #
 if __name__ == "__main__":

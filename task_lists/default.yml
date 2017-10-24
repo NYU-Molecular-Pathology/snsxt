@@ -1,11 +1,10 @@
-# the standard tasks to perform on an sns wes pipeline output
+# tasks I am working on testing and developing for the pipeline
 tasks:
   Delly2: 
-    run_func: run_qsub_sample_task
     qsub_wait: False
-  GATK_DepthOfCoverage_custom: 
-    run_func: run_qsub_sample_task
-  Summary_Avg_Coverage: 
-    run_func: run_analysis_task
+  GATKDepthOfCoverageCustom: 
+    qsub_wait: False
+  SummaryAvgCoverage: 
+  HapMapVariantRef:
 
 setup_report: True
