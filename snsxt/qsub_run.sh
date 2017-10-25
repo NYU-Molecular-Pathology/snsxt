@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # script to submit the snsxt program to run on the computer cluster
+# example:
+# $ snsxt/qsub_run.sh --analysis_id example_analysis --results_id results1 new demo3-qsub-test/fastq/ -o demo3-qsub-test/sns_output
 
 # $ module list
 # Currently Loaded Modulefiles:
