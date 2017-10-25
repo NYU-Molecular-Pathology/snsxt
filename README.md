@@ -16,7 +16,7 @@ __NOTE:__ Usage may change as development progresses
 
 ## New Analysis
 
-__Requirements__: Directory of .fastq.gz files, and a valid `samples.pairs.csv` samplesheet file.
+__Requirements__: Directory of .fastq.gz files, and a valid `samples.pairs.csv` samplesheet file [[example here](https://github.com/NYU-Molecular-Pathology/snsxt/blob/0a2a308baf25af5a67bac9f0668025061693a8a5/demo/misc/samples.pairs.csv)].
 
 - Create a new directory for your analysis
 
