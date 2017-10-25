@@ -173,7 +173,7 @@ def parse():
     parser_new.add_argument('--targets', dest = 'targets_bed', help = 'Targets .bed file with regions for analysis', default = os.path.join(snsxt_parent_dir, 'targets.bed'))
     parser_new.add_argument('--pairs_sheet', dest = 'pairs_sheet', help = '"samples.pairs.csv" samplesheet to use for paired analysis', default = None, type = str)
     parser.add_argument("--no_qsub_wait", default = False, action = "store_true", dest = 'no_qsub_wait', help="Do not wait for the qsub jobs to finish in a new analysis")
-    parser.add_argument("--no_downstream", default = False, action = "store_true", dest = 'include_downstream', help="Do not run the downstream snsxt analysis tasks after the completion of a new analysis")
+    parser.add_argument("--no_downstream", default = False, action = "store_true", dest = 'no_downstream', help="Do not run the downstream snsxt analysis tasks after the completion of a new analysis")
 
 
     # create the parser for the "d" downstream command
