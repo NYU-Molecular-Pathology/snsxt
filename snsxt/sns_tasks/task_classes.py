@@ -80,8 +80,11 @@ class AnalysisTask(LoggedObject):
 
         # get the 'main_configs' from this script
         self.main_configs = configs
-        # get the 'task_configs' from external YAML file
-        self._task_config_from_file(config_file = config_file)
+
+        if config_file:
+            # get the 'task_configs' from external YAML file
+            self._task_config_from_file(config_file = config_file)
+            # self.task_configs
 
         if analysis:
             # setup the input and output locations
@@ -229,6 +232,25 @@ class AnalysisTask(LoggedObject):
             else:
                 self.logger.info("No jobs were submitted for task {0}".format(self.taskname))
         return()
+
+
+class SnsTask(AnalysisTask):
+    '''
+    Class for a task that runs part of the sns pipeline on the analysis
+
+    from task_classes import AnnotationInplace
+    x = AnnotationInplace()
+    '''
+    def __init__(self, analysis, taskname, config_file, extra_handlers = None):
+        '''
+        '''
+        AnalysisTask.__init__(self, taskname = str(taskname), config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+
+        # directory holding the sns repo
+        self.sns_repo_dir = os.path.join(self.analysis.dir, 'sns')
+        # with self.tools.DirHop(self.analysis.dir) as d:
+        #     do_something()
+
 
 
 class AnnotationInplace(AnalysisTask):
