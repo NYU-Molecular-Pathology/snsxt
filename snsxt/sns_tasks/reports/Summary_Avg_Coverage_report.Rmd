@@ -72,9 +72,10 @@ coverage_per_sample_long <- reshape2::melt(coverage_per_sample[, which(! colname
 
 coverage_per_sample_long_lim <- coverage_per_sample_long[which(coverage_per_sample_long[["coverage"]] < y_lim), ]
 
-plot_title <- sprintf("Coverage Per Sample\n(for regions <%s coverage)", y_lim)
+# plot_title <- sprintf("Coverage Per Sample\n(for regions <%s coverage)", y_lim)
+plot_title <- "Coverage Per Sample"
 
-coverage_per_sample_boxplot <- ggplot(data = coverage_per_sample_long_lim, 
+coverage_per_sample_boxplot <- ggplot(data = coverage_per_sample_long, # coverage_per_sample_long_lim
                                       aes(x = sample, y = coverage, fill = sample)) +
     geom_abline(intercept = 200, slope = 0, color = "red")  + 
     geom_boxplot() +
