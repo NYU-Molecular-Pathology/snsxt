@@ -68,9 +68,9 @@ snsxt/run.py --analysis_id example_analysis --results_id results1 d -i /path/to/
 
 Some common program arguments to the `snsxt/run.py` program include:
 
-- `--analysis_id`: An identifier for the analysis
+- `--analysis_id`: An identifier for the analysis (e.g. NextSeq run ID)
 
-- `--results_id`: A sub-identifier for the analysis
+- `--results_id`: A sub-identifier for the analysis (e.g. a timestamp)
 
 - `--task-list`: A YAML formatted list of downstream analysis tasks for `snsxt`, defaults to `task_lists/default.yml`
 
