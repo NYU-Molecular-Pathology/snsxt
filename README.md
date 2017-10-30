@@ -80,7 +80,7 @@ The following subcommands are included in the program:
 
 #### `new`
 
-Starts a new `sns wes` pipeline analysis, along with paired.
+Starts a new `sns wes` pipeline analysis, along with paired tumor-normal variant calling.
 
 - positional arguments represent directories containing .fastq files
 
