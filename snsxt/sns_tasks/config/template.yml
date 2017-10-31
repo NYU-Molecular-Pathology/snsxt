@@ -1,7 +1,7 @@
 # ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
 # every sns_task should have these items
 
-# name of the parent Python module
+# name of the task as listed in the Python class implementation
 task_name: template_task
 
 # name of the sns output subdirectory from which to take input files 
@@ -9,6 +9,10 @@ input_dir: 'VCF-GATK-HC-annot'
 
 # filename pattern to use for input file
 input_pattern: '*.combined.txt'
+
+# or exact suffix to append to sample ID for input file
+input_suffix: '.combined.txt'
+
 
 # name of the parent directory to use for the program output
 output_dir_name: Template-Task

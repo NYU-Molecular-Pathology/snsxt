@@ -192,21 +192,36 @@ class AnalysisTask(LoggedObject):
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
-        if analysis:
-            # get all the Sample objects for the analysis
-            samples = analysis.get_samples()
-            # empty list to hold the qsub jobs
-            jobs = []
-            for sample in samples:
-                # run the task on each sample; should return a qsub Job object
-                job = self.main(sample = sample, *args, **kwargs)
-                if job:
-                    jobs.append(job)
-            self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
-            # montitor the qsub jobs until they are all completed
-            if qsub_wait:
-                self.qsub.monitor_jobs(jobs = jobs)
-        return()
+
+        # get all the Sample objects for the analysis
+        samples = analysis.get_samples()
+
+        # empty list to hold the qsub jobs
+        jobs = []
+
+        for sample in samples:
+            # run the task on each sample; should return a qsub Job object
+            job = self.main(sample = sample, *args, **kwargs)
+            if job:
+                jobs.append(job)
+        self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+
+        # montitor the qsub jobs until they are all completed
+        if qsub_wait:
+            self.logger.debug('Waiting for jobs to complete')
+            self.qsub.monitor_jobs(jobs = jobs)
+            if jobs:
+                self.logger.debug('Validating completion status of jobs')
+                job_validations = [job.validate_completion() for job in jobs]
+                if all(job_validations):
+                    self.logger.debug('All jobs appear to have completed successfully')
+                else:
+                    for job in jobs:
+                        if not job.validate_completion():
+                            self.logger.error('Job {0} did not complete successfully!'.format((job.id, job.name)))
+            return(None)
+        else:
+            return(jobs)
 
     def run_qsub_analysis_task(self, analysis = None, qsub_wait = True, *args, **kwargs):
         '''
@@ -214,24 +229,25 @@ class AnalysisTask(LoggedObject):
         analysis is an SnsWESAnalysisOutput object
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
+
+        TODO: Update this with run_qsub_sample_task methods
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
-        if analysis:
-            # empty list to hold the qsub jobs
-            jobs = []
-            # run the task on each sample; should return a qsub Job object
-            job = self.main(sample = sample, *args, **kwargs)
-            if job:
-                jobs.append(job)
-                self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+        # empty list to hold the qsub jobs
+        jobs = []
+        # run the task on the analysis; should return a qsub Job object
+        job = self.main(analysis = analysis, *args, **kwargs)
+        if job:
+            jobs.append(job)
+            self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
-                if qsub_wait:
-                    # montitor the qsub jobs until they are all completed
-                    self.qsub.monitor_jobs(jobs = jobs)
-            else:
-                self.logger.info("No jobs were submitted for task {0}".format(self.taskname))
-        return()
+            if qsub_wait:
+                # montitor the qsub jobs until they are all completed
+                self.qsub.monitor_jobs(jobs = jobs)
+        else:
+            self.logger.info("No jobs were submitted for task {0}".format(self.taskname))
+        return(None)
 
 
 class SnsTask(AnalysisTask):
