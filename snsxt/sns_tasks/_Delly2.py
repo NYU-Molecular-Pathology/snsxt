@@ -72,6 +72,7 @@ class Delly2(AnalysisTask):
         sample is an SnsAnalysisSample object
         return the qsub job for the sample
         '''
+        self.setup_report()
         qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 
@@ -90,9 +91,10 @@ class Delly2(AnalysisTask):
             return(job)
         else:
             self.logger.error('A required item does not exist')
+
     def run(self, *args, **kwargs):
         '''
         run_qsub_sample_task
         '''
-        self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()
+        job = self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
+        return(job)

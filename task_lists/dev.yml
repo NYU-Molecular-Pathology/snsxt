@@ -2,7 +2,10 @@
 tasks:
   DemoQsubSampleTask: 
     qsub_wait: False
-  # SummaryAvgCoverage: 
+  # GATKDepthOfCoverageCustom: 
+  #   qsub_wait: False
+  # Delly2: 
+  #   qsub_wait: False
   # HapMapVariantRef:
 
 setup_report: False

@@ -8,7 +8,8 @@ task_name: GATK_DepthOfCoverage_custom
 input_dir: 'BAM-GATK-RA-RC'
 
 # filename pattern to use for input file
-input_pattern: '*.dd.ra.rc.bam'
+# input_pattern: '*.dd.ra.rc.bam'
+input_suffix: '.dd.ra.rc.bam'
 
 # name of the parent directory to use for the program output
 output_dir_name: QC-Coverage-Custom

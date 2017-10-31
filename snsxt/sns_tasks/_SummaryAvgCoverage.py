@@ -9,6 +9,7 @@ from task_classes import AnalysisTask
 class SummaryAvgCoverage(AnalysisTask):
     '''
     Class for creating summaries of the average coverages for the analysis from GATK DepthOfCoverage output
+    Run this from an external R script in the current session
     '''
     def __init__(self, analysis, taskname = 'Summary_Avg_Coverage', config_file = 'Summary_Avg_Coverage.yml', extra_handlers = None):
         '''

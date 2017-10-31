@@ -8,7 +8,7 @@ task_name: DemoQsubSampleTask
 input_dir: 'BAM-GATK-RA-RC'
 
 # filename pattern to use for input file
-input_pattern: '*.dd.ra.rc.bam'
+# input_pattern: '*.dd.ra.rc.bam'
 
 # or exact suffix to append to sample ID for input file
 input_suffix: '.dd.ra.rc.bam'
@@ -22,5 +22,5 @@ report_files:
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # naming pattern for files produced by this task
-output_pattern: '.combined.txt'
+# output_pattern: '.combined.txt'
 output_suffix: '.combined.txt'

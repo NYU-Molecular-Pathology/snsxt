@@ -7,6 +7,7 @@ Base classes for snsxt analysis tasks
 import os
 import sys
 import re
+import functools
 
 # add parent dir to sys.path to import util
 scriptdir = os.path.dirname(os.path.realpath(__file__)) # this script's dir
@@ -54,8 +55,22 @@ configs['tasks_files_dir'] = os.path.join(configs['sns_tasks_dir'], 'files')
 # ^ i.e. same as sns_tasks/files
 
 
+# ~~~~~ DECORATORS ~~~~~ #
+def _setup_report(func, *args, **kwargs):
+    '''
+    Decorator to set up the analysis task's report files
+    '''
+    def report_wrapper(self, *args, **kwargs) :
+        '''
+        Wrap another class method
+        '''
+        self.logger.debug('Setting up the report files for the task')
+        self.setup_report()
+        func(self, *args, **kwargs)
+    return(report_wrapper)
 
 
+# ~~~~~ CLASSES ~~~~~ #
 class AnalysisTask(LoggedObject):
     '''
     Base class for an sns analysis task
@@ -84,16 +99,44 @@ class AnalysisTask(LoggedObject):
         self.main_configs = configs
 
         if config_file:
-            # get the 'task_configs' from external YAML file
-            self._task_config_from_file(config_file = config_file)
-            # self.task_configs
+            # get the 'task_configs' from external YAML file, load them in self.task_configs
+            self._task_config_from_file(config_file = config_file) #
+            # set some extra attributes for convenience
+            self._init_task_attrs()
 
         if analysis:
             # setup the input and output locations
-            self.output_dir = self.tools.mkdirs(path = os.path.join(self.analysis.dir, self.task_configs['output_dir_name']), return_path = True)
-            self.logger.debug('output_dir: {0}'.format(self.output_dir))
-            self.input_dir = os.path.join(self.analysis.dir, self.task_configs['input_dir'])
+            self._init_locs()
+            # setup the report
+            self.setup_report()
 
+    def _init_task_attrs(self):
+        '''
+        Initialize some extra object attributes from the task config, if they're present
+
+        These are convenience items for easy access in child classes
+        '''
+        if self.task_configs.get('input_pattern', None):
+            self.input_pattern = self.task_configs['input_pattern']
+
+        if self.task_configs.get('input_suffix', None):
+            self.input_suffix = self.task_configs['input_suffix']
+
+        if self.task_configs.get('output_pattern', None):
+            self.output_pattern = self.task_configs['output_pattern']
+
+        if self.task_configs.get('output_suffix', None):
+            self.output_suffix = self.task_configs['output_suffix']
+
+
+    def _init_locs(self):
+        '''
+        Initialize locations for the task
+        '''
+        self.output_dir = self.tools.mkdirs(path = os.path.join(self.analysis.dir, self.task_configs['output_dir_name']), return_path = True)
+        self.logger.debug('task output_dir: {0}'.format(self.output_dir))
+        self.input_dir = os.path.join(self.analysis.dir, self.task_configs['input_dir'])
+        self.validate_items([self.output_dir, self.input_dir])
 
     def _task_config_from_file(self, config_file):
         '''
@@ -101,16 +144,59 @@ class AnalysisTask(LoggedObject):
         config_file = basename of a file in the tasks_config_dir, for convenience
         '''
         config_filepath = os.path.join(self.main_configs['tasks_config_dir'], config_file)
+        self.validate_items([config_filepath])
         with open(config_filepath, "r") as f:
             self.task_configs = yaml.load(f)
             self.task_configs['config_file'] = config_filepath
+
+    def create_sample_file_outpath(self, sampleID, suffix = None):
+        '''
+        Create a path to a file in the analysis output directory
+        '''
+        # try to resolve an output_suffix
+        if not suffix:
+            suffix = self.output_suffix
+        output_path = os.path.join(self.output_dir, sampleID + suffix)
+        return(output_path)
+
+    def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
+        '''
+        Create the path to an expected sample file in the input directory
+        '''
+        # try to resolve an input_suffix
+        if not suffix:
+            suffix = self.input_suffix
+        path = os.path.join(self.input_dir, sampleID + suffix)
+        if validate:
+            self.logger.debug('Validating expected input file path: {0}'.format(path))
+            self.validate_items([path])
+        return(path)
+
+    def validate_items(self, items):
+        '''
+        Run validations on a list of items
+        items = list of file or dir paths
+
+        TODO: raise custom exceptions here if files dont validate
+        '''
+        if len(items) < 1 or not items:
+            self.logger.error('No items were passed')
+            sys.exit()
+        # make sure all files and dirs exist
+        items_exist = {item: self.tools.item_exists(item) for item in items}
+        if not all(items_exist.values()):
+            self.logger.error('Some items did not exist:')
+            self.logger.error('{0}'.format(items_exist))
+            sys.exit()
+            # add more criteria here...
+        # TODO: raise custom exceptions here if files dont validate
 
     def get_report_files(self):
         '''
         Get the files for the report based on the configs, return a list of files
         '''
         report_files = []
-        self.logger.debug('Getting report files for task: {0}'.format(self.taskname))
+
         report_dir = self.main_configs['tasks_reports_dir']
         if self.task_configs.get('report_files', None):
             for item in self.task_configs['report_files']:
@@ -118,6 +204,9 @@ class AnalysisTask(LoggedObject):
                 report_files.append(file_path)
         else:
             self.logger.warning('No report files are set for analysis task {0}'.format(self.taskname))
+
+        if report_files:
+            self.validate_items(report_files)
         return(report_files)
 
     def setup_report(self, output_dir = None):

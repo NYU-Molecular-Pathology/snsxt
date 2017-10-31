@@ -99,12 +99,13 @@ class GATKDepthOfCoverageCustom(AnalysisTask):
         self.logger.debug('Sample is: {0}'.format(sample))
         self.logger.debug(sample.static_files)
         self.log.print_filehandler_filepaths_to_log(logger = self.logger)
+        self.setup_report()
 
         # get the dir for the qsub logs
         qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 
-        sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
+        sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
         targets_bed = sample.list_none(sample.get_files('targets_bed'))
 
         if sample_bam and self.output_dir and qsub_log_dir:
@@ -127,5 +128,5 @@ class GATKDepthOfCoverageCustom(AnalysisTask):
         '''
         Run the analysis step
         '''
-        self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()
+        job = self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
+        return(job)
