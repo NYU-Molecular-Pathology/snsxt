@@ -1,0 +1,8 @@
+# tasks I am working on testing and developing for the pipeline
+tasks:
+  DemoQsubSampleTask: 
+    qsub_wait: False
+  # SummaryAvgCoverage: 
+  # HapMapVariantRef:
+
+setup_report: False

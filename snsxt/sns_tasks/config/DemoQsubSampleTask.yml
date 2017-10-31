@@ -1,0 +1,20 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: DemoQsubSampleTask
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: ''
+
+# filename pattern to use for input file
+input_pattern: ''
+
+# name of the parent directory to use for the program output
+output_dir_name: Demo-QsubSampleTask
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+  # - 
+
