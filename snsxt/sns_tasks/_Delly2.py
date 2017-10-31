@@ -4,16 +4,16 @@
 import os
 import sys
 import re
-from task_classes import AnalysisTask
+from task_classes import QsubSampleTask
 
-class Delly2(AnalysisTask):
+class Delly2(QsubSampleTask):
     '''
     Class for for running Delly2 with the sns pipeline
     '''
     def __init__(self, analysis, taskname = 'Delly2', config_file = 'Delly2.yml', extra_handlers = None):
         '''
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def delly2_cmd(self, sampleID, bam_file, output_dir):
         '''
@@ -78,23 +78,17 @@ class Delly2(AnalysisTask):
 
         sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
 
-        if sample_bam and self.output_dir and qsub_log_dir:
-            self.logger.debug('sample_bam: {0}'.format(sample_bam))
+        # make sure the files and locations exist
+        self.validate_items([sample_bam, qsub_log_dir])
 
-            # make the shell command to run
-            command = self.delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = self.output_dir)
 
-            # submit the command as a qsub job on the HPC
-            # commands to create debug jobs
-            job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
+        self.logger.debug('sample_bam: {0}'.format(sample_bam))
 
-            return(job)
-        else:
-            self.logger.error('A required item does not exist')
+        # make the shell command to run
+        command = self.delly2_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = self.output_dir)
 
-    def run(self, *args, **kwargs):
-        '''
-        run_qsub_sample_task
-        '''
-        job = self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
+        # submit the command as a qsub job on the HPC
+        # commands to create debug jobs
+        job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
+
         return(job)

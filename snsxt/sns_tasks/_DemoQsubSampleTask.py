@@ -5,9 +5,9 @@ import os
 import sys
 import re
 import task_classes
-from task_classes import AnalysisTask
+from task_classes import QsubSampleTask
 
-class DemoQsubSampleTask(AnalysisTask):
+class DemoQsubSampleTask(QsubSampleTask):
     '''
     Demo task that will submit a qsub job for every sample in the analysis
 
@@ -18,7 +18,7 @@ class DemoQsubSampleTask(AnalysisTask):
         '''
         analysis is an SnsWESAnalysisOutput object
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
         '''
@@ -52,11 +52,4 @@ class DemoQsubSampleTask(AnalysisTask):
         # submit the command as a qsub job on the HPC
         job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1)
 
-        return(job)
-
-    def run(self, *args, **kwargs):
-        '''
-        Put your code for running the analysis task here
-        '''
-        job = self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
         return(job)

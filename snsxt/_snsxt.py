@@ -104,6 +104,5 @@ def run_task_list(analysis, task_list, extra_handlers = None):
                         background_jobs.append(item)
 
     if background_jobs:
-        # job_management.monitor_background_jobs(background_jobs = background_jobs)
         logger.debug('Background jobs will be monitored for completion and validated')
         job_management.monitor_validate_jobs(jobs = background_jobs)

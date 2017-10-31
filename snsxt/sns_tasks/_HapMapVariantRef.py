@@ -4,9 +4,9 @@
 import os
 import sys
 import re
-from task_classes import AnalysisTask
+from task_classes import AnalysisSampleTask
 
-class HapMapVariantRef(AnalysisTask):
+class HapMapVariantRef(AnalysisSampleTask):
     '''
     Class for comparing each HapMap sample variant calls against
     a known list of previously sequenced HapMap variants
@@ -18,7 +18,7 @@ class HapMapVariantRef(AnalysisTask):
     def __init__(self, analysis, taskname = 'HapMap_variant_ref', config_file = 'HapMap_variant_ref.yml', extra_handlers = None):
         '''
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        AnalysisSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
         '''
@@ -52,11 +52,5 @@ class HapMapVariantRef(AnalysisTask):
             self.logger.debug('Overlapping the sample_annot_file against the hapmap_variant_file...')
             self.tools.write_tabular_overlap(file1 = sample_annot_file, ref_file = hapmap_variant_file, output_file = output_file, delim = '\t', inverse = True)
             self.logger.debug('{0} non-overlapping variants were output'.format(self.tools.num_lines(output_file, skip = 1)))
+        # TODO: what to return here??
         return(hapmap_variant_file)
-
-    def run(self, *args, **kwargs):
-        '''
-        Run the analysis step
-        '''
-        self.run_sample_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()

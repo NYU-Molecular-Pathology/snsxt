@@ -19,6 +19,7 @@ from util import tools
 from util import log
 from util import qsub
 from util.classes import LoggedObject
+import job_management
 sys.path.pop(0)
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
@@ -248,10 +249,36 @@ class AnalysisTask(LoggedObject):
             self.logger.debug('No input_dir specified')
         return()
 
+    def run(self, analysis = None, *args, **kwargs):
+        '''
+        Run a task that operates an analysis (not per-sample)
+        analysis is an SnsWESAnalysisOutput object
 
-    def run_sample_task(self, analysis = None, *args, **kwargs):
+        this will be overwritten with run() set by subclasses
+        '''
+        if not analysis:
+            analysis = getattr(self, 'analysis', None)
+        if analysis:
+            self.main(analysis = analysis, *args, **kwargs)
+        return()
+
+
+
+
+
+
+class AnalysisSampleTask(AnalysisTask):
+    '''
+    Analysis Task task that will run separately for every sample in the analysis
+    '''
+    def __init__(self, *ars, **kwargs):
+        AnalysisTask.__init__(self, *ars, **kwargs)
+
+    def run(self, analysis = None, *args, **kwargs):
         '''
         Run a task that operates on every sample in the analysis individually
+
+        overrides AnalysisTask.run()
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -261,25 +288,26 @@ class AnalysisTask(LoggedObject):
             for sample in samples:
                 self.logger.debug('Running task {0} on sample {1}'.format(self.taskname, sample.id))
                 self.main(sample = sample, *args, **kwargs)
+        # TODO: what to return here??
         return()
 
-    def run_analysis_task(self, analysis = None, *args, **kwargs):
-        '''
-        Run a task that operates an analysis (not per-sample)
-        analysis is an SnsWESAnalysisOutput object
-        '''
-        if not analysis:
-            analysis = getattr(self, 'analysis', None)
-        if analysis:
-            self.main(analysis = analysis, *args, **kwargs)
-        return()
 
-    def run_qsub_sample_task(self, analysis = None, qsub_wait = True, *args, **kwargs):
+
+class QsubSampleTask(AnalysisTask):
+    '''
+    Analysis Task task that will submit a qsub job for every sample in the analysis
+    '''
+    def __init__(self, *ars, **kwargs):
+        AnalysisTask.__init__(self, *ars, **kwargs)
+
+    def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
         '''
         Run a task that submits qsub jobs on all the samples in the analysis output
         analysis is an SnsWESAnalysisOutput object
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
+
+        overrides AnalysisTask.run()
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -299,29 +327,28 @@ class AnalysisTask(LoggedObject):
 
         # montitor the qsub jobs until they are all completed
         if qsub_wait:
-            self.logger.debug('Waiting for jobs to complete')
-            self.qsub.monitor_jobs(jobs = jobs)
-            if jobs:
-                self.logger.debug('Validating completion status of jobs')
-                job_validations = [job.validate_completion() for job in jobs]
-                if all(job_validations):
-                    self.logger.debug('All jobs appear to have completed successfully')
-                else:
-                    for job in jobs:
-                        if not job.validate_completion():
-                            self.logger.error('Job {0} did not complete successfully!'.format((job.id, job.name)))
+            self.logger.debug('Jobs will be monitored for completion and validated')
+            job_management.monitor_validate_jobs(jobs = jobs)
             return(None)
         else:
             return(jobs)
 
-    def run_qsub_analysis_task(self, analysis = None, qsub_wait = True, *args, **kwargs):
+
+class QsubAnalysisTask(AnalysisTask):
+    '''
+    Analysis Task task that will submit a single qsub job for the entire analysis
+    '''
+    def __init__(self, *ars, **kwargs):
+        AnalysisTask.__init__(self, *ars, **kwargs)
+
+    def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
         '''
         Run a task that submits one qsub job for the analysis
         analysis is an SnsWESAnalysisOutput object
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
 
-        TODO: Update this with run_qsub_sample_task methods
+        overrides AnalysisTask.run()
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -333,12 +360,14 @@ class AnalysisTask(LoggedObject):
             jobs.append(job)
             self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
-            if qsub_wait:
-                # montitor the qsub jobs until they are all completed
-                self.qsub.monitor_jobs(jobs = jobs)
+        if qsub_wait:
+            # montitor the qsub jobs until they are all completed
+            self.logger.debug('Jobs will be monitored for completion and validated')
+            job_management.monitor_validate_jobs(jobs = jobs)
+            return(None)
         else:
-            self.logger.info("No jobs were submitted for task {0}".format(self.taskname))
-        return(None)
+            return(jobs)
+
 
 
 class SnsTask(AnalysisTask):
@@ -347,6 +376,8 @@ class SnsTask(AnalysisTask):
 
     from task_classes import AnnotationInplace
     x = AnnotationInplace()
+
+    TODO: finish this
     '''
     def __init__(self, analysis, taskname, config_file, extra_handlers = None):
         '''

@@ -4,16 +4,16 @@
 import os
 import sys
 import re
-from task_classes import AnalysisTask
+from task_classes import QsubSampleTask
 
-class GATKDepthOfCoverageCustom(AnalysisTask):
+class GATKDepthOfCoverageCustom(QsubSampleTask):
     '''
     Class for running custom thresholds GATK DepthOfCoverage with the sns pipeline
     '''
     def __init__(self, analysis, taskname = 'GATK_DepthOfCoverage_custom', config_file = 'GATK_DepthOfCoverage_custom.yml', extra_handlers = None):
         '''
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def make_tresholds_arg(self):
         '''
@@ -108,25 +108,19 @@ class GATKDepthOfCoverageCustom(AnalysisTask):
         sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
         targets_bed = sample.list_none(sample.get_files('targets_bed'))
 
-        if sample_bam and self.output_dir and qsub_log_dir:
-            self.logger.debug('sample_bam: {0}'.format(sample_bam))
+        # make sure the files and locations exist
+        self.validate_items([sample_bam, qsub_log_dir])
 
-            # make the shell command to run
-            command = self.gatk_DepthOfCoverage_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = self.output_dir, intervals_bed_file = targets_bed)
-            self.logger.debug(command)
 
-            # submit the command as a qsub job on the HPC
-            # commands to create debug jobs
-            # command = 'sleep 60'
-            # qsub_log_dir = qsub_log_dir[:-1]
-            job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
-            return(job)
-        else:
-            self.logger.error('A required item does not exist')
+        self.logger.debug('sample_bam: {0}'.format(sample_bam))
 
-    def run(self, *args, **kwargs):
-        '''
-        Run the analysis step
-        '''
-        job = self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
+        # make the shell command to run
+        command = self.gatk_DepthOfCoverage_cmd(sampleID = sample.id, bam_file = sample_bam, output_dir = self.output_dir, intervals_bed_file = targets_bed)
+        self.logger.debug(command)
+
+        # submit the command as a qsub job on the HPC
+        # commands to create debug jobs
+        # command = 'sleep 60'
+        # qsub_log_dir = qsub_log_dir[:-1]
+        job = self.qsub.submit(command = command, name = self.taskname + '.' + sample.id, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1) #
         return(job)

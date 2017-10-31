@@ -4,18 +4,21 @@
 import os
 import sys
 import re
-from task_classes import AnalysisTask
+from task_classes import QsubSampleTask
+from task_classes import QsubAnalysisTask
 
-class TemplateAnalysisTask(AnalysisTask):
+class TemplateAnalysisTask(QsubAnalysisTask):
     '''
     This is a template for an analysis task that operates on the entire analysis at once
     Put your description of the analysis task here
     '''
     def __init__(self, analysis, taskname = 'Template_Analysis_Task', config_file = 'Template_Analysis_Task.yml', extra_handlers = None):
         '''
+        Initialize the object with the parent class
+        
         analysis is an SnsWESAnalysisOutput object
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        QsubAnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, analysis):
         '''
@@ -27,26 +30,20 @@ class TemplateAnalysisTask(AnalysisTask):
         self.logger.debug('The global configs for all tasks will be in this dict: {0}'.format(self.main_configs))
         self.logger.debug('The configs loaded from the task YAML file will be in this dict: {0}'.format(self.task_configs))
 
-    def run(self, *args, **kwargs):
-        '''
-        Put your code for running the analysis task here
-        '''
-        # submit qsub jobs for a task that operates on the entire analysis at once
-        self.run_qsub_analysis_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()
 
 
-
-class TemplateAnalysisSampleTask(AnalysisTask):
+class TemplateAnalysisSampleTask(QsubSampleTask):
     '''
     This is a template for an analysis task that operates a single sample in the analysis at a time
     Put your description of the analysis task here
     '''
     def __init__(self, analysis, taskname = 'Template_Analysis_Sample_Task', config_file = 'Template_Analysis_Sample_Task.yml', extra_handlers = None):
         '''
+        Initialize the object with the parent class
+
         analysis is an SnsWESAnalysisOutput object
         '''
-        AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
         '''
@@ -58,11 +55,3 @@ class TemplateAnalysisSampleTask(AnalysisTask):
         self.logger.debug('Put your code for doing the analysis task in this function')
         self.logger.debug('The global configs for all tasks will be in this dict: {0}'.format(self.main_configs))
         self.logger.debug('The configs loaded from the task YAML file will be in this dict: {0}'.format(self.task_configs))
-
-    def run(self, *args, **kwargs):
-        '''
-        Put your code for running the analysis task here
-        '''
-        # submit qsub jobs for a task that operates on the entire analysis at once
-        self.run_qsub_sample_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()

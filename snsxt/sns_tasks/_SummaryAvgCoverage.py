@@ -54,9 +54,3 @@ class SummaryAvgCoverage(AnalysisTask):
 
         # Annotation_inplace(input_dir = output_dir, annotation_method = configs['annotation_method'], extra_handlers = extra_handlers)
         self.annotate(input_dir = self.output_dir, extra_handlers = extra_handlers)
-
-    def run(self, *args, **kwargs):
-        '''
-        '''
-        self.run_analysis_task(analysis = self.analysis, *args, **kwargs)
-        self.setup_report()
