@@ -122,6 +122,7 @@ def start_sns(configs, **kwargs):
 
         if not no_qsub_wait: # True = do not wait, False = do wait
             if jobs:
+                # TODO: add some handling if no jobs were produced
                 logger.debug('sns pipeline jobs will be monitored for completion and validated')
                 job_management.monitor_validate_jobs(jobs = jobs)
 

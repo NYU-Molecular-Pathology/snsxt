@@ -33,6 +33,15 @@ class DemoQsubSampleTask(AnalysisTask):
         # setup report output
         self.setup_report()
 
+        # find the input file for the sample
+        # sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
+        input_analysis_step = self.task_configs['input_dir']
+        input_search_dir = sample.list_none(sample.analysis_config['dirs'][input_analysis_step])
+        patterns = [sample.id + self.task_configs['input_suffix']]
+        sample_bam = self.find.find(search_dir = input_search_dir, inclusion_patterns = patterns, search_type = 'file', match_mode = 'all')
+
+        self.logger.debug('sample_bam is: {0}'.format(sample_bam))
+
         # get the dir for the qsub logs
         qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
 

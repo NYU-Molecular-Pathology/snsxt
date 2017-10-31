@@ -13,6 +13,7 @@ scriptdir = os.path.dirname(os.path.realpath(__file__)) # this script's dir
 parentdir = os.path.dirname(scriptdir) # this script's parent dir
 sys.path.insert(0, parentdir)
 import util
+from util import find
 from util import tools
 from util import log
 from util import qsub
@@ -77,6 +78,7 @@ class AnalysisTask(LoggedObject):
         self.tools = tools
         self.qsub = qsub
         self.log = log
+        self.find = find
 
         # get the 'main_configs' from this script
         self.main_configs = configs

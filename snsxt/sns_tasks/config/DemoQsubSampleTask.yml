@@ -5,10 +5,13 @@
 task_name: DemoQsubSampleTask
 
 # name of the sns output subdirectory from which to take input files 
-input_dir: ''
+input_dir: 'BAM-GATK-RA-RC'
 
 # filename pattern to use for input file
-input_pattern: ''
+input_pattern: '*.dd.ra.rc.bam'
+
+# or exact suffix to append to sample ID for input file
+input_suffix: '.dd.ra.rc.bam'
 
 # name of the parent directory to use for the program output
 output_dir_name: Demo-QsubSampleTask
@@ -16,5 +19,8 @@ output_dir_name: Demo-QsubSampleTask
 
 # files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
-  # - 
 
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+# naming pattern for files produced by this task
+output_pattern: '.combined.txt'
+output_suffix: '.combined.txt'

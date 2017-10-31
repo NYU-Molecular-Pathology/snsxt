@@ -11,6 +11,7 @@ import sns_tasks
 import job_management
 # from util import log
 from util import qsub
+from util import tools
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ def snsxt(task_list, configs, *args, **kwargs):
         if analysis_dir:
             logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
             analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
+            # tools.my_debugger(locals().copy())
     if not analysis_dir and not analysis:
         logger.error('No analysis dir provided')
         return()
