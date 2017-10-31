@@ -9,6 +9,7 @@ import sys
 import shutil
 from util import tools as t
 from util import qsub
+import job_management
 import logging
 logger = logging.getLogger(__name__)
 
@@ -120,8 +121,9 @@ def start_sns(configs, **kwargs):
         logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
         if not no_qsub_wait: # True = do not wait, False = do wait
-            logger.debug('Waiting for jobs to complete...')
-            qsub.monitor_jobs(jobs = jobs)
+            if jobs:
+                logger.debug('sns pipeline jobs will be monitored for completion and validated')
+                job_management.monitor_validate_jobs(jobs = jobs)
 
         # run paired analysis
         if pairs_sheet:

@@ -70,4 +70,8 @@ loggers:
     level: DEBUG
     handlers: [console, main, email]
     propagate: true
-  
+  job_management:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+
