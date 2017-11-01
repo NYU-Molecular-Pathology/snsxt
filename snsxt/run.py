@@ -42,6 +42,7 @@ logger.debug("snsxt program is starting")
 import sys
 import argparse
 import yaml
+import collections
 
 # this program's modules
 import config
@@ -73,6 +74,16 @@ def get_task_list(task_list_file):
     Read the task_list from a YAML formatted file
     '''
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
+
+    # https://stackoverflow.com/a/21048064/5359531
+    _mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
+    def dict_representer(dumper, data):
+        return(dumper.represent_dict(data.items()))
+    def dict_constructor(loader, node):
+        return(collections.OrderedDict(loader.construct_pairs(node)))
+    yaml.add_representer(collections.OrderedDict, dict_representer)
+    yaml.add_constructor(_mapping_tag, dict_constructor)
+
     # get the list of tasks to run
     if task_list_file:
         with open(task_list_file, "r") as f:
