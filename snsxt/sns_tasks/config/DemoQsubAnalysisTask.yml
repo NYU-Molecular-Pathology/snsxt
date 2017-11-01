@@ -7,25 +7,27 @@ task_name: DemoQsubSampleTask
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'BAM-GATK-RA-RC'
 
-# filename pattern to use for input file
-# input_pattern: '*.dd.ra.rc.bam'
-
-# or exact suffix to append to sample ID for input file
-input_suffix: '.dd.ra.rc.bam'
-
 # name of the parent directory to use for the program output
-output_dir_name: Demo-QsubSampleTask
+output_dir_name: Demo-QsubAnalysisTask
 # i.e. analysis_dir/QC-Coverage-Custom will be used
 
 # files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
 
+# other files needed by the task
+task_files:
+  # - 'HapMap_GATKHC_variants.tsv'
 
-# ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
-# use these if the analysis task will operate on each sample individually
-# naming pattern for files produced by this task
-# output_pattern: '.combined.txt'
-output_suffix: '.combined.txt'
 
+# ~~~~~ ANALYSIS TASK ITEMS ~~~~~ # 
+# use these if the task will operate on the analysis as a whole
+
+# input_files: 
+  # - 'baz.txt'
+
+# files that should be output by the analysis task
+output_files:
+  - 'foo.txt'
+  - 'bar.txt'
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #

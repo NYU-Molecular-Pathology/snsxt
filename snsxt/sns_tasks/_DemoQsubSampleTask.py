@@ -37,7 +37,7 @@ class DemoQsubSampleTask(QsubSampleTask):
         sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
 
         # output file
-        sample_output = self.create_sample_file_outpath(sampleID = sample.id, suffix = self.output_suffix)
+        sample_output = self.get_sample_file_outpath(sampleID = sample.id, suffix = self.output_suffix)
 
         self.logger.debug('sample_bam is: {0}'.format(sample_bam))
         self.logger.debug('sample output file will be: {0}'.format(sample_output))

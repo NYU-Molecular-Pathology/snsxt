@@ -12,3 +12,4 @@ from _GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
 from _SummaryAvgCoverage import SummaryAvgCoverage
 from _Delly2 import Delly2
 from _DemoQsubSampleTask import DemoQsubSampleTask
+from _DemoQsubAnalysisTask import DemoQsubAnalysisTask

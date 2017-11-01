@@ -74,4 +74,13 @@ loggers:
     level: DEBUG
     handlers: [console, main, email]
     propagate: true
+  _exceptions:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  validation:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+
 

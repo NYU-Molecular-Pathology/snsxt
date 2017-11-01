@@ -11,7 +11,7 @@ from util import qsub
 from util import tools as t
 import logging
 import config
-
+import _exceptions as _e
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +36,43 @@ def monitor_validate_jobs(jobs):
 
     TODO: add error handling of invalid or err_jobs here
     '''
+    if not jobs:
+        logger.debug('No jobs were passed for monitoring')
+        # TODO: what to return here?
+        return()
+
     logger.debug('Waiting for qsub jobs to complete:\n{0}'.format([(job.id, job.name) for job in jobs]))
 
     completed_jobs, err_jobs = qsub.monitor_jobs(jobs = jobs)
 
     logger.debug('All jobs completed')
 
-    if err_jobs:
-        logger.error('Some jobs had errors: {0}'.format([(job.id, job.name) for job in err_jobs]))
+    logger.debug('Validating completion status of completed jobs...')
 
-    logger.debug('Validating completion status of jobs...')
-    job_validations = [job.validate_completion() for job in completed_jobs]
-    if all(job_validations):
-        logger.debug('All jobs appear to have completed successfully')
-    else:
-        for job in completed_jobs:
-            if not job.validate_completion():
-                logger.error('Job {0} did not complete successfully!'.format(job.id))
+    valid_jobs = []
+    invalid_jobs = []
+
+    for job in completed_jobs:
+        if job.validate_completion():
+            valid_jobs.append(job)
+        else:
+            invalid_jobs.append(job)
+
+    if invalid_jobs:
+        logger.error('Some completed jobs appear invalid: {0}'.format([(job.id, job.name) for job in invalid_jobs]))
+
+    if err_jobs:
+        logger.error('Some jobs did not complete due to errors: {0}'.format([(job.id, job.name) for job in err_jobs]))
+
+    if invalid_jobs or err_jobs:
+        all_invalid_jobs = []
+
+        if invalid_jobs:
+            for job in invalid_jobs:
+                all_invalid_jobs.append(job)
+
+        if err_jobs:
+            for job in err_jobs:
+                all_invalid_jobs.append(job)
+
+        raise _e.ComputeJobInvalid(message = 'Jobs did not complete successfully: {0}'.format([(job.id, job.name) for job in all_invalid_jobs]), errors = '')

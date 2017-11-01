@@ -7,7 +7,6 @@ Base classes for snsxt analysis tasks
 import os
 import sys
 import re
-import functools
 
 # add parent dir to sys.path to import util
 scriptdir = os.path.dirname(os.path.realpath(__file__)) # this script's dir
@@ -20,6 +19,7 @@ from util import log
 from util import qsub
 from util.classes import LoggedObject
 import job_management
+import _exceptions as _e
 sys.path.pop(0)
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
@@ -111,6 +111,9 @@ class AnalysisTask(LoggedObject):
             # setup the report
             self.setup_report()
 
+    def __repr__():
+        return('{0}'.format(self.taskname))
+
     def _init_task_attrs(self):
         '''
         Initialize some extra object attributes from the task config, if they're present
@@ -129,6 +132,14 @@ class AnalysisTask(LoggedObject):
         if self.task_configs.get('output_suffix', None):
             self.output_suffix = self.task_configs['output_suffix']
 
+        if self.task_configs.get('output_suffixes', None):
+            self.output_suffixes = self.task_configs['output_suffixes']
+
+        if self.task_configs.get('output_files', None):
+            self.output_files = self.task_configs['output_files']
+
+        if self.task_configs.get('input_files', None):
+            self.input_files = self.task_configs['input_files']
 
     def _init_locs(self):
         '''
@@ -150,47 +161,87 @@ class AnalysisTask(LoggedObject):
             self.task_configs = yaml.load(f)
             self.task_configs['config_file'] = config_filepath
 
-    def create_sample_file_outpath(self, sampleID, suffix = None):
+    def get_path(self, dirpath, file_basename, validate = False):
+        '''
+        Get the path to a file, optionally validate the file
+        '''
+        # self.logger.debug('dirpath is {0}'.format(dirpath))
+        # self.logger.debug('file_basename is {0}'.format(file_basename))
+        path = os.path.join(dirpath, file_basename)
+        # self.logger.debug('path is {0}'.format(path))
+        if validate:
+            # self.logger.debug('Validating expected file path: {0}'.format(path))
+            self.validate_items([path])
+        return(path)
+
+    def get_analysis_file_outpath(self, file_basename):
         '''
         Create a path to a file in the analysis output directory
         '''
-        # try to resolve an output_suffix
-        if not suffix:
-            suffix = self.output_suffix
-        output_path = os.path.join(self.output_dir, sampleID + suffix)
+        output_path = self.get_path(dirpath = self.output_dir, file_basename = file_basename, validate = False)
         return(output_path)
 
-    def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
+    def get_analysis_file_inputpath(self, file_basename, validate = True):
         '''
         Create the path to an expected sample file in the input directory
         '''
-        # try to resolve an input_suffix
-        if not suffix:
-            suffix = self.input_suffix
-        path = os.path.join(self.input_dir, sampleID + suffix)
-        if validate:
-            self.logger.debug('Validating expected input file path: {0}'.format(path))
-            self.validate_items([path])
+        path = self.get_path(dirpath = self.input_dir, file_basename = file_basename, validate = validate)
         return(path)
+
+    def get_expected_output_files(self, analysis = None):
+        '''
+        Return a list of all the expected output files for all of the samples in the analysis
+        '''
+        if not analysis:
+            analysis = getattr(self, 'analysis', None)
+
+        expected_output = []
+
+        # check if there are output_files set
+        if not getattr(self, 'output_files', None):
+            self.logger.debug('output files not set for analysis task {0}'.format(self.taskname))
+            return(expected_output)
+
+        for output_file in self.output_files:
+            path = self.get_analysis_file_outpath(file_basename = output_file)
+            expected_output.append(path)
+
+        if len(expected_output) < 1:
+            self.logger.warning('output files were not set for analysis task {0}'.format(self.taskname))
+
+        return(expected_output)
 
     def validate_items(self, items):
         '''
         Run validations on a list of items
         items = list of file or dir paths
-
-        TODO: raise custom exceptions here if files dont validate
         '''
+        # self.logger.debug('validating items: {0}'.format(items))
+        self.logger.debug('validating {0} items'.format(len(items)))
         if len(items) < 1 or not items:
             self.logger.error('No items were passed')
             sys.exit()
         # make sure all files and dirs exist
-        items_exist = {item: self.tools.item_exists(item) for item in items}
+        items_exist = {}
+        for item in items:
+            # self.logger.debug('item is: {0}'.format(item))
+            items_exist[item] = self.tools.item_exists(item)
+        # items_exist = {item: self.tools.item_exists(item) for item in items}
         if not all(items_exist.values()):
-            self.logger.error('Some items did not exist:')
-            self.logger.error('{0}'.format(items_exist))
-            sys.exit()
+            # self.logger.error('Some items did not exist:')
+            # self.logger.error('{0}'.format(items_exist))
+            # sys.exit()
+            raise _e.AnalysisFileMissing(message = 'Expected files for {0} do not exist:\n{1}'.format(self, items_exist), errors = '')
             # add more criteria here...
-        # TODO: raise custom exceptions here if files dont validate
+
+    def validate_output(self):
+        '''
+        Validate all the expected output files per sample from the analysis task
+        '''
+        self.logger.debug('Validating expected task output')
+        expected_output = self.get_expected_output_files()
+        self.logger.debug('{0} Expected output files'.format(len(expected_output)))
+        self.validate_items(expected_output)
 
     def get_report_files(self):
         '''
@@ -274,6 +325,71 @@ class AnalysisSampleTask(AnalysisTask):
     def __init__(self, *ars, **kwargs):
         AnalysisTask.__init__(self, *ars, **kwargs)
 
+    def get_sample_file_outpath(self, sampleID, suffix = None):
+        '''
+        Create a path to a file in the analysis output directory
+        '''
+        # try to resolve an output_suffix
+        if not suffix:
+            suffix = self.output_suffix
+        output_path = os.path.join(self.output_dir, sampleID + suffix)
+        return(output_path)
+
+    def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
+        '''
+        Create the path to an expected sample file in the input directory
+        '''
+        # try to resolve an input_suffix
+        if not suffix:
+            suffix = self.input_suffix
+        path = os.path.join(self.input_dir, sampleID + suffix)
+        if validate:
+            self.logger.debug('Validating expected input file path: {0}'.format(path))
+            self.validate_items([path])
+        return(path)
+
+    def get_expected_output_files(self, analysis = None):
+        '''
+        Return a list of all the expected output files for all of the samples in the analysis
+        '''
+        if not analysis:
+            analysis = getattr(self, 'analysis', None)
+
+        expected_output = []
+        suffixes = []
+
+        # get all the Sample objects for the analysis
+        samples = analysis.get_samples()
+
+        # check if there are output_suffix or output_suffixes set
+        if getattr(self, 'output_suffix', None):
+            suffixes.append(self.output_suffix)
+        else:
+            self.logger.debug('output_suffix not set for analysis task {0}'.format(self.taskname))
+
+        if getattr(self, 'output_suffixes', None):
+            for suffix in self.output_suffixes:
+                suffixes.append(suffix)
+        else:
+            self.logger.debug('output_suffixes not set for analysis task {0}'.format(self.taskname))
+
+        for sample in samples:
+            for suffix in suffixes:
+                path = self.get_sample_file_outpath(sampleID = sample.id, suffix = suffix)
+                expected_output.append(path)
+
+        if len(expected_output) < 1:
+            self.logger.debug('expected output files could not be created for analysis task {0}'.format(self.taskname))
+
+        if len(samples) < 1:
+            self.logger.debug('No samples were found in the analysis')
+
+        return(expected_output)
+
+
+
+
+
     def run(self, analysis = None, *args, **kwargs):
         '''
         Run a task that operates on every sample in the analysis individually
@@ -282,23 +398,22 @@ class AnalysisSampleTask(AnalysisTask):
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)
-        if analysis:
-            # get all the Sample objects for the analysis
-            samples = analysis.get_samples()
-            for sample in samples:
-                self.logger.debug('Running task {0} on sample {1}'.format(self.taskname, sample.id))
-                self.main(sample = sample, *args, **kwargs)
+        # get all the Sample objects for the analysis
+        samples = analysis.get_samples()
+        for sample in samples:
+            self.logger.debug('Running task {0} on sample {1}'.format(self.taskname, sample.id))
+            self.main(sample = sample, *args, **kwargs)
         # TODO: what to return here??
         return()
 
 
 
-class QsubSampleTask(AnalysisTask):
+class QsubSampleTask(AnalysisSampleTask):
     '''
     Analysis Task task that will submit a qsub job for every sample in the analysis
     '''
     def __init__(self, *ars, **kwargs):
-        AnalysisTask.__init__(self, *ars, **kwargs)
+        AnalysisSampleTask.__init__(self, *ars, **kwargs)
 
     def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
         '''
@@ -307,7 +422,7 @@ class QsubSampleTask(AnalysisTask):
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
 
-        overrides AnalysisTask.run()
+        overrides AnalysisSampleTask.run()
         '''
         if not analysis:
             analysis = getattr(self, 'analysis', None)

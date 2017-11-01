@@ -25,6 +25,14 @@ report_files:
   - GATK_DepthOfCoverage_custom_report.Rmd
 
 
+output_suffixes: 
+  - '.sample_cumulative_coverage_counts'
+  - '.sample_cumulative_coverage_proportions'
+  - '.sample_interval_statistics'
+  - '.sample_interval_summary'
+  - '.sample_statistics'
+  - '.sample_summary'
+
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
 # https://software.broadinstitute.org/gatk/documentation/tooldocs/current/org_broadinstitute_gatk_tools_walkers_coverage_DepthOfCoverage.php

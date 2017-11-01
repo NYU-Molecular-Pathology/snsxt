@@ -7,13 +7,6 @@ task_name: template_task
 # name of the sns output subdirectory from which to take input files 
 input_dir: 'VCF-GATK-HC-annot'
 
-# filename pattern to use for input file
-input_pattern: '*.combined.txt'
-
-# or exact suffix to append to sample ID for input file
-input_suffix: '.combined.txt'
-
-
 # name of the parent directory to use for the program output
 output_dir_name: Template-Task
 # i.e. analysis_dir/QC-Coverage-Custom will be used
@@ -27,6 +20,38 @@ task_files:
   # - 'HapMap_GATKHC_variants.tsv'
 
 
+# ~~~~~ ANALYSIS TASK ITEMS ~~~~~ # 
+# use these if the task will operate on the analysis as a whole
+
+input_files: 
+  - 'baz.txt'
+
+# files that should be output by the analysis task
+output_files:
+  - 'foo.txt'
+  - 'bar.txt'
+
+# ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
+# use these if the analysis task will operate on each sample individually
+
+# suffix to append to sample ID for expected input file
+input_suffix: '.combined.txt'
+
+# suffix to append to sample ID for file produced by this task
+output_suffix: '.combined.txt'
+
+# list of suffixes that should be output for every sample in the analysis
+output_suffixes: 
+  - '.sample_cumulative_coverage_counts'
+  - '.sample_cumulative_coverage_proportions'
+  - '.sample_interval_statistics'
+  - '.sample_interval_summary'
+  - '.sample_statistics'
+  - '.sample_summary'
+
+
+
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
-# naming pattern for files produced by this task
-output_pattern: '.combined.txt'
+
+# path to binary file for task
+# bin:
