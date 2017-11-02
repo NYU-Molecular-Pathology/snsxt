@@ -10,6 +10,7 @@ from sns_classes.classes import SnsWESAnalysisOutput
 import sns_tasks
 import job_management
 import validation
+import cleanup
 # from util import log
 from util import qsub
 from util import tools
@@ -135,3 +136,5 @@ def run_task_list(analysis, task_list, extra_handlers = None):
     if background_output_files:
         logger.debug('Background task output files will be validated')
         validation.validate_items(items = background_output_files)
+
+    cleanup.analysis_complete(analysis = analysis)

@@ -102,7 +102,7 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
     # copy over the main report
     main_report_path = os.path.join(output_dir, main_report_filename)
     main_report_template_path = get_main_report_file()
-    validation.validate_items(items = [get_main_report_file])
+    validation.validate_items(items = [main_report_template_path])
 
     if os.path.exists(main_report_template_path):
         logger.debug("Copying report file '{0}' to '{1}' ".format(main_report_template_path, main_report_path))

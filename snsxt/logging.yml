@@ -82,5 +82,9 @@ loggers:
     level: DEBUG
     handlers: [console, main, email]
     propagate: true
+  cleanup:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
 
 
