@@ -44,9 +44,10 @@ logger.debug("snsxt program is starting")
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 import config
 # update program-wide config with extra items from this script
-config.config['snsxt_parent_dir'] = snsxt_parent_dir
-config.config['snsxt_dir'] = scriptdir
+config.config['snsxt_parent_dir'] = snsxt_parent_dir # snsxt/
+config.config['snsxt_dir'] = scriptdir # snsxt/snsxt/
 config.config['extra_handlers'] = extra_handlers
+config.config['sns_repo_dir'] = os.path.join(config.config['snsxt_dir'], config.config['sns_repo_dir']) # snsxt/snsxt/sns
 configs = config.config
 
 

@@ -1,4 +1,12 @@
 # tasks I am working on testing and developing for the pipeline
+
+# sns analysis setup tasks
+sns:
+  StartSns:
+  SnsWes:
+  SnsWesPairsSnv:
+
+# downstream analysis tasks
 tasks:
   DemoQsubSampleTask: 
     qsub_wait: False

@@ -52,6 +52,9 @@ config.config['tasks_config_dir'] = os.path.join(config.config['sns_tasks_dir'],
 config.config['tasks_files_dir'] = os.path.join(config.config['sns_tasks_dir'], config.config['tasks_files_dir'])
 # ^ i.e. same as sns_tasks/files
 
+# path to the sns repo to use for sns_tasks that use sns itself
+# tasks_sns_repo_dir
+# TODO: add this path
 configs = config.config
 
 # ~~~~~ DECORATORS ~~~~~ #
@@ -72,12 +75,12 @@ def _setup_report(func, *args, **kwargs):
 # ~~~~~ CLASSES ~~~~~ #
 class AnalysisTask(LoggedObject):
     '''
-    Base class for an sns analysis task
+    Base class for an sns analysis tasks
 
     from task_classes import AnalysisTask
     x = AnalysisTask(taskname = 'Delly2', config_file = 'Delly2.yml')
     '''
-    def __init__(self, taskname, config_file, analysis = None, extra_handlers = None):
+    def __init__(self, taskname, config_file, analysis = None, extra_handlers = None, setup_report = True):
         '''
         Initialize the object
         taskname = name of this task
@@ -93,6 +96,7 @@ class AnalysisTask(LoggedObject):
         self.qsub = qsub
         self.log = log
         self.find = find
+        self._exceptions = _e
 
         # get the 'main_configs' from this script
         self.main_configs = configs
@@ -106,6 +110,8 @@ class AnalysisTask(LoggedObject):
         if analysis:
             # setup the input and output locations
             self._init_locs()
+
+        if setup_report:
             # setup the report
             self.setup_report()
 
@@ -316,6 +322,11 @@ class AnalysisTask(LoggedObject):
 
 
 
+
+
+
+
+
 class AnalysisSampleTask(AnalysisTask):
     '''
     Analysis Task task that will run separately for every sample in the analysis
@@ -384,10 +395,6 @@ class AnalysisSampleTask(AnalysisTask):
 
         return(expected_output)
 
-
-
-
-
     def run(self, analysis = None, *args, **kwargs):
         '''
         Run a task that operates on every sample in the analysis individually
@@ -403,6 +410,13 @@ class AnalysisSampleTask(AnalysisTask):
             self.main(sample = sample, *args, **kwargs)
         # TODO: what to return here??
         return()
+
+
+
+
+
+
+
 
 
 
@@ -447,6 +461,13 @@ class QsubSampleTask(AnalysisSampleTask):
             return(jobs)
 
 
+
+
+
+
+
+
+
 class QsubAnalysisTask(AnalysisTask):
     '''
     Analysis Task task that will submit a single qsub job for the entire analysis
@@ -483,24 +504,92 @@ class QsubAnalysisTask(AnalysisTask):
 
 
 
+
+
+
+
+
+
 class SnsTask(AnalysisTask):
     '''
     Class for a task that runs part of the sns pipeline on the analysis
+    and operates on the entires sns analysis
 
-    from task_classes import AnnotationInplace
-    x = AnnotationInplace()
+    get the AnalysisTask methods but do not initialize its locations
+
+    note: do not use methods that call self.analysis, such as get_expected_output_files
 
     TODO: finish this
     '''
-    def __init__(self, analysis, taskname, config_file, extra_handlers = None):
+    def __init__(self, analysis_dir, taskname, config_file = None, extra_handlers = None):
         '''
         '''
-        AnalysisTask.__init__(self, taskname = str(taskname), config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        AnalysisTask.__init__(self, taskname = str(taskname), config_file = config_file, analysis = None, extra_handlers = extra_handlers)
 
-        # directory holding the sns repo
-        self.sns_repo_dir = os.path.join(self.analysis.dir, 'sns')
-        # with self.tools.DirHop(self.analysis.dir) as d:
-        #     do_something()
+        if analysis_dir:
+            self._init_locs()
+
+    def _init_locs(self):
+        '''
+        Initialize output locations
+        '''
+        self.output_dir = self.tools.mkdirs(path = os.path.realpath(self.analysis_dir), return_path = True)
+        # internal sns repo
+        self.sns_repo_dir = self.main_configs['sns_repo_dir']
+
+
+    def get_expected_output_files(self, analysis_dir = None):
+        '''
+        Return a list of all the expected output files for all of the samples in the analysis
+        '''
+        if not analysis_dir:
+            analysis_dir = getattr(self, 'analysis_dir', None)
+
+        expected_output = []
+
+        for output_file in self.main_configs['analysis_output_index']['_parent']['file-names']:
+            path = self.get_analysis_file_outpath(file_basename = output_file)
+            expected_output.append(path)
+
+        if len(expected_output) < 1:
+            self.logger.warning('output files were not set for sns analysis task {0}'.format(self.taskname))
+
+        return(expected_output)
+
+    def run_sns_command(self, command = None):
+        '''
+        Run a command in the context of an sns directory
+        '''
+        output_dir = self.output_dir
+        with t.DirHop(output_dir) as d:
+            run_cmd = self.tools.SubprocessCmd(command = command).run()
+            self.logger.debug(run_cmd.proc_stdout)
+            self.logger.debug(run_cmd.proc_stderr)
+        return(run_cmd)
+
+    def catch_sns_jobs(self, proc_stdout):
+        '''
+        Capture the job ID's of all qsub jobs submitted by an sns command
+        by parsing its stdout
+        return a list of jobs
+        '''
+        jobs = []
+        for job in [self.qsub.Job(id = job_id, name = job_name)
+                    for job_id, job_name
+                    in self.qsub.find_all_job_id_names(text = proc_stderr)]:
+            jobs.append(job)
+        self.logger.debug('Captured qsub jobs from sns pipeline output:\n{0}'.format([(job.id, job.name) for job in jobs]))
+        return(jobs)
+
+
+
+
+
+
+
+
+
+
 
 
 

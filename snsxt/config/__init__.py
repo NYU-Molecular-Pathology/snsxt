@@ -32,26 +32,3 @@ config = {}
 
 config.update(snsxt)
 config.update(sns)
-
-
-# config['analysis_output_index'] = sns['analysis_output_index']
-#
-# # sns pipeline
-# config['sns_route'] = snsxt['sns_route']
-# config['sns_pairs_route'] = snsxt['sns_pairs_route']
-# config['sns_repo_dir'] = snsxt['sns_repo_dir']
-#
-# # email
-# config['email_recipients'] = snsxt['email_recipients']
-# config['mail_files'] = snsxt['mail_files']
-#
-#
-# # report
-# config['report_dir'] = snsxt['report_dir']
-# config['report_files'] = snsxt['report_files']
-# config['main_report'] = snsxt['main_report']
-# config['report_compile_script'] = snsxt['report_compile_script']
-# config['analysis_id_file'] = snsxt['analysis_id_file']
-# config['results_id_file'] = snsxt['results_id_file']
-#
-# config['samples_fastq_raw_file'] = snsxt['samples_fastq_raw_file']
