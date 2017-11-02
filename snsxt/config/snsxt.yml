@@ -1,10 +1,28 @@
 # settings to use globally across the 'snsxt' program
+
+# ~~~~~ SNSXT MAIN SETTINGS ~~~~~ # 
+# settings to configure the main program
+
+
 # ~~~~~ SNS PIPELINE ~~~~~ #
+# default settings for running an sns pipeline
 sns_route: "wes"
 sns_pairs_route: "wes-pairs-snv"
-
 sns_repo_dir: 'sns'
-# snsxt/sns
+# e.g.: snsxt/sns
+
+
+
+# ~~~~~ SNSXT ANALYSIS TASKS SETTINGS ~~~~~ # 
+# directories and locations for sns_tasks items
+# subdirectories of snsxt/sns_tasks/
+tasks_scripts_dir: "scripts"
+# ^ e.g. snsxt/sns_tasks/scripts
+tasks_reports_dir: "reports"
+tasks_config_dir: "config"
+tasks_files_dir: "files"
+tasks_sns_repo_dir: 'sns'
+
 
 # ~~~~~ MAIL ~~~~~ # 
 # settings to use when sending email from the pipeline
@@ -22,6 +40,10 @@ mail_files:
 # ~~~~~ REPORT ~~~~~ #
 # settings to use when setting up the reports for the pipeline
 
+# script to use to compile the RMD reports
+report_compile_script: compile_RMD_report.R
+# ^ i.e. snsxt/snsxt/compile_RMD_report.R
+
 # path to the `report` directory relative to the `snsxt` dir
 # dont change this!
 report_dir: report
@@ -30,6 +52,7 @@ report_dir: report
 # files in the `report_dir` associated with this sns_task
 # parent report file
 main_report: analysis_report.Rmd
+
 # supporting report files
 report_files: 
   - report_tools.R
@@ -38,10 +61,6 @@ report_files:
   - summary_report.Rmd
   - variant_report.Rmd
   - paired_variant_report.Rmd
-
-# script to use to compile the RMD reports
-report_compile_script: compile_RMD_report.R
-# ^ i.e. snsxt/snsxt/compile_RMD_report.R
 
 # files to read run meta data from 
 # !! This also needs to be set in snsxt/config/snsxt.yml !! 

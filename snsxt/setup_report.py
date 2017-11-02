@@ -10,6 +10,7 @@ from util import log
 import logging
 import config
 from util import tools as t
+import validation
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,10 @@ scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
+config.config['report_dir'] = os.path.join(config.config['snsxt_dir'], config.config['report_dir'])
+config.config['report_compile_script'] = os.path.join(config.config['snsxt_dir'], config.config['report_compile_script'])
+config.config['main_report'] = os.path.join(config.config['report_dir'], config.config['main_report'])
+
 configs = config.config
 
 
@@ -29,7 +34,7 @@ def get_report_files():
     Get the files for the report based on the configs, return a list
     '''
     report_files = []
-    report_dir = os.path.join(scriptdir, configs['report_dir'])
+    report_dir = configs['report_dir']
     for item in configs['report_files']:
         file_path = os.path.join(report_dir, item)
         report_files.append(file_path)
@@ -39,8 +44,8 @@ def get_main_report_file():
     '''
     get the path to the main report file
     '''
-    report_dir = os.path.join(scriptdir, configs['report_dir'])
-    main_report_file = os.path.join(report_dir, configs['main_report'])
+    report_dir = configs['report_dir']
+    main_report_file = configs['main_report']
     return(main_report_file)
 
 def compile_RMD_report(input_file):
@@ -48,7 +53,7 @@ def compile_RMD_report(input_file):
     Compile an RMD report using the script set in the configs
     '''
     # path to the script that does the document compiling
-    compile_script = os.path.join(scriptdir, configs['report_compile_script'])
+    compile_script = configs['report_compile_script']
 
     # shell command to run before running the script to make sure the environment is set right
     setup_command = 'module load pandoc/1.13.1'
@@ -92,20 +97,26 @@ def setup_report(output_dir, analysis_id = None, results_id = None):
         f.write(str(results_id) + '\n')
 
     # set the main report output filename
-    main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), configs['main_report'])
+    main_report_filename = '{0}_{1}_{2}'.format(str(analysis_id), str(results_id), os.path.basename(configs['main_report']))
 
     # copy over the main report
     main_report_path = os.path.join(output_dir, main_report_filename)
     main_report_template_path = get_main_report_file()
+    validation.validate_items(items = [get_main_report_file])
+
     if os.path.exists(main_report_template_path):
         logger.debug("Copying report file '{0}' to '{1}' ".format(main_report_template_path, main_report_path))
         shutil.copy2(main_report_template_path, main_report_path)
     else:
         logger.warning("File does not exist: {0}".format(main_report_template_path))
 
+    validation.validate_items(items = [main_report_path])
+
     # copy over the supporting report files
     report_files = get_report_files()
     logger.debug("Report files are: {0}".format(report_files))
+    validation.validate_items(items = report_files)
+
     for item in report_files:
         if os.path.exists(item):
             output_file = os.path.join(output_dir, os.path.basename(item))

@@ -12,6 +12,10 @@ import logging
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
+# path to parent dir 2 levels above this script
+snsxt_parent_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)) )
+# /ifs/data/molecpathlab/scripts/snsxt/
+
 # set a timestamped log file for debug log
 log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.log'.format(scriptname, script_timestamp))
 email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scriptname, script_timestamp))
@@ -33,8 +37,17 @@ def email_logpath():
 # load the logging config
 config_yaml = os.path.join(scriptdir, 'logging.yml')
 logger = log.log_setup(config_yaml = config_yaml, logger_name = "run")
+extra_handlers = [h for h in log.get_all_handlers(logger)]
 logger.debug("snsxt program is starting")
 
+
+# ~~~~~ LOAD CONFIGS ~~~~~ #
+import config
+# update program-wide config with extra items from this script
+config.config['snsxt_parent_dir'] = snsxt_parent_dir
+config.config['snsxt_dir'] = scriptdir
+config.config['extra_handlers'] = extra_handlers
+configs = config.config
 
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
@@ -45,7 +58,6 @@ import yaml
 import collections
 
 # this program's modules
-import config
 from util import tools as t
 from util import find
 from util import qsub
@@ -55,16 +67,6 @@ import setup_report
 from _snsxt import snsxt
 from _start_sns import start_sns
 
-# ~~~~~ LOAD CONFIGS ~~~~~ #
-configs = config.config
-
-# path to parent dir 2 levels above this script
-snsxt_parent_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)) )
-# /ifs/data/molecpathlab/scripts/snsxt/
-configs['snsxt_parent_dir'] = snsxt_parent_dir
-
-extra_handlers = [h for h in log.get_all_handlers(logger)]
-configs['extra_handlers'] = extra_handlers
 
 
 

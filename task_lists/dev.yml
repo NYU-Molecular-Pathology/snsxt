@@ -11,4 +11,4 @@ tasks:
   # SummaryAvgCoverage: 
   # HapMapVariantRef:
 
-setup_report: False
+setup_report: True

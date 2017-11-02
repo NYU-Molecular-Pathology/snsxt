@@ -6,8 +6,12 @@ Base classes for snsxt analysis tasks
 '''
 import os
 import sys
-import re
+import csv
+import yaml
+import shutil
 
+
+# ~~~~ LOAD MORE PACKAGES ~~~~~~ #
 # add parent dir to sys.path to import util
 scriptdir = os.path.dirname(os.path.realpath(__file__)) # this script's dir
 parentdir = os.path.dirname(scriptdir) # this script's parent dir
@@ -20,41 +24,35 @@ from util import qsub
 from util.classes import LoggedObject
 import job_management
 import _exceptions as _e
+import config
 sys.path.pop(0)
-
-# ~~~~ LOAD MORE PACKAGES ~~~~~~ #
-import csv
-import yaml
-import shutil
 
 
 # ~~~~ SETUP GLOBAL CONFIGS ~~~~~~ #
-# configs that should be available to all analysis tasks
-configs = {}
-
-# from this script
-configs['sns_tasks_dir'] = scriptdir # this dir; /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks
+# update program-wide config with extra items from this script
+config.config['sns_tasks_dir'] = scriptdir # this dir; /ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks
 
 # path to the `scripts` directory relative to the `sns_tasks` dir
 # dont change this!
-configs['tasks_scripts_dir'] = os.path.join(configs['sns_tasks_dir'], 'scripts')
+config.config['tasks_scripts_dir'] = os.path.join(config.config['sns_tasks_dir'], config.config['tasks_scripts_dir'])
 # ^ i.e. same as sns_tasks/scripts
 
 # path to the `reports` directory relative to the `sns_tasks` dir
 # dont change this!
-configs['tasks_reports_dir'] = os.path.join(configs['sns_tasks_dir'], 'reports')
+config.config['tasks_reports_dir'] = os.path.join(config.config['sns_tasks_dir'], config.config['tasks_reports_dir'])
 # ^ i.e. same as sns_tasks/reports
 
 # path to the `reports` directory relative to the `sns_tasks` dir
 # dont change this!
-configs['tasks_config_dir'] = os.path.join(configs['sns_tasks_dir'], 'config')
+config.config['tasks_config_dir'] = os.path.join(config.config['sns_tasks_dir'], config.config['tasks_config_dir'])
 # ^ i.e. same as sns_tasks/config
 
 # path to the `files` directory relative to the `sns_tasks` dir
 # dont change this!
-configs['tasks_files_dir'] = os.path.join(configs['sns_tasks_dir'], 'files')
+config.config['tasks_files_dir'] = os.path.join(config.config['sns_tasks_dir'], config.config['tasks_files_dir'])
 # ^ i.e. same as sns_tasks/files
 
+configs = config.config
 
 # ~~~~~ DECORATORS ~~~~~ #
 def _setup_report(func, *args, **kwargs):
