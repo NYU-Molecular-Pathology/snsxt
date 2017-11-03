@@ -74,5 +74,6 @@ def monitor_validate_jobs(jobs):
         if err_jobs:
             for job in err_jobs:
                 all_invalid_jobs.append(job)
-
-        raise _e.ComputeJobInvalid(message = 'Jobs did not complete successfully: {0}'.format([(job.id, job.name) for job in all_invalid_jobs]), errors = '')
+        err_message = 'Jobs did not complete successfully:\n\n'
+        jobs_message = '\n'.join([job.completions for job in all_invalid_jobs])
+        raise _e.ComputeJobInvalid(message = err_message + jobs_message, errors = '')
