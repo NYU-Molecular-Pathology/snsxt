@@ -521,12 +521,13 @@ class SnsTask(AnalysisTask):
 
     TODO: finish this
     '''
-    def __init__(self, analysis_dir, taskname, config_file = None, extra_handlers = None):
+    def __init__(self, taskname, analysis_dir = None, config_file = None, extra_handlers = None):
         '''
         '''
         AnalysisTask.__init__(self, taskname = str(taskname), config_file = config_file, analysis = None, extra_handlers = extra_handlers)
 
         if analysis_dir:
+            self.analysis_dir = analysis_dir
             self._init_locs()
 
     def _init_locs(self):
@@ -561,7 +562,7 @@ class SnsTask(AnalysisTask):
         Run a command in the context of an sns directory
         '''
         output_dir = self.output_dir
-        with t.DirHop(output_dir) as d:
+        with self.tools.DirHop(output_dir) as d:
             run_cmd = self.tools.SubprocessCmd(command = command).run()
             self.logger.debug(run_cmd.proc_stdout)
             self.logger.debug(run_cmd.proc_stderr)
@@ -576,7 +577,7 @@ class SnsTask(AnalysisTask):
         jobs = []
         for job in [self.qsub.Job(id = job_id, name = job_name)
                     for job_id, job_name
-                    in self.qsub.find_all_job_id_names(text = proc_stderr)]:
+                    in self.qsub.find_all_job_id_names(text = proc_stdout)]:
             jobs.append(job)
         self.logger.debug('Captured qsub jobs from sns pipeline output:\n{0}'.format([(job.id, job.name) for job in jobs]))
         return(jobs)

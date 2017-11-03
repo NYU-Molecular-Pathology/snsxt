@@ -11,13 +11,10 @@ class StartSns(SnsTask):
     '''
     Setup a new sns analysis
     '''
-    def __init__(self, analysis_dir, targets_bed, taskname = 'StartSns', extra_handlers = None, **kwargs):
+    def __init__(self, analysis_dir, targets_bed = None, fastq_dirs = None, taskname = 'StartSns', extra_handlers = None, **kwargs):
         '''
         '''
         SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname, extra_handlers = extra_handlers)
-        targets_bed = kwargs.pop('targets_bed', None)
-        fastq_dirs = kwargs.pop('fastq_dirs', [])
-
         if not fastq_dirs:
             raise self._exceptions.AnalysisFileMissing(message = 'Fastq directories were not passed to task {0}'.format(self), errors = '')
         if not targets_bed:
@@ -66,6 +63,7 @@ class StartSns(SnsTask):
         fastq_gather_commands, # 0
         'sns/generate-settings hg19'  # 1
         )
+        # self.logger.debug('command is:\n{0}'.format(command))
         run_cmd = self.run_sns_command(command = command)
         jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
         return(jobs)

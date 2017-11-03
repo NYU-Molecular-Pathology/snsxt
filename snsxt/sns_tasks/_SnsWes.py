@@ -20,6 +20,8 @@ class SnsWes(SnsTask):
         '''
         '''
         command = 'sns/run wes'
-        run_cmd = self.run_sns_command(command = command)
-        jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
-        return(jobs)
+        # run_cmd = self.run_sns_command(command = command)
+        # jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
+        # return(jobs)
+        self.logger.debug(command)
+        return()
