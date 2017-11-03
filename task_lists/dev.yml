@@ -4,7 +4,7 @@
 sns:
   StartSns:
   SnsWes:
-  SnsWesPairsSnv:
+  # SnsWesPairsSnv:
 
 # downstream analysis tasks
 tasks:

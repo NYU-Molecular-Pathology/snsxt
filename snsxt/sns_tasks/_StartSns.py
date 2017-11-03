@@ -56,9 +56,8 @@ class StartSns(SnsTask):
         self.setup_sns_analysis_dir()
         fastq_gather_commands = '\n'.join(['sns/gather-fastqs {0}'.format(d) for d in self.fastq_dirs])
         command = '''
-        {0}
-        {1}
-
+{0}
+{1}
         '''.format(
         fastq_gather_commands, # 0
         'sns/generate-settings hg19'  # 1

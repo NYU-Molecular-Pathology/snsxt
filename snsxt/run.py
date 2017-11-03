@@ -217,6 +217,11 @@ def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
     logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
     run_tasks(tasks, analysis = analysis, debug_mode = debug_mode, **kwargs)
+
+    if task_list.get('setup_report', None):
+        logger.debug('Starting report setup')
+        setup_report.setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
+
     cleanup.analysis_complete(analysis = analysis)
 
 
