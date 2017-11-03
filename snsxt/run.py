@@ -201,7 +201,6 @@ def run_sns_tasks(task_list, analysis_dir, **kwargs):
 
     # run tasks one at a time
     tasks = task_list['sns']
-    logger.debug(tasks)
     for key, value in tasks.items():
         run_tasks(tasks = {key: value}, analysis_dir = analysis_dir, fastq_dirs = fastq_dirs, targets_bed = targets_bed, probes_bed = probes_bed, pairs_sheet = pairs_sheet, **kwargs)
 
@@ -215,10 +214,8 @@ def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
     debug_mode = kwargs.pop('debug_mode')
 
     tasks = task_list['tasks']
-    logger.debug(tasks)
     logger.info('Loading analysis {0} : {1} from dir {2}'.format(analysis_id, results_id, os.path.abspath(analysis_dir)))
     analysis = SnsWESAnalysisOutput(dir = analysis_dir, id = analysis_id, results_id = results_id, sns_config = configs, extra_handlers = extra_handlers)
-    logger.debug(analysis)
     run_tasks(tasks, analysis = analysis, debug_mode = debug_mode, **kwargs)
     cleanup.analysis_complete(analysis = analysis)
 
