@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import task_classes
+import shutil
 from task_classes import SnsTask
 
 class StartSns(SnsTask):
@@ -48,7 +49,7 @@ class StartSns(SnsTask):
         # copy over the targets .bed file
         output_targets = os.path.join(self.output_dir, os.path.basename(self.targets_bed))
         self.logger.debug('targest .bed file will be copied from\n{0}\nto\n{0}'.format(self.targets_bed, output_targets))
-        self.tools.copy_and_overwrite(from_path = self.targets_bed, to_path = output_targets)
+        shutil.copy2(self.targets_bed, output_targets)
 
 
     def run(self, *args, **kwargs):
