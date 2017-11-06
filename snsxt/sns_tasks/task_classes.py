@@ -145,6 +145,14 @@ class AnalysisTask(LoggedObject):
         if self.task_configs.get('input_files', None):
             self.input_files = self.task_configs['input_files']
 
+        if self.task_configs.get('email_files', None):
+            self.email_files = self.task_configs['email_files']
+
+        if self.task_configs.get('email_suffixes', None):
+            self.email_suffixes = self.task_configs['email_suffixes']
+
+
+
     def _init_locs(self):
         '''
         Initialize locations for the task
@@ -160,6 +168,7 @@ class AnalysisTask(LoggedObject):
         config_file = basename of a file in the tasks_config_dir, for convenience
         '''
         config_filepath = os.path.join(self.main_configs['tasks_config_dir'], config_file)
+        self.logger.debug('Loading task config file: {0}'.format(config_filepath))
         self.validate_items([config_filepath])
         with open(config_filepath, "r") as f:
             self.task_configs = yaml.load(f)
@@ -214,6 +223,31 @@ class AnalysisTask(LoggedObject):
             self.logger.warning('output files were not set for analysis task {0}'.format(self.taskname))
 
         return(expected_output)
+
+    def get_expected_email_files(self, analysis = None):
+        '''
+        Return a list of all the expected email files for all of the samples in the analysis
+
+        Only run this after the task completion !!
+        '''
+        if not analysis:
+            analysis = getattr(self, 'analysis', None)
+
+        expected_email_files = []
+
+        if not getattr(self, 'email_files', None):
+            self.logger.debug('email files not set for analysis task {0}'.format(self.taskname))
+            return(expected_email_files)
+
+        for expected_email_file in self.email_files:
+            path = self.get_path(dirpath = self.output_dir, file_basename = expected_email_file, validate = True)
+            expected_email_files.append(path)
+
+        if len(expected_email_files) < 1:
+            self.logger.warning('output files were not set for analysis task {0}'.format(self.taskname))
+
+        return(expected_email_files)
+
 
     def validate_items(self, items):
         '''
@@ -530,6 +564,10 @@ class SnsTask(AnalysisTask):
             self.analysis_dir = analysis_dir
             self._init_locs()
 
+        if config_file:
+            # get the 'task_configs' from external YAML file, load them in self.task_configs
+            self._task_config_from_file(config_file = config_file) #
+
     def _init_locs(self):
         '''
         Initialize output locations
@@ -542,6 +580,8 @@ class SnsTask(AnalysisTask):
     def get_expected_output_files(self, analysis_dir = None):
         '''
         Return a list of all the expected output files for all of the samples in the analysis
+
+        get expected files from the main configs
         '''
         if not analysis_dir:
             analysis_dir = getattr(self, 'analysis_dir', None)

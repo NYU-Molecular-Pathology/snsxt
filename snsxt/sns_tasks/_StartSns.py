@@ -12,10 +12,10 @@ class StartSns(SnsTask):
     '''
     Setup a new sns analysis
     '''
-    def __init__(self, analysis_dir, targets_bed = None, fastq_dirs = None, taskname = 'StartSns', extra_handlers = None, **kwargs):
+    def __init__(self, analysis_dir, targets_bed = None, fastq_dirs = None, taskname = 'StartSns', config_file = 'StartSns.yml', extra_handlers = None, **kwargs):
         '''
         '''
-        SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname, extra_handlers = extra_handlers)
+        SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname, extra_handlers = extra_handlers, config_file = config_file)
         if not fastq_dirs:
             raise self._exceptions.AnalysisFileMissing(message = 'Fastq directories were not passed to task {0}'.format(self), errors = '')
         if not targets_bed:

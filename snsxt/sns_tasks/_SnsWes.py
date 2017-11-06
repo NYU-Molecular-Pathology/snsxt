@@ -9,7 +9,7 @@ from task_classes import SnsTask
 
 class SnsWes(SnsTask):
     '''
-    Run the sns wes analysis pipeline
+    Run the sns wes analysis pipeline for unpaired variant calling on exome data
     '''
     def __init__(self, analysis_dir, taskname = 'SnsWes', extra_handlers = None, **kwargs):
         '''

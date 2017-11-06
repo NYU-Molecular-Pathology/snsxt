@@ -2,34 +2,39 @@
 # every sns_task should have these items
 
 # name of the parent Python module
-task_name: DemoQsubSampleTask
+task_name: SnsWesPairsSnv
+
 
 # name of the sns output subdirectory from which to take input files 
-input_dir: 'BAM-GATK-RA-RC'
+# input_dir: '.'
+# ^ this will be ignored
 
 # filename pattern to use for input file
 # input_pattern: '*.dd.ra.rc.bam'
 
 # or exact suffix to append to sample ID for input file
-input_suffix: '.dd.ra.rc.bam'
+# input_suffix: ''
 
 # name of the parent directory to use for the program output
-output_dir_name: Demo-QsubSampleTask
+# output_dir_name: Demo-QsubSampleTask
 # i.e. analysis_dir/QC-Coverage-Custom will be used
 
 # files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
 
 
-# ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
-# use these if the analysis task will operate on each sample individually
-# naming pattern for files produced by this task
-# output_pattern: '.combined.txt'
-output_suffix: '.combined.txt'
+# ~~~~~ ANALYSIS TASK ITEMS ~~~~~ # 
+# use these if the task will operate on the analysis as a whole
 
-# suffixes of files that should be sent in the email output
-email_suffixes:
-  - '.txt'
+# input_files: 
+# - 'baz.txt'
 
+# files that should be output by the analysis task
+output_files:
+  - samples.pairs.csv
+
+# files that should be sent in email output for the task
+email_files:
+  - samples.pairs.csv
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #

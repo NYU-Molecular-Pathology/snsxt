@@ -2,38 +2,45 @@
 # every sns_task should have these items
 
 # name of the parent Python module
-task_name: DemoQsubSampleTask
+task_name: StartSns
+
 
 # name of the sns output subdirectory from which to take input files 
-input_dir: 'BAM-GATK-RA-RC'
+# input_dir: '.'
+# ^ this will be ignored
+
+# filename pattern to use for input file
+# input_pattern: '*.dd.ra.rc.bam'
+
+# or exact suffix to append to sample ID for input file
+# input_suffix: ''
 
 # name of the parent directory to use for the program output
-output_dir_name: Demo-QsubAnalysisTask
+# output_dir_name: Demo-QsubSampleTask
 # i.e. analysis_dir/QC-Coverage-Custom will be used
 
 # files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
 report_files: 
-
-# other files needed by the task
-task_files:
-  # - 'HapMap_GATKHC_variants.tsv'
 
 
 # ~~~~~ ANALYSIS TASK ITEMS ~~~~~ # 
 # use these if the task will operate on the analysis as a whole
 
 # input_files: 
-  # - 'baz.txt'
+# - 'baz.txt'
 
 # files that should be output by the analysis task
 output_files:
-  - 'foo.txt'
-  - 'bar.txt'
+  - settings.txt
+  # - samples.pairs.csv
+  - summary-combined.wes.csv
+  - samples.fastq-raw.csv
 
 # files that should be sent in email output for the task
 email_files:
-  - 'foo.txt'
-  - 'bar.txt'
-
+  - settings.txt
+  # - samples.pairs.csv
+  - summary-combined.wes.csv
+  - samples.fastq-raw.csv
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
