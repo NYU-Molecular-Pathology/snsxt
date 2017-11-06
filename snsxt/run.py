@@ -6,6 +6,7 @@ Run a series of analysis tasks, as an extension to the sns pipeline output
 # ~~~~~ LOGGING ~~~~~~ #
 import os
 from util import log
+from util import mutt
 import logging
 
 # path to the script's dir
@@ -286,10 +287,18 @@ def main(**kwargs):
                 logger.debug('downstream snsxt tasks:\n{0}'.format(task_list['tasks'].items()))
                 run_snsxt_tasks(task_list, analysis_dir, **kwargs)
     except:
-        logger.exception('Got exception on main handler')
-        # raise
+        # run this if an exception is caught
+        logger.exception('Encountered an exception while running tasks')
+    # else:
+        # run this if no exception is caught
     finally:
+        # run this no matter what
+        # print the paths to the log files to the log
         log.print_filehandler_filepaths_to_log(logger)
+        mutt.mutt_mail(recipient_list = configs['email_recipients'],
+                        reply_to = mutt.get_reply_to_address(server = configs['reply_to_server']),
+                        subject_line = '[NGS580] Test',
+                        message_file = email_log_file)
 
 
 

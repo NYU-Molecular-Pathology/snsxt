@@ -27,7 +27,12 @@ tasks_sns_repo_dir: 'sns'
 # ~~~~~ MAIL ~~~~~ # 
 # settings to use when sending email from the pipeline
 # email addresses to send results to; format is 'email1@server.com,email2@server.com'
-email_recipients: '#MolecularPathology@nyumc.org'
+# email_recipients: '#MolecularPathology@nyumc.org'
+email_recipients: 'kellys04@nyumc.org'
+
+
+# email server to use in the reply-to field of emails sent
+reply_to_server: 'nyumc.org'
 
 # files to include in the email output from the parent analysis dir
 mail_files:

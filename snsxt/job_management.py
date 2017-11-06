@@ -5,12 +5,9 @@ Functions for custom management of compute cluster qsub jobs
 '''
 # ~~~~~ LOGGING ~~~~~~ #
 import os
-import shutil
 from util import log
 from util import qsub
-from util import tools as t
 import logging
-import config
 import _exceptions as _e
 
 logger = logging.getLogger(__name__)
@@ -19,10 +16,6 @@ logger = logging.getLogger(__name__)
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
-
-# ~~~~~ LOAD CONFIGS ~~~~~ #
-configs = config.config
-
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #

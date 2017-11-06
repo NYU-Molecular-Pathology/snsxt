@@ -8,8 +8,8 @@ import os
 import shutil
 from util import log
 import logging
-import config
-from util import tools as t
+# import config
+from util import tools
 
 logger = logging.getLogger(__name__)
 
