@@ -10,6 +10,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ~~~~~ EXCEPTIONS ~~~~~ #
+class AnalysisInvalid(Exception):
+    '''
+    Base exception to use if the analysis is invalid
+    '''
+    def __init__(self, message, errors):
+        super(AnalysisInvalid, self).__init__(message)
+        self.errors = errors
+
 class AnalysisFileMissing(Exception):
     '''
     Base exception to use if a file needed for the analysis is missing

@@ -60,6 +60,7 @@ import sys
 import argparse
 import yaml
 import collections
+import json
 
 # this program's modules
 from util import tools as t
@@ -71,7 +72,7 @@ import validation
 import cleanup
 import setup_report
 import sns_tasks
-
+import _exceptions as _e
 
 # ~~~~~ FUNCTIONS ~~~~~~ #
 def get_task_list(task_list_file):
@@ -116,6 +117,8 @@ def get_task_class(task_name):
 def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, **kwargs):
     '''
     Run a series of analysis tasks
+
+    analysis = SnsWESAnalysisOutput
     '''
     if analysis_dir and analysis:
         logger.error('Both analysis_dir and analysis were passed; there can be only one.')
@@ -138,10 +141,13 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
         if analysis_dir:
             task = task_class(analysis_dir = analysis_dir, extra_handlers = extra_handlers, **kwargs)
         if analysis:
+            # make sure the ana analysis ouput object is valid before continuing
             if not debug_mode:
                 if not analysis.is_valid:
-                    logger.error('The analysis did not pass validations')
-                    raise
+                    err_message = 'The analysis did not pass validations\n'
+                    validations_message = json.dumps(analysis.validations, indent = 4)
+                    logger.error(err_message)
+                    raise _e.AnalysisInvalid(message = err_message + validations_message, errors = '')
             task = task_class(analysis = analysis, extra_handlers = extra_handlers)
 
         # run the task
@@ -190,6 +196,8 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
 def run_sns_tasks(task_list, analysis_dir, **kwargs):
     '''
     Run tasks that start and run the main sns pipeline
+
+    Run each sns task individually, so that all qsub jobs will be completed at every step
     '''
     # get the args that were passed
     fastq_dirs = kwargs.pop('fastq_dirs')
@@ -244,6 +252,7 @@ def main(**kwargs):
     analysis_dir = kwargs.pop('analysis_dir', None)
     if not analysis_dir:
         logger.error('No analysis dir passed')
+        # TODO: make sure this raise works, intended for when snsxt is not called as script
         raise
 
     # rebuild the kwargs with only the items chosen
@@ -261,19 +270,28 @@ def main(**kwargs):
     # get the task list contents
     task_list = get_task_list(task_list_file)
 
-    # check if 'sns' is in the task list
-    if task_list.get('sns', None):
-        # check if there are items there
-        if task_list['sns']:
-            logger.debug('sns tasks:\n{0}'.format(task_list['sns'].items()))
-            run_sns_tasks(task_list, analysis_dir, **kwargs)
+    # try to run all the tasks for the analysis
+    try:
+        # check if 'sns' is in the task list
+        if task_list.get('sns', None):
+            # check if there are items there
+            if task_list['sns']:
+                logger.debug('sns tasks:\n{0}'.format(task_list['sns'].items()))
+                run_sns_tasks(task_list, analysis_dir, **kwargs)
 
-    # check if there are downstream snsxt tasks
-    if task_list.get('tasks', None):
-        # check if there are items there
-        if task_list['tasks']:
-            logger.debug('downstream snsxt tasks:\n{0}'.format(task_list['tasks'].items()))
-            run_snsxt_tasks(task_list, analysis_dir, **kwargs)
+        # check if there are downstream snsxt tasks
+        if task_list.get('tasks', None):
+            # check if there are items there
+            if task_list['tasks']:
+                logger.debug('downstream snsxt tasks:\n{0}'.format(task_list['tasks'].items()))
+                run_snsxt_tasks(task_list, analysis_dir, **kwargs)
+    except:
+        logger.exception('Got exception on main handler')
+        # raise
+    finally:
+        log.print_filehandler_filepaths_to_log(logger)
+
+
 
 
 def parse():
