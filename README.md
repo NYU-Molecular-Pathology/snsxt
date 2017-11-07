@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/NYU-Molecular-Pathology/snsxt.svg?branch=master)](https://travis-ci.org/NYU-Molecular-Pathology/snsxt)
+[![Documentation Status](https://readthedocs.org/projects/snsxt/badge/?version=latest)](http://snsxt.readthedocs.io/en/lates/?badge=latest)
+
 # snsxt
 Extension to the sns pipeline
 
