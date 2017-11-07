@@ -34,6 +34,15 @@ error_recipients = mutt.get_reply_to_address(server = configs['reply_to_server']
 email_files = []
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
+def validate_email_files():
+    '''
+    Make sure all the items in the email_files list exist
+    '''
+    for i, item in enumerate(email_files):
+        if not tools.item_exists(item):
+            logger.error('email file does not exist: {0}'.format(item))
+            email_files.pop(i)
+
 def email_error_output(message_file, *args, **kwargs):
     '''
     Email to send if an error occured
@@ -48,6 +57,8 @@ def email_output(message_file, *args, **kwargs):
     reply_to = kwargs.pop('reply_to', default_reply_to)
     subject_line = kwargs.pop('subject_line', default_subject_line_base)
     recipient_list = kwargs.pop('recipient_list', default_recipients)
+
+    validate_email_files()
 
     logger.debug('email_files: {0}'.format(email_files))
 

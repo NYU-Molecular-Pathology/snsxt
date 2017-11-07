@@ -240,7 +240,7 @@ class AnalysisTask(LoggedObject):
             return(expected_email_files)
 
         for expected_email_file in self.email_files:
-            path = self.get_path(dirpath = self.output_dir, file_basename = expected_email_file, validate = True)
+            path = self.get_path(dirpath = self.output_dir, file_basename = expected_email_file, validate = False)
             expected_email_files.append(path)
 
         if len(expected_email_files) < 1:
