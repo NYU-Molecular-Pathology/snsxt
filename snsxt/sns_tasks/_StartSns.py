@@ -9,12 +9,12 @@ import shutil
 from task_classes import SnsTask
 
 class StartSns(SnsTask):
-    '''
+    """
     Setup a new sns analysis
-    '''
+    """
     def __init__(self, analysis_dir, targets_bed = None, fastq_dirs = None, taskname = 'StartSns', config_file = 'StartSns.yml', extra_handlers = None, **kwargs):
-        '''
-        '''
+        """
+        """
         SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname, extra_handlers = extra_handlers, config_file = config_file)
         if not fastq_dirs:
             raise self._exceptions.AnalysisFileMissing(message = 'Fastq directories were not passed to task {0}'.format(self), errors = '')
@@ -38,9 +38,9 @@ class StartSns(SnsTask):
         self.validate_items(items = setup_items)
 
     def setup_sns_analysis_dir(self):
-        '''
+        """
         Copy the base files over to start the sns analysis
-        '''
+        """
         # copy sns repo over from the internal one
         output_sns_repo = os.path.join(self.output_dir, os.path.basename(self.sns_repo_dir))
         self.logger.debug('sns repo will be copied from\n{0}\nto\n{0}'.format(self.sns_repo_dir, output_sns_repo))
@@ -53,18 +53,18 @@ class StartSns(SnsTask):
 
 
     def run(self, *args, **kwargs):
-        '''
+        """
         Main function for performing the analysis task on the entire analysis
         Put your code for performing the analysis task on the entire analysis here
 
         analysis is an SnsWESAnalysisOutput object
-        '''
+        """
         self.setup_sns_analysis_dir()
         fastq_gather_commands = '\n'.join(['sns/gather-fastqs {0}'.format(d) for d in self.fastq_dirs])
-        command = '''
+        command = """
 {0}
 {1}
-        '''.format(
+        """.format(
         fastq_gather_commands, # 0
         'sns/generate-settings hg19'  # 1
         )

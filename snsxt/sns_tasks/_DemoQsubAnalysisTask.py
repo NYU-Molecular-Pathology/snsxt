@@ -8,22 +8,22 @@ import task_classes
 from task_classes import QsubAnalysisTask
 
 class DemoQsubAnalysisTask(QsubAnalysisTask):
-    '''
+    """
     Demo task that will submit a single qsub job for the analysis
-    '''
+    """
     def __init__(self, analysis, taskname = 'DemoQsubAnalysisTask', config_file = 'DemoQsubAnalysisTask.yml', extra_handlers = None):
-        '''
+        """
         analysis is an SnsWESAnalysisOutput object
-        '''
+        """
         QsubAnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, analysis):
-        '''
+        """
         Main function for performing the analysis task on the entire analysis
         Put your code for performing the analysis task on the entire analysis here
 
         analysis is an SnsWESAnalysisOutput object
-        '''
+        """
         self.logger.debug('Put your code for doing the analysis task in this function')
         self.logger.debug('The global configs for all tasks will be in this dict: {0}'.format(self.main_configs))
         self.logger.debug('The configs loaded from the task YAML file will be in this dict: {0}'.format(self.task_configs))

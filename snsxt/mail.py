@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Module to send email output of the pipeline results
-'''
+"""
 # ~~~~~ LOGGING ~~~~~~ #
 import os
 import shutil
@@ -35,24 +35,24 @@ email_files = []
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def validate_email_files():
-    '''
+    """
     Make sure all the items in the email_files list exist
-    '''
+    """
     for i, item in enumerate(email_files):
         if not tools.item_exists(item):
             logger.error('email file does not exist: {0}'.format(item))
             email_files.pop(i)
 
 def email_error_output(message_file, *args, **kwargs):
-    '''
+    """
     Email to send if an error occured
-    '''
+    """
     email_output(message_file = message_file, subject_line = error_subject_line_base, recipient_list = error_recipients)
 
 def email_output(message_file, *args, **kwargs):
-    '''
+    """
     The default email output for the program
-    '''
+    """
     recipient_list = kwargs.pop('recipient_list', default_recipients)
     reply_to = kwargs.pop('reply_to', default_reply_to)
     subject_line = kwargs.pop('subject_line', default_subject_line_base)

@@ -7,20 +7,20 @@ import re
 from task_classes import QsubSampleTask
 
 class Delly2(QsubSampleTask):
-    '''
+    """
     Class for for running Delly2 with the sns pipeline
-    '''
+    """
     def __init__(self, analysis, taskname = 'Delly2', config_file = 'Delly2.yml', extra_handlers = None):
-        '''
-        '''
+        """
+        """
         QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def delly2_cmd(self, sampleID, bam_file, output_dir):
-        '''
+        """
         Build the terminal commands to run Delly2 on a single sample
 
         Make a separate command for each SV calling type, concatenate them all together
-        '''
+        """
         # get params from config
         delly2_bin = self.task_configs['bin']
         bcftools_bin = self.task_configs['bcftools_bin']
@@ -44,11 +44,11 @@ class Delly2(QsubSampleTask):
 
             # delly call -t DEL -g "genome.fa" -o "results_dir/delly2-snv/Sample1.deletions.bcf" "results_dir/BAM-GATK-RA-RC/Sample1.dd.ra.rc.bam"
             # bcftools view "results_dir/delly2-snv/Sample1.deletions.bcf" > "results_dir/delly2-snv/Sample1.deletions.vcf"
-            command = '''
+            command = """
     {0} call -t {1} -g "{2}" -o "{3}" "{4}"
 
     {5} view "{6}" "{7}"
-    '''.format(
+    """.format(
     delly2_bin,
     call_type_arg,
     hg19_fa,
@@ -66,12 +66,12 @@ class Delly2(QsubSampleTask):
         return(delly2_command)
 
     def main(self, sample, extra_handlers = None):
-        '''
+        """
         Main control function for the program
         Runs Delly2 on a single sample from an sns analysis
         sample is an SnsAnalysisSample object
         return the qsub job for the sample
-        '''
+        """
         self.setup_report()
         qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))

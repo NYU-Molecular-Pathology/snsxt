@@ -8,25 +8,25 @@ import task_classes
 from task_classes import QsubSampleTask
 
 class DemoQsubSampleTask(QsubSampleTask):
-    '''
+    """
     Demo task that will submit a qsub job for every sample in the analysis
 
     This is a template for an analysis task that operates a single sample in the analysis at a time
     Put your description of the analysis task here
-    '''
+    """
     def __init__(self, analysis, taskname = 'DemoQsubSampleTask', config_file = 'DemoQsubSampleTask.yml', extra_handlers = None):
-        '''
+        """
         analysis is an SnsWESAnalysisOutput object
-        '''
+        """
         QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
-        '''
+        """
         Main function for performing the analysis task on a single sample here
         Put your code for performing the analysis task in here on a single sample here
 
         sample is an SnsAnalysisSample object
-        '''
+        """
         self.logger.debug('Put your code for doing the analysis task in this function')
         self.logger.debug('The global configs for all tasks will be in this dict: {0}'.format(self.main_configs))
         self.logger.debug('The configs loaded from the task YAML file will be in this dict: {0}'.format(self.task_configs))

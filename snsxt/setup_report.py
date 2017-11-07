@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Functions to set up and compile the reports for the pipeline output
-'''
+"""
 # ~~~~~ LOGGING ~~~~~~ #
 import os
 import shutil
@@ -30,9 +30,9 @@ configs = config.config
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def get_report_files():
-    '''
+    """
     Get the files for the report based on the configs, return a list
-    '''
+    """
     report_files = []
     report_dir = configs['report_dir']
     for item in configs['report_files']:
@@ -41,17 +41,17 @@ def get_report_files():
     return(report_files)
 
 def get_main_report_file():
-    '''
+    """
     get the path to the main report file
-    '''
+    """
     report_dir = configs['report_dir']
     main_report_file = configs['main_report']
     return(main_report_file)
 
 def compile_RMD_report(input_file):
-    '''
+    """
     Compile an RMD report using the script set in the configs
-    '''
+    """
     # path to the script that does the document compiling
     compile_script = configs['report_compile_script']
 
@@ -65,10 +65,10 @@ def compile_RMD_report(input_file):
         sys.exit()
     else:
         # build the script command to run
-        command = '''
+        command = """
 {0}
 {1} {2}
-'''.format(
+""".format(
 setup_command, # 0
 compile_script, # 1
 str(input_file) # 2
@@ -81,10 +81,10 @@ str(input_file) # 2
         return(run_cmd)
 
 def setup_report(output_dir, analysis_id = None, results_id = None):
-    '''
+    """
     setup the main analysis report in the analysis directory
     by copying over every associated file for the report to the output dir
-    '''
+    """
     # write the analysis_id and results_id to files for the report
     analysis_id_file = configs['analysis_id_file']
     analysis_id_filepath = os.path.join(output_dir, analysis_id_file)

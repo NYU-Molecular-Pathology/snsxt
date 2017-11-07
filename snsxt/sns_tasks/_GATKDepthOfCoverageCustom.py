@@ -7,26 +7,26 @@ import re
 from task_classes import QsubSampleTask
 
 class GATKDepthOfCoverageCustom(QsubSampleTask):
-    '''
+    """
     Class for running custom thresholds GATK DepthOfCoverage with the sns pipeline
-    '''
+    """
     def __init__(self, analysis, taskname = 'GATK_DepthOfCoverage_custom', config_file = 'GATK_DepthOfCoverage_custom.yml', extra_handlers = None):
-        '''
-        '''
+        """
+        """
         QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def make_tresholds_arg(self):
-        '''
+        """
         Make the command line arg for the thresholds to use
         ex: -ct 10 -ct 50 -ct 100 -ct 500
 
         d = {'thresholds': [10, 50, 100, 200, 500]}
-        '''
+        """
         thresholds = self.task_configs['thresholds']
         return(' '.join(['-ct ' + str(x) for x in thresholds]))
 
     def gatk_DepthOfCoverage_cmd(self, sampleID, bam_file, intervals_bed_file, output_dir):
-        '''
+        """
         Build the terminal commands to run GATK DepthOfCoverage on a single sample
 
         ex:
@@ -39,7 +39,7 @@ class GATKDepthOfCoverageCustom(QsubSampleTask):
         --input_file $bam \
         --outputFormat csv \
         --out $out_prefix
-        '''
+        """
         # get params from config
         GATK_bin = self.task_configs['bin']
         ref_fasta = self.task_configs['ref_fasta']
@@ -54,7 +54,7 @@ class GATKDepthOfCoverageCustom(QsubSampleTask):
         thresholds_arg = self.make_tresholds_arg()
         output_summary_file = os.path.join(output_dir, '{0}'.format(sampleID))
 
-        gatk_cmd = '''
+        gatk_cmd = """
     java -Xms16G -Xmx16G -jar {0} -T DepthOfCoverage \
     --logging_level ERROR \
     --downsampling_type {1} \
@@ -71,7 +71,7 @@ class GATKDepthOfCoverageCustom(QsubSampleTask):
     --input_file {11} \
     --outputFormat {12} \
     --out {13}
-    '''.format(
+    """.format(
     GATK_bin,
     downsampling_type,
     readFilter,
@@ -90,12 +90,12 @@ class GATKDepthOfCoverageCustom(QsubSampleTask):
         return(gatk_cmd)
 
     def main(self, sample, extra_handlers = None):
-        '''
+        """
         Main control function for the program
         Runs GATK DepthOfCoverage on a single sample from an sns analysis
         sample is an SnsAnalysisSample object
         return the qsub job for the sample
-        '''
+        """
         self.logger.debug('Sample is: {0}'.format(sample))
         self.logger.debug(sample.static_files)
         self.log.print_filehandler_filepaths_to_log(logger = self.logger)

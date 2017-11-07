@@ -7,23 +7,23 @@ import re
 from task_classes import AnalysisSampleTask
 
 class HapMapVariantRef(AnalysisSampleTask):
-    '''
+    """
     Class for comparing each HapMap sample variant calls against
     a known list of previously sequenced HapMap variants
     Save the overlapping variants in a new files to load in the report
 
     from HapMap_variant_ref_dev import HapMapVariantRef
     x = HapMapVariantRef(analysis = None)
-    '''
+    """
     def __init__(self, analysis, taskname = 'HapMap_variant_ref', config_file = 'HapMap_variant_ref.yml', extra_handlers = None):
-        '''
-        '''
+        """
+        """
         AnalysisSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
-        '''
+        """
         Main function for running the analysis task
-        '''
+        """
         self.logger.debug('Sample is: {0}'.format(sample))
 
         # get paths to files for the sample

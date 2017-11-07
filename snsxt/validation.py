@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Functions for validating aspects of the pipeline
-'''
+"""
 # ~~~~~ LOGGING ~~~~~~ #
 import os
 from util import log
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 # ~~~~~ FUNCTIONS ~~~~~~ #
 
 def validate_items(items):
-    '''
+    """
     Run validations on a list of items
     items = list of file or dir paths
-    '''
+    """
     logger.debug('validating {0} items'.format(len(items)))
     if len(items) < 1 or not items:
         logger.error('No items were passed')

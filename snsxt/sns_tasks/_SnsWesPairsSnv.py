@@ -9,12 +9,12 @@ import task_classes
 from task_classes import SnsTask
 
 class SnsWesPairsSnv(SnsTask):
-    '''
+    """
     Run the sns wes-pairs paired tumor-normal variant calling pipeline
-    '''
+    """
     def __init__(self, analysis_dir, pairs_sheet = None, taskname = 'SnsWesPairsSnv', config_file = 'SnsWesPairsSnv.yml', extra_handlers = None, **kwargs):
-        '''
-        '''
+        """
+        """
         SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname,  extra_handlers = extra_handlers, config_file = config_file)
         # make sure the samples pairs sheet was passed
         if not pairs_sheet:
@@ -25,8 +25,8 @@ class SnsWesPairsSnv(SnsTask):
         shutil.copy2(pairs_sheet, pairs_sheet_output)
 
     def run(self, *args, **kwargs):
-        '''
-        '''
+        """
+        """
         # command = 'sns/run wes-pairs-snv'
         command = 'echo "foo" '
         # run_cmd = self.run_sns_command(command = command)

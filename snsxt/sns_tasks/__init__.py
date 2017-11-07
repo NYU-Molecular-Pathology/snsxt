@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Initialize the sns_tasks module and import task classes
-'''
+"""
 
 # task classes
 # from _template import TemplateAnalysisTask

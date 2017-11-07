@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Module to load all of the individual config files
 Set up internal config dictionary for use throughout the program
 do any config re-mapping & aggregation here
-'''
+"""
 # ~~~~~ LOGGING ~~~~~~ #
 import logging
 logger = logging.getLogger("config")

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Base classes for snsxt analysis tasks
-'''
+"""
 import os
 import sys
 import csv
@@ -59,13 +59,13 @@ configs = config.config
 
 # ~~~~~ DECORATORS ~~~~~ #
 def _setup_report(func, *args, **kwargs):
-    '''
+    """
     Decorator to set up the analysis task's report files
-    '''
+    """
     def report_wrapper(self, *args, **kwargs) :
-        '''
+        """
         Wrap another class method
-        '''
+        """
         self.logger.debug('Setting up the report files for the task')
         self.setup_report()
         func(self, *args, **kwargs)
@@ -74,18 +74,18 @@ def _setup_report(func, *args, **kwargs):
 
 # ~~~~~ CLASSES ~~~~~ #
 class AnalysisTask(LoggedObject):
-    '''
+    """
     Base class for an sns analysis tasks
 
     from task_classes import AnalysisTask
     x = AnalysisTask(taskname = 'Delly2', config_file = 'Delly2.yml')
-    '''
+    """
     def __init__(self, taskname, config_file, analysis = None, extra_handlers = None, setup_report = True):
-        '''
+        """
         Initialize the object
         taskname = name of this task
         analysis = SnsWESAnalysisOutput object
-        '''
+        """
         LoggedObject.__init__(self, id = taskname, extra_handlers = extra_handlers)
         self.taskname = str(taskname)
         self.analysis = analysis
@@ -119,11 +119,11 @@ class AnalysisTask(LoggedObject):
         return('{0}'.format(self.taskname))
 
     def _init_task_attrs(self):
-        '''
+        """
         Initialize some extra object attributes from the task config, if they're present
 
         These are convenience items for easy access in child classes
-        '''
+        """
         if self.task_configs.get('input_pattern', None):
             self.input_pattern = self.task_configs['input_pattern']
 
@@ -154,19 +154,19 @@ class AnalysisTask(LoggedObject):
 
 
     def _init_locs(self):
-        '''
+        """
         Initialize locations for the task
-        '''
+        """
         self.output_dir = self.tools.mkdirs(path = os.path.join(self.analysis.dir, self.task_configs['output_dir_name']), return_path = True)
         self.logger.debug('task output_dir: {0}'.format(self.output_dir))
         self.input_dir = os.path.join(self.analysis.dir, self.task_configs['input_dir'])
         self.validate_items([self.output_dir, self.input_dir])
 
     def _task_config_from_file(self, config_file):
-        '''
+        """
         Load a YAML formatted file and add it to the object's configs
         config_file = basename of a file in the tasks_config_dir, for convenience
-        '''
+        """
         config_filepath = os.path.join(self.main_configs['tasks_config_dir'], config_file)
         self.logger.debug('Loading task config file: {0}'.format(config_filepath))
         self.validate_items([config_filepath])
@@ -175,9 +175,9 @@ class AnalysisTask(LoggedObject):
             self.task_configs['config_file'] = config_filepath
 
     def get_path(self, dirpath, file_basename, validate = False):
-        '''
+        """
         Get the path to a file, optionally validate the file
-        '''
+        """
         # self.logger.debug('dirpath is {0}'.format(dirpath))
         # self.logger.debug('file_basename is {0}'.format(file_basename))
         path = os.path.join(dirpath, file_basename)
@@ -188,23 +188,23 @@ class AnalysisTask(LoggedObject):
         return(path)
 
     def get_analysis_file_outpath(self, file_basename):
-        '''
+        """
         Create a path to a file in the analysis output directory
-        '''
+        """
         output_path = self.get_path(dirpath = self.output_dir, file_basename = file_basename, validate = False)
         return(output_path)
 
     def get_analysis_file_inputpath(self, file_basename, validate = True):
-        '''
+        """
         Create the path to an expected sample file in the input directory
-        '''
+        """
         path = self.get_path(dirpath = self.input_dir, file_basename = file_basename, validate = validate)
         return(path)
 
     def get_expected_output_files(self, analysis = None):
-        '''
+        """
         Return a list of all the expected output files for all of the samples in the analysis
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
 
@@ -225,11 +225,11 @@ class AnalysisTask(LoggedObject):
         return(expected_output)
 
     def get_expected_email_files(self, analysis = None):
-        '''
+        """
         Return a list of all the expected email files for all of the samples in the analysis
 
         Only run this after the task completion !!
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
 
@@ -250,10 +250,10 @@ class AnalysisTask(LoggedObject):
 
 
     def validate_items(self, items):
-        '''
+        """
         Run validations on a list of items
         items = list of file or dir paths
-        '''
+        """
         # self.logger.debug('validating items: {0}'.format(items))
         self.logger.debug('validating {0} items'.format(len(items)))
         if len(items) < 1 or not items:
@@ -273,18 +273,18 @@ class AnalysisTask(LoggedObject):
             # add more criteria here...
 
     def validate_output(self):
-        '''
+        """
         Validate all the expected output files per sample from the analysis task
-        '''
+        """
         self.logger.debug('Validating expected task output')
         expected_output = self.get_expected_output_files()
         self.logger.debug('{0} Expected output files'.format(len(expected_output)))
         self.validate_items(expected_output)
 
     def get_report_files(self):
-        '''
+        """
         Get the files for the report based on the configs, return a list of files
-        '''
+        """
         report_files = []
 
         report_dir = self.main_configs['tasks_reports_dir']
@@ -300,10 +300,10 @@ class AnalysisTask(LoggedObject):
         return(report_files)
 
     def setup_report(self, output_dir = None):
-        '''
+        """
         Set up the report files output for the pipeline step
         by copying over every associated file for the report to the output dir
-        '''
+        """
         # try to get an outputdir if it wasnt passed
         if not output_dir:
             output_dir = getattr(self, 'output_dir', None) # self.output_dir
@@ -324,9 +324,9 @@ class AnalysisTask(LoggedObject):
             self.logger.debug('No report files set for task')
 
     def annotate(self, input_dir = None, extra_handlers = None):
-        '''
+        """
         Run the ANNOVAR in-place annotation on the analysis task;
-        '''
+        """
         if not extra_handlers:
             extra_handlers = getattr(self, 'extra_handlers', None)
         # if not input_dir:
@@ -339,12 +339,12 @@ class AnalysisTask(LoggedObject):
         return()
 
     def run(self, analysis = None, *args, **kwargs):
-        '''
+        """
         Run a task that operates an analysis (not per-sample)
         analysis is an SnsWESAnalysisOutput object
 
         this will be overwritten with run() set by subclasses
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
         if analysis:
@@ -362,16 +362,16 @@ class AnalysisTask(LoggedObject):
 
 
 class AnalysisSampleTask(AnalysisTask):
-    '''
+    """
     Analysis Task task that will run separately for every sample in the analysis
-    '''
+    """
     def __init__(self, *ars, **kwargs):
         AnalysisTask.__init__(self, *ars, **kwargs)
 
     def get_sample_file_outpath(self, sampleID, suffix = None):
-        '''
+        """
         Create a path to a file in the analysis output directory
-        '''
+        """
         # try to resolve an output_suffix
         if not suffix:
             suffix = self.output_suffix
@@ -379,9 +379,9 @@ class AnalysisSampleTask(AnalysisTask):
         return(output_path)
 
     def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
-        '''
+        """
         Create the path to an expected sample file in the input directory
-        '''
+        """
         # try to resolve an input_suffix
         if not suffix:
             suffix = self.input_suffix
@@ -392,9 +392,9 @@ class AnalysisSampleTask(AnalysisTask):
         return(path)
 
     def get_expected_output_files(self, analysis = None):
-        '''
+        """
         Return a list of all the expected output files for all of the samples in the analysis
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
 
@@ -430,11 +430,11 @@ class AnalysisSampleTask(AnalysisTask):
         return(expected_output)
 
     def run(self, analysis = None, *args, **kwargs):
-        '''
+        """
         Run a task that operates on every sample in the analysis individually
 
         overrides AnalysisTask.run()
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
         # get all the Sample objects for the analysis
@@ -455,21 +455,21 @@ class AnalysisSampleTask(AnalysisTask):
 
 
 class QsubSampleTask(AnalysisSampleTask):
-    '''
+    """
     Analysis Task task that will submit a qsub job for every sample in the analysis
-    '''
+    """
     def __init__(self, *ars, **kwargs):
         AnalysisSampleTask.__init__(self, *ars, **kwargs)
 
     def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
-        '''
+        """
         Run a task that submits qsub jobs on all the samples in the analysis output
         analysis is an SnsWESAnalysisOutput object
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
 
         overrides AnalysisSampleTask.run()
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
 
@@ -503,21 +503,21 @@ class QsubSampleTask(AnalysisSampleTask):
 
 
 class QsubAnalysisTask(AnalysisTask):
-    '''
+    """
     Analysis Task task that will submit a single qsub job for the entire analysis
-    '''
+    """
     def __init__(self, *ars, **kwargs):
         AnalysisTask.__init__(self, *ars, **kwargs)
 
     def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
-        '''
+        """
         Run a task that submits one qsub job for the analysis
         analysis is an SnsWESAnalysisOutput object
         task is a module with a function 'main' that returns a qsub Job object
         qsub_wait = wait for all qsub jobs to complete
 
         overrides AnalysisTask.run()
-        '''
+        """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
         # empty list to hold the qsub jobs
@@ -545,7 +545,7 @@ class QsubAnalysisTask(AnalysisTask):
 
 
 class SnsTask(AnalysisTask):
-    '''
+    """
     Class for a task that runs part of the sns pipeline on the analysis
     and operates on the entires sns analysis
 
@@ -554,10 +554,10 @@ class SnsTask(AnalysisTask):
     note: do not use methods that call self.analysis, such as get_expected_output_files
 
     TODO: finish this
-    '''
+    """
     def __init__(self, taskname, analysis_dir = None, config_file = None, extra_handlers = None):
-        '''
-        '''
+        """
+        """
         AnalysisTask.__init__(self, taskname = str(taskname), config_file = config_file, analysis = None, extra_handlers = extra_handlers)
 
         if analysis_dir:
@@ -569,20 +569,20 @@ class SnsTask(AnalysisTask):
             self._task_config_from_file(config_file = config_file) #
 
     def _init_locs(self):
-        '''
+        """
         Initialize output locations
-        '''
+        """
         self.output_dir = self.tools.mkdirs(path = os.path.realpath(self.analysis_dir), return_path = True)
         # internal sns repo
         self.sns_repo_dir = self.main_configs['sns_repo_dir']
 
 
     def get_expected_output_files(self, analysis_dir = None):
-        '''
+        """
         Return a list of all the expected output files for all of the samples in the analysis
 
         get expected files from the main configs
-        '''
+        """
         if not analysis_dir:
             analysis_dir = getattr(self, 'analysis_dir', None)
 
@@ -598,9 +598,9 @@ class SnsTask(AnalysisTask):
         return(expected_output)
 
     def run_sns_command(self, command = None):
-        '''
+        """
         Run a command in the context of an sns directory
-        '''
+        """
         output_dir = self.output_dir
         with self.tools.DirHop(output_dir) as d:
             run_cmd = self.tools.SubprocessCmd(command = command).run()
@@ -609,11 +609,11 @@ class SnsTask(AnalysisTask):
         return(run_cmd)
 
     def catch_sns_jobs(self, proc_stdout):
-        '''
+        """
         Capture the job ID's of all qsub jobs submitted by an sns command
         by parsing its stdout
         return a list of jobs
-        '''
+        """
         jobs = []
         for job in [self.qsub.Job(id = job_id, name = job_name)
                     for job_id, job_name
@@ -635,19 +635,19 @@ class SnsTask(AnalysisTask):
 
 
 class AnnotationInplace(AnalysisTask):
-    '''
+    """
     Class for annotation object to add to other analysis steps
 
     from task_classes import AnnotationInplace
     x = AnnotationInplace()
-    '''
+    """
     def __init__(self, taskname = 'Annotation_inplace', config_file = 'Annotation_inplace.yml', extra_handlers = None):
-        '''
-        '''
+        """
+        """
         AnalysisTask.__init__(self, taskname = taskname, config_file = config_file, analysis = None, extra_handlers = extra_handlers)
 
     def annotate(self, input_dir, annotation_method = 'ANNOVAR'):
-        '''
+        """
         Run an annotation command
 
         Function for annotating genomic regions and variants output by other pipeline steps in-place
@@ -666,7 +666,7 @@ class AnnotationInplace(AnalysisTask):
 
         example command output:
         annotation_command = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/annotate-peaks/ANNOVAR/annotate.R -d /ifs/data/molecpathlab/scripts/snsxt/example_sns_analysis2/Summary-Avg-Coverage --bin-dir /ifs/data/molecpathlab/bin/annovar_annotate --db-dir /ifs/data/molecpathlab/bin/annovar_annotate/db --genome hg19'
-        '''
+        """
         self.logger.debug("Starting annotation for dir: {0}".format(input_dir))
         self.logger.debug("Annotation method: {0}".format(annotation_method))
 
@@ -691,9 +691,9 @@ class AnnotationInplace(AnalysisTask):
             db_dir = self.task_configs['ANNOVAR_db_dir']
             genome = self.task_configs['ANNOVAR_genome']
 
-            annotation_command = '''
+            annotation_command = """
             {0} -d {1} --bin-dir {2} --db-dir {3} --genome {4}
-            '''.format(
+            """.format(
             annotation_script_path, # 0
             input_dir, # 1
             bin_dir, # 2
