@@ -30,7 +30,6 @@ tasks_sns_repo_dir: 'sns'
 # email_recipients: '#MolecularPathology@nyumc.org'
 email_recipients: 'kellys04@nyumc.org'
 
-
 # email server to use in the reply-to field of emails sent
 reply_to_server: 'nyumc.org'
 

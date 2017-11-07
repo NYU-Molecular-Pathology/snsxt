@@ -8,8 +8,9 @@ import os
 import shutil
 from util import log
 import logging
-# import config
+import config
 from util import tools
+from util import mutt
 
 logger = logging.getLogger(__name__)
 
@@ -21,42 +22,39 @@ script_timestamp = log.timestamp()
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 configs = config.config
 
+default_recipients = configs['email_recipients']
+default_reply_to = mutt.get_reply_to_address(server = configs['reply_to_server'])
+default_subject_line_base = '[NGS580] Success'
+error_subject_line_base = '[NGS580] Error'
+error_recipients = mutt.get_reply_to_address(server = configs['reply_to_server'])
+
+# list to hold files to send as attachments
+# other modults should append to this
+# TODO: is there a better way to handle this ??
+email_files = []
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-
-
-
-
-# ~~~~ NOTES ~~~~~~ #
-
-# function from lyz for email
-# def email_results(self):
-#     '''
-#     Send an email using the object's INFO log as the body of the message
-#     '''
-#     email_recipients = self.email_recipients
-#     email_subject_line = self.email_subject_line
-#     reply_to = self.reply_to
-#     message_file = log.logger_filepath(logger = self.logger, handler_name = 'emaillog')
-#
-#     email_command = mutt.mutt_mail(recipient_list = email_recipients, reply_to = reply_to, subject_line = email_subject_line, message = 'This message should have been replaced by the script log file contents. If you are reading it, something broke, sorry', message_file = message_file, return_only_mode = True, quiet = True)
-#
-#     self.logger.debug('Email command is:\n\n{0}\n\n'.format(email_command))
-#     mutt.subprocess_cmd(command = email_command)
-#
-# def get_reply_to_address(self, server):
-#     '''
-#     Get the email address to use for the 'reply to' field in the email
-#     '''
-#     username = getpass.getuser()
-#     address = username + '@' + server
-#     return(address)
-
-
-
-# ~~~~ RUN ~~~~~~ #
-def email_analysis_results(analysis, analysis_id = None, results_id = None):
+def email_error_output(message_file, *args, **kwargs):
     '''
-    Send an email with analysis results
+    Email to send if an error occured
     '''
-    analysis_dir = analysis.dir
+    email_output(message_file = message_file, subject_line = error_subject_line_base, recipient_list = error_recipients)
+
+def email_output(message_file, *args, **kwargs):
+    '''
+    The default email output for the program
+    '''
+    recipient_list = kwargs.pop('recipient_list', default_recipients)
+    reply_to = kwargs.pop('reply_to', default_reply_to)
+    subject_line = kwargs.pop('subject_line', default_subject_line_base)
+    recipient_list = kwargs.pop('recipient_list', default_recipients)
+
+    logger.debug('email_files: {0}'.format(email_files))
+
+    mail_command = mutt.mutt_mail(recipient_list = recipient_list,
+                    reply_to = reply_to,
+                    subject_line = subject_line,
+                    message_file = message_file,
+                    attachment_files = email_files,
+                    return_only_mode = True)
+    tools.SubprocessCmd(command = mail_command).run()
