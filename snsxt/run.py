@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Run a series of analysis tasks, as an extension to the sns pipeline output
-'''
+"""
 # ~~~~~ LOGGING ~~~~~~ #
 import os
 from util import log
@@ -22,17 +22,17 @@ log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.log'.format(scriptname, scri
 email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scriptname, script_timestamp))
 
 def logpath():
-    '''
+    """
     Return the path to the main log file; needed by the logging.yml
     use this for dynamic output log file paths & names
-    '''
+    """
     global log_file
     return(log.logpath(logfile = log_file))
 
 def email_logpath():
-    '''
+    """
     Return the path for the email log output
-    '''
+    """
     return(log.logpath(logfile = email_log_file))
 
 # load the logging config
@@ -83,9 +83,9 @@ mail.email_files.append(log_file)
 
 # ~~~~~ FUNCTIONS ~~~~~~ #
 def get_task_list(task_list_file):
-    '''
+    """
     Read the task_list from a YAML formatted file
-    '''
+    """
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
 
     # https://stackoverflow.com/a/21048064/5359531
@@ -108,9 +108,9 @@ def get_task_list(task_list_file):
 
 
 def get_task_class(task_name):
-    '''
+    """
     Get the task's class from the sns_tasks module
-    '''
+    """
     # make sure the task is present in sns_tasks
     if not task_name in dir(sns_tasks):
         logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
@@ -122,11 +122,11 @@ def get_task_class(task_name):
     return(task_class)
 
 def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, **kwargs):
-    '''
+    """
     Run a series of analysis tasks
 
     analysis = SnsWESAnalysisOutput
-    '''
+    """
     # items output by tasks which should be returned by this function
     tasks_output = {}
     # list of files to send in output email
@@ -216,11 +216,11 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
 
 
 def run_sns_tasks(task_list, analysis_dir, **kwargs):
-    '''
+    """
     Run tasks that start and run the main sns pipeline
 
     Run each sns task individually, so that all qsub jobs will be completed at every step
-    '''
+    """
     # get the args that were passed
     fastq_dirs = kwargs.pop('fastq_dirs')
     targets_bed = kwargs.pop('targets_bed')
@@ -235,9 +235,9 @@ def run_sns_tasks(task_list, analysis_dir, **kwargs):
         run_tasks(tasks = {key: value}, analysis_dir = analysis_dir, fastq_dirs = fastq_dirs, targets_bed = targets_bed, probes_bed = probes_bed, pairs_sheet = pairs_sheet, **kwargs)
 
 def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
-    '''
+    """
     Run the downstream snsxt analysis tasks on sns pipeline output
-    '''
+    """
     # get the args that were passed
     analysis_id = kwargs.pop('analysis_id')
     results_id = kwargs.pop('results_id')
@@ -258,9 +258,9 @@ def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
 
 
 def main(**kwargs):
-    '''
+    """
     Main control function for the program
-    '''
+    """
     # get the args that were passed
     analysis_id = kwargs.pop('analysis_id', None)
     task_list_file = kwargs.pop('task_list_file', default_task_list)
@@ -334,10 +334,10 @@ def main(**kwargs):
 
 
 def parse():
-    '''
+    """
     Run the program
     arg parsing goes here, if program was run as a script
-    '''
+    """
     # ~~~~ GET SCRIPT ARGS ~~~~~~ #
     # create the top-level parser
     parser = argparse.ArgumentParser(description='snsxt: sns bioinformatics pipeline extension program')
