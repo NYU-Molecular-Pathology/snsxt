@@ -249,6 +249,7 @@ def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
     run_tasks(tasks, analysis = analysis, debug_mode = debug_mode, **kwargs)
 
     if task_list.get('setup_report', None):
+        # TODO: move report out of this function and into main as part of cleanup
         logger.debug('Starting report setup')
         setup_report.setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
     # cleanup.analysis_complete(analysis = analysis)
