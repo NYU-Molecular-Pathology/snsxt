@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Run a series of analysis tasks, as an extension to the sns pipeline output
+Runs a series of analysis tasks
+Originally designed as an extension to the sns pipeline output, with the flexibility of added ad hoc extra analysis tasks for downstream processing
 """
 # ~~~~~ LOGGING ~~~~~~ #
 import os
@@ -23,15 +24,26 @@ email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scri
 
 def logpath():
     """
-    Return the path to the main log file; needed by the logging.yml
-    use this for dynamic output log file paths & names
+    Returns the path to the main log file; needed by the logging.yml config file
+    This generates dynamic output log file paths & names
+
+    Returns
+    -------
+    logging.FileHandler
+        a Python logging FileHandler object configured with a log file path set dynamically at program run time
     """
     global log_file
     return(log.logpath(logfile = log_file))
 
 def email_logpath():
     """
-    Return the path for the email log output
+    Returns the path to the email log file; needed by the logging.yml config file
+    This generates dynamic output log file paths & names
+
+    Returns
+    -------
+    logging.FileHandler
+        a Python logging FileHandler object configured with a log file path set dynamically at program run time
     """
     return(log.logpath(logfile = email_log_file))
 
@@ -39,6 +51,10 @@ def email_logpath():
 config_yaml = os.path.join(scriptdir, 'logging.yml')
 logger = log.log_setup(config_yaml = config_yaml, logger_name = "run")
 extra_handlers = [h for h in log.get_all_handlers(logger)]
+"""
+Python logging Filehandlers to be passed throughout the program, in order to keep all submodules logging to the same file(s) set by `logpath()` and  `email_logpath()`
+"""
+
 logger.debug("snsxt program is starting at location: {0}".format(__file__))
 # print the paths to the log files to the log
 log.print_filehandler_filepaths_to_log(logger)
@@ -51,10 +67,25 @@ config.config['snsxt_dir'] = scriptdir # snsxt/snsxt/
 config.config['extra_handlers'] = extra_handlers
 config.config['sns_repo_dir'] = os.path.join(config.config['snsxt_dir'], config.config['sns_repo_dir']) # snsxt/snsxt/sns
 configs = config.config
+"""
+The main configurations dictionary to use for settings throughout the program. The `sns_repo_dir` value is modified at program run time, by preprending the  `snsxt_dir` path (path to this script's directory). Other dict keys are set at program run time as well, including `snsxt_parent_dir`, `snsxt_dir`, and `extra_handlers`
+"""
+
 
 default_targets = os.path.join(snsxt_parent_dir, 'targets.bed')
+"""
+A .bed formatted file to use by default as the target regions for variant calling
+"""
+
 default_probes = os.path.join(snsxt_parent_dir, 'probes.bed')
+"""
+A .bed formatted file to use by default for CNV analysis. Must have only 3 tab-delimited columns.
+"""
+
 default_task_list = os.path.join(snsxt_parent_dir, "task_lists", "default.yml")
+"""
+The YAML formatted task list containing analysis tasks to be run by default
+"""
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
 # system modules
@@ -84,7 +115,18 @@ mail.email_files.append(log_file)
 # ~~~~~ FUNCTIONS ~~~~~~ #
 def get_task_list(task_list_file):
     """
-    Read the task_list from a YAML formatted file
+    Reads the task_list from a YAML formatted file
+
+    Parameters
+    ----------
+    task_list_file: str
+        the path to a YAML formatted file from which to read analysis tasks
+
+    Returns
+    -------
+    dict
+        a dictionary containing the contents of the YAML `task_list_file`
+
     """
     logger.debug('Loading tasks from task list file: {0}'.format(os.path.abspath(task_list_file)))
 
@@ -109,7 +151,17 @@ def get_task_list(task_list_file):
 
 def get_task_class(task_name):
     """
-    Get the task's class from the sns_tasks module
+    Gets the task's class from the `sns_tasks` module
+
+    Parameters
+    ----------
+    task_name: str
+        the name of an analysis task, assumed to correspond to a Class loaded in the `sns_tasks` module
+
+    Returns
+    -------
+    Class
+        the Class object matching the `task_name`
     """
     # make sure the task is present in sns_tasks
     if not task_name in dir(sns_tasks):
@@ -123,9 +175,30 @@ def get_task_class(task_name):
 
 def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, **kwargs):
     """
-    Run a series of analysis tasks
+    Runs a series of analysis tasks
 
-    analysis = SnsWESAnalysisOutput
+    Parameters
+    ----------
+    tasks: dict
+        a dictionary (e.g. loaded from a YAML formatted `task_list`) containing the names of analysis tasks to be run
+    analysis_dir: str
+        the path to a directory to use for the analysis. For `sns` tasks, this corresponds to the data output location. For downstream `tasks`, this will be used to create a `SnsWESAnalysisOutput` object
+    analysis: SnsWESAnalysisOutput
+        object representing output from an `sns wes` analysis pipeline output on which to run downstream analysis tasks
+    debug_mode: bool
+        prevent the program from halting if errors are found in qsub log output files; defaults to `False`. `True` = do not stop for qsub log errors, `False` = stop if errors are found
+    kwargs: dict
+        a dictionary containing extra args to pass to the `task_class` upon initialization
+
+    Returns
+    -------
+    tasks_output: dict
+        a dictionary containing items output by the analysis task(s) which were run
+
+    Todo
+    ----
+    Figure out what should be contained in `tasks_output`
+
     """
     # items output by tasks which should be returned by this function
     tasks_output = {}
@@ -142,9 +215,15 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
 
     # list to capture qsub jobs submitted but not monitored by a task
     background_jobs = []
+    """
+    If an analysis task generated qsub jobs, but did not wait for them to finish, they will be captured in this list and will be monitored to completion when `run_tasks` finishes running all tasks. This way, the program will not exit until all jobs created have finished.
+    """
 
     # list to capture background output that should be validated after all jobs finish
     background_output_files = []
+    """
+    By default, a task will validated its expected output files upon task completion. However, tasks that submit qsub jobs and do not wait for them to complete will not be able to validate their expected output files. Instead, the paths to those expected files will be collected in this list, and they will be evaluated once all qsub jobs have been monitored to completion and validated.
+    """
 
     for task_name, task_params in tasks.items():
         task_class = get_task_class(task_name)
@@ -217,9 +296,19 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
 
 def run_sns_tasks(task_list, analysis_dir, **kwargs):
     """
-    Run tasks that start and run the main sns pipeline
+    Runs tasks which run analysis commands in the context of creating and running new `sns` pipeline analyses.
 
-    Run each sns task individually, so that all qsub jobs will be completed at every step
+    Parameters
+    ----------
+    analysis_dir: str
+        path to a directory to hold the analysis output
+    kwargs: dict
+        dictionary containing extra args to pass to `run_tasks`
+
+    Notes
+    -----
+    Each sns task will be run individually, so that all qsub jobs will be monitored to completion at every step.
+
     """
     # get the args that were passed
     fastq_dirs = kwargs.pop('fastq_dirs')
@@ -236,7 +325,15 @@ def run_sns_tasks(task_list, analysis_dir, **kwargs):
 
 def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
     """
-    Run the downstream snsxt analysis tasks on sns pipeline output
+    Runs the downstream `snsxt` analysis tasks on `sns` pipeline output
+
+    Parameters
+    ----------
+    analysis_dir: str
+        path to a directory containing `sns` analysis output
+    kwargs: dict
+        dictionary containing extra args to pass to `run_tasks`
+
     """
     # get the args that were passed
     analysis_id = kwargs.pop('analysis_id')
@@ -260,6 +357,31 @@ def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
 def main(**kwargs):
     """
     Main control function for the program
+
+    Parameters
+    ----------
+    kwargs: dict
+        dictionary containing args to run the program, expected to be passed from `parse()` and passed on to `run_sns_tasks()` and `run_sns_tasks()`
+
+    Keyword Arguments
+    -----------------
+    analysis_id: str
+        an identifier for the analysis (e.g. the NextSeq run ID)
+    results_id: str
+        a sub-identifier for the analysis (e.g. a timestamp)
+    task_list_file: str
+        the path to a YAML formatted file containing analysis tasks to be run
+    debug_mode: bool
+        prevents the program from halting if errors are found in qsub log output files; defaults to `False`. `True` = do not stop for qsub log errors, `False` = stop if errors are found
+    fastq_dirs: list
+        a list of paths to directories to use as input data locations for a new `sns` analysis. These directories should contain .fastq.gz files within two levels from the top level of the dir (e.g. at most 2 subdirs deep). The .fastq.gz files contained in these directories should keep the exact filenames output by the NextSeq; sample parsing will take place automatically.
+    targets_bed: str
+        path to a .bed formatted file to use as the target regions for variant calling
+    probes_bed: str
+        path to a .bed formatted file to use as the probes for CNV analysis
+    pairs_sheet: str
+        path to a .csv samplesheet to use for matching tumor and normal samples in the paired variant calling analysis steps. See GitHub for example.
+
     """
     # get the args that were passed
     analysis_id = kwargs.pop('analysis_id', None)
@@ -321,22 +443,25 @@ def main(**kwargs):
         # run cleanup
         cleanup.save_configs(analysis_dir = analysis_dir)
 
-        # logger.debug('email_files: {0}'.format(mail.email_files))
-        # mail_command = mutt.mutt_mail(recipient_list = configs['email_recipients'],
-        #                 reply_to = mutt.get_reply_to_address(server = configs['reply_to_server']),
-        #                 subject_line = '[NGS580] Test',
-        #                 message_file = email_log_file,
-        #                 attachment_files = email_files,
-        #                 return_only_mode = True)
-        # tools.SubprocessCmd(command = mail_command).run()
-
 
 
 
 def parse():
     """
-    Run the program
-    arg parsing goes here, if program was run as a script
+    Runs the program based on CLI arguments.
+    arg parsing happens here, if program was run as a script
+
+    Returns
+    -------
+    dict
+        a dictionary of keyword arguments to pass to `main()`
+
+    Examples
+    --------
+    Example script usage::
+
+        snsxt$ snsxt/run.py -d mini_analysis-controls/ -f mini_analysis-controls/fastq/ -a mini_analysis -r results1 -t task_lists/dev.yml --pairs_sheet mini_analysis-controls/samples.pairs.csv_usethis
+
     """
     # ~~~~ GET SCRIPT ARGS ~~~~~~ #
     # create the top-level parser
