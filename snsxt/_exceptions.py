@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 class AnalysisInvalid(Exception):
     """
     Base exception to use if the analysis is invalid
+
+    Examples
+    --------
+    Example usage::
+
+        raise _e.AnalysisInvalid(message = err_message, errors = '')
+
     """
     def __init__(self, message, errors):
         super(AnalysisInvalid, self).__init__(message)

@@ -17,8 +17,16 @@ logger = logging.getLogger(__name__)
 
 def validate_items(items):
     """
-    Run validations on a list of items
-    items = list of file or dir paths
+    Runs validations on a list of items
+
+    Parameters
+    ----------
+    items: list
+        a list of file or dir paths to be validated
+
+    Todo
+    ----
+    Need to figure out what should be returned if no items were passed
     """
     logger.debug('validating {0} items'.format(len(items)))
     if len(items) < 1 or not items:

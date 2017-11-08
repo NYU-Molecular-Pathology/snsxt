@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Module to send email output of the pipeline results
+Sends email output of the pipeline results
 """
 # ~~~~~ LOGGING ~~~~~~ #
 import os
@@ -32,11 +32,27 @@ error_recipients = mutt.get_reply_to_address(server = configs['reply_to_server']
 # other modults should append to this
 # TODO: is there a better way to handle this ??
 email_files = []
+"""
+This list should contain file paths output by analysis tasks for inclusion as email attachments at the end of a successful analysis pipeline. It should be accessed by other parts of the program external to this module
+
+Examples
+--------
+Example usage::
+
+    task_output_file = 'foo.txt'
+    mail.email_files.append(task_output_file)
+
+"""
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def validate_email_files():
     """
-    Make sure all the items in the email_files list exist
+    Makes sure all the items in the ``email_files`` list exist and are considered valid for inclusion in email output
+
+    Notes
+    -----
+    Since the email output is sent by an external program such as ``mutt``, it is important that file attachments be valid before attempting to include them, since it will be more difficult to ensure that the email is sent successfully.
+
     """
     for i, item in enumerate(email_files):
         if not tools.item_exists(item):
@@ -45,18 +61,48 @@ def validate_email_files():
 
 def email_error_output(message_file, *args, **kwargs):
     """
-    Email to send if an error occured
+    Sends an email in the event that errors occurred during the analysis.
+
+    Parameters
+    ----------
+    message_file: str
+        path to a file to use as the body of the email, typically the program's log file
+
+    Keyword Arguments
+    -----------------
+    subject_line: str
+        the subject line that should be used for the email
+    recipient_list: str
+        the recipients for the email, in the format ``recipient_list = "user1@server.com,user2@server.com" ``
+
     """
     email_output(message_file = message_file, subject_line = error_subject_line_base, recipient_list = error_recipients)
 
 def email_output(message_file, *args, **kwargs):
     """
-    The default email output for the program
+    Sends an email upon the successful completion of the analysis pipeline. If any ``email_files`` were set by the program while running, they will be validated and included as email attachments.
+
+    Parameters
+    ----------
+    message_file: str
+        path to a file to use as the body of the email, typically the program's log file
+    args: list
+        a list containing extra args to pass to ``email_output()``
+    kwargs: dict
+        a dictionary containing extra args to pass to ``email_output()``
+
+    Keyword Arguments
+    -----------------
+    recipient_list: str
+        the recipients for the email, in the format ``recipient_list = "user1@server.com,user2@server.com" ``
+    reply_to: str
+        email address to use in the 'Reply To' field of the email
+    subject_line: str
+        the subject line that should be used for the email
     """
     recipient_list = kwargs.pop('recipient_list', default_recipients)
     reply_to = kwargs.pop('reply_to', default_reply_to)
     subject_line = kwargs.pop('subject_line', default_subject_line_base)
-    recipient_list = kwargs.pop('recipient_list', default_recipients)
 
     validate_email_files()
 

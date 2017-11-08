@@ -22,7 +22,17 @@ configs = config.config
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def save_configs(analysis_dir):
     """
-    Save the global configs to the analysis dir
+    Saves the global ``configs`` object to a YAML file in the analysis dir
+
+    Parameters
+    ----------
+    analysis_dir: str
+        path to a directory to hold the analysis output
+
+    Notes
+    -----
+    Some config items are added or modified during program run time, so final configs may not exactly match starting configs set in external config YAML files
+
     """
     # save the configs to a YAML file
     output_config_yaml = os.path.join(analysis_dir, 'snsxt_config.yml')
@@ -34,7 +44,11 @@ def analysis_complete(analysis):
     """
     Actions to take after an analysis is done
 
-    analysis is an SnsWESAnalysisOutput object
+    Parameters
+    ----------
+    analysis: SnsWESAnalysisOutput
+        object representing output from an `sns wes` analysis pipeline output on which to run downstream analysis tasks
+
     """
     analysis_dir = analysis.dir
     save_configs(analysis_dir)

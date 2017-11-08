@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-Run all the unit tests
-'''
+"""
+Runs all the unit tests found throughout the program
+"""
 
 import unittest
 

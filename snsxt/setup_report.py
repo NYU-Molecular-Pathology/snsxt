@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Functions to set up and compile the reports for the pipeline output
+Sets up and compiles the parent analysis report for the pipeline output
 """
 # ~~~~~ LOGGING ~~~~~~ #
 import os
@@ -9,7 +9,7 @@ import shutil
 from util import log
 import logging
 import config
-from util import tools as t
+from util import tools
 import validation
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,12 @@ configs = config.config
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def get_report_files():
     """
-    Get the files for the report based on the configs, return a list
+    Gets the supporting files for the parent analysis report based on the configs. These include files with helper functions, sub-reports, etc.
+
+    Returns
+    -------
+    list
+        a list of paths to files that should be used to set up the parent analysis report
     """
     report_files = []
     report_dir = configs['report_dir']
@@ -42,7 +47,12 @@ def get_report_files():
 
 def get_main_report_file():
     """
-    get the path to the main report file
+    Gets the path to the main parent report .Rmd file which should be used to compile the analysis report.
+
+    Returns
+    -------
+    str
+        the path to the parent .Rmd file to use in compiling the report
     """
     report_dir = configs['report_dir']
     main_report_file = configs['main_report']
@@ -50,7 +60,16 @@ def get_main_report_file():
 
 def compile_RMD_report(input_file):
     """
-    Compile an RMD report using the script set in the configs
+    Compiles a .Rmd format report using the R script set in the configs.
+
+    Todo
+    ----
+    Need to raise an exception here in case the report script does not exist
+
+    Returns
+    -------
+    SubprocessCmd
+        the ``tools.SubprocessCmd`` object for the shell command that was run to execute the report compilation script
     """
     # path to the script that does the document compiling
     compile_script = configs['report_compile_script']
@@ -62,6 +81,7 @@ def compile_RMD_report(input_file):
     if not os.path.exists(compile_script):
         logger.error("Report script does not exist: {0}".format(compile_script))
         logger.error("Exiting program")
+        # TODO: raise exception here!
         sys.exit()
     else:
         # build the script command to run
@@ -75,7 +95,7 @@ str(input_file) # 2
 )
         logger.debug('Report compile command: \n{0}\n'.format(command))
         logger.debug('Compiling the report...')
-        run_cmd = t.SubprocessCmd(command = command).run()
+        run_cmd = tools.SubprocessCmd(command = command).run()
         logger.debug(run_cmd.proc_stdout)
         logger.debug(run_cmd.proc_stderr)
         return(run_cmd)
