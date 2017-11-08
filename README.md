@@ -14,12 +14,6 @@ Use this framework to run any extra analysis tasks you like after an `sns` pipel
 
 # Usage
 
-__NOTE:__ Usage may change as development progresses
-
-## New Analysis
-
-__Requirements__: Directory of .fastq.gz files, and a valid `samples.pairs.csv` samplesheet file [[example here](https://github.com/NYU-Molecular-Pathology/snsxt/blob/0a2a308baf25af5a67bac9f0668025061693a8a5/demo/misc/samples.pairs.csv)].
-
 - Create a new directory for your analysis
 
 ```bash
@@ -34,67 +28,35 @@ git clone --recursive https://github.com/NYU-Molecular-Pathology/snsxt.git
 cd snsxt
 ```
 
-- Run the `run.py` script with the `new` subcommand (new analysis).
+- Run the `run.py` script 
 
 ```bash
-snsxt/run.py --analysis_id example_analysis --results_id results1 new /path/to/fastq_dir -o ../ --pairs_sheet samples.pairs.csv
-```
+snsxt/run.py -d .
 
-The program will start a new analysis in the given output directory (e.g. `../`), and automatically run downstream `snsxt` analysis tasks upon completion.
-
-
-## Existing `sns wes` Pipeline Output
-
-__Requirements__: Directory with output from the `sns wes` pipeline.
-
-- Navigate to the directory containing your `sns` analysis output
-
-```bash
-cd /path/to/sns_output
-```
-
-- Clone this repository and navigate to its directory
-
-```bash
-git clone --recursive https://github.com/NYU-Molecular-Pathology/snsxt.git
-cd snsxt
-```
-
-- Run the `run.py` script with the `d` subcommand (downstream analysis).
-
-```bash
-snsxt/run.py --analysis_id example_analysis --results_id results1 d -i /path/to/sns_output_dir
 ```
 
 ## Arguments
 
-Some common program arguments to the `snsxt/run.py` program include:
+### Required
 
-- `--analysis_id`: An identifier for the analysis (e.g. NextSeq run ID)
+- `-d`, `--analysis_dir`: Path to the to use for the analysis. For a new sns analysis, this will become the output directory. For an existing sns analysis output, this will become the input directory
 
-- `--results_id`: A sub-identifier for the analysis (e.g. a timestamp)
+## Optional
 
-- `--task-list`: A YAML formatted list of downstream analysis tasks for `snsxt`, defaults to `task_lists/default.yml`
+- `-f`, `--fastq_dir`: Directories containing .fastq.gz files (required for a new `sns` analysis)
 
-### Subcommands
+- `-a`, `--analysis_id`: An identifier for the analysis (e.g. NextSeq run ID)
 
-The following subcommands are included in the program:
+- `-r`, `--results_id`: A sub-identifier for the analysis (e.g. a timestamp)
 
-#### `new`
-
-Starts a new `sns wes` pipeline analysis, along with paired tumor-normal variant calling.
-
-- positional arguments represent directories containing .fastq files
-
-- `--output_dir`: output directory for the analysis results
+- `-t`, `--task-list`: A YAML formatted list of downstream analysis tasks for `snsxt`, defaults to `task_lists/default.yml`
 
 - `--targets`: A .bed file with genomic regions for the analysis, defaults to the included `targets.bed` file
 
-#### `d`
+- `--probes`: Probes .bed file with regions for CNV analysis, defaults to the included `probes.bed` file
 
-Performs downstream `snsxt` analysis on an existing `sns wes` pipeline output.
+- `--pairs_sheet`: "samples.pairs.csv" samplesheet to use for paired analysis
 
-- `--input_dir`: Path to the directory containing the `sns wes` pipeline output
 
 # Program Components
 
