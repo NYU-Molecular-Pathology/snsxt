@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Runs a series of analysis tasks
+
 Originally designed as an extension to the sns pipeline output, with the flexibility of added ad hoc extra analysis tasks for downstream processing
 """
 # ~~~~~ LOGGING ~~~~~~ #
@@ -25,6 +26,7 @@ email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scri
 def logpath():
     """
     Returns the path to the main log file; needed by the logging.yml config file
+
     This generates dynamic output log file paths & names
 
     Returns
@@ -38,6 +40,7 @@ def logpath():
 def email_logpath():
     """
     Returns the path to the email log file; needed by the logging.yml config file
+    
     This generates dynamic output log file paths & names
 
     Returns
