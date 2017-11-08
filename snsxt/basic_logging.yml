@@ -1,0 +1,92 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    format: '[%(asctime)s] %(levelname)s (%(name)s:%(module)s:%(funcName)s:%(lineno)d) %(message)s'
+  console:
+    format: '[%(asctime)s] %(levelname)s (%(name)s:%(module)s:%(funcName)s:%(lineno)d) %(message)s'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  email:
+    format: '[%(levelname)-8s] %(message)s'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: console
+    stream: ext://sys.stdout
+  main:
+    class: logging.FileHandler
+    filename: main.log
+    level: DEBUG   
+    formatter: default
+  email:
+    class: logging.FileHandler
+    filename: email.log
+    level: INFO   
+    formatter: email
+
+loggers:
+  run:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  config:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  tools:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  find:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  git:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  qsub:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  task_func:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  setup_report:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  mail:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  _start_sns:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  _snsxt:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  job_management:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  _exceptions:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  validation:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+  cleanup:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
+
+

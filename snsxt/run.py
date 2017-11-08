@@ -49,7 +49,12 @@ def email_logpath():
 
 # load the logging config
 config_yaml = os.path.join(scriptdir, 'logging.yml')
-logger = log.log_setup(config_yaml = config_yaml, logger_name = "run")
+basic_yaml = os.path.join(scriptdir, "basic_logging.yml")
+if __name__ == "__main__":
+    logger = log.log_setup(config_yaml = config_yaml, logger_name = "run")
+else:
+    logger = log.log_setup(config_yaml = basic_yaml, logger_name = "run")
+
 extra_handlers = [h for h in log.get_all_handlers(logger)]
 """
 Python logging Filehandlers to be passed throughout the program, in order to keep all submodules logging to the same file(s) set by `logpath()` and  `email_logpath()`
