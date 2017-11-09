@@ -19,6 +19,12 @@ snsxt.sns_tasks.task_classes module
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: snsxt.sns_tasks.AnalysisTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 
 Module contents
 ---------------
