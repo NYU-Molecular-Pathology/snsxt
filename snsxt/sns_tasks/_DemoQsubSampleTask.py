@@ -16,7 +16,12 @@ class DemoQsubSampleTask(QsubSampleTask):
     """
     def __init__(self, analysis, taskname = 'DemoQsubSampleTask', config_file = 'DemoQsubSampleTask.yml', extra_handlers = None):
         """
-        analysis is an SnsWESAnalysisOutput object
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+        extra_handlers: list
+            a list of extra Filehandlers to use for logging
         """
         QsubSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
@@ -25,7 +30,15 @@ class DemoQsubSampleTask(QsubSampleTask):
         Main function for performing the analysis task on a single sample here
         Put your code for performing the analysis task in here on a single sample here
 
-        sample is an SnsAnalysisSample object
+        Parameters
+        ----------
+        sample: SnsAnalysisSample
+            a single sample from the analysis
+
+        Returns
+        -------
+        qsub.Job
+            a single qsub job object
         """
         self.logger.debug('Put your code for doing the analysis task in this function')
         self.logger.debug('The global configs for all tasks will be in this dict: {0}'.format(self.main_configs))

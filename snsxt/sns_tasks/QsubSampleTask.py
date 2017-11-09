@@ -7,19 +7,39 @@ from AnalysisSampleTask import AnalysisSampleTask
 
 class QsubSampleTask(AnalysisSampleTask):
     """
-    Analysis Task task that will submit a qsub job for every sample in the analysis
+    Base class for an ``AnalysisSampleTask`` operates on each sample in the analysis, and submits a single qsub job for each.
+
+    Notes
+    -----
+    This class should have a ``main`` method that returns a single ``qsub.Job`` object for each sample in the analysis
     """
     def __init__(self, *ars, **kwargs):
         AnalysisSampleTask.__init__(self, *ars, **kwargs)
 
     def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
         """
-        Run a task that submits qsub jobs on all the samples in the analysis output
-        analysis is an SnsWESAnalysisOutput object
-        task is a module with a function 'main' that returns a qsub Job object
-        qsub_wait = wait for all qsub jobs to complete
+        Runs a task that operates on each sample in the analysis, and submits a single qsub job for each.
 
-        overrides AnalysisSampleTask.run()
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+        qsub_wait: bool
+            whether the task should wait for the qsub job to finish before continuing; default is ``True``
+        args: list
+            a list of extra positional arguments to pass to ``self.main()``
+        kwargs: dict
+            a dictionary of extra positional arguments to pass to ``self.main()``
+
+        Returns
+        -------
+        list or None
+            a list of ``qsub.Job`` objects if ``qsub_wait`` is ``False``, otherwise returns ``None`` after waiting for all jobs to finish
+
+        Notes
+        -----
+        If ``qsub_wait`` is ``True``, then qsub jobs will also be validated for completion status.
+
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)

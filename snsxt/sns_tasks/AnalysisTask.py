@@ -126,7 +126,7 @@ class AnalysisTask(LoggedObject):
 
     def _init_locs(self):
         """
-        Initializes locations for the task
+        Initializes directory location attributes for the task
         """
         self.output_dir = self.tools.mkdirs(path = os.path.join(self.analysis.dir, self.task_configs['output_dir_name']), return_path = True)
         self.logger.debug('task output_dir: {0}'.format(self.output_dir))
