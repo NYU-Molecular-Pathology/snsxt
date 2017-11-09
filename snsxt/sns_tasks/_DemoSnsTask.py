@@ -18,8 +18,11 @@ class DemoSnsTask(SnsTask):
         """
         """
         command = '''
+        echo ""
         echo "this is the demo sns task, pwd is:"
         echo $PWD
+        ls -l
+        echo ""
         '''
         run_cmd = self.run_sns_command(command = command)
         self.logger.debug(run_cmd.proc_stdout)
