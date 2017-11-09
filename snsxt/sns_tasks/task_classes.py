@@ -508,7 +508,7 @@ class AnalysisTask(LoggedObject):
         Todo
         ----
         Should this method ``return`` something?
-        
+
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -528,14 +528,33 @@ class AnalysisTask(LoggedObject):
 
 class AnalysisSampleTask(AnalysisTask):
     """
-    Analysis Task task that will run separately for every sample in the analysis
+    An ``AnalysisTask`` that will run actions separately for every sample in the analysis
     """
     def __init__(self, *ars, **kwargs):
         AnalysisTask.__init__(self, *ars, **kwargs)
 
     def get_sample_file_outpath(self, sampleID, suffix = None):
         """
-        Create a path to a file in the analysis output directory
+        Creates a path to an expected file in the analysis output directory by concatenating the provided ``sampleID`` and ``suffix`` into a file basename and then preprending the path to the task's ``output_dir``.
+
+        Parameters
+        ----------
+        sampleID: str
+            the ID for the sample
+        suffix: str
+            the suffix of the file to create. If ``None`` is passed, the task's ``output_suffix`` is used instead
+
+        Returns
+        -------
+        str
+            the path to the expected output file for the sample
+
+        Examples
+        --------
+        Example usage::
+
+            sample_output = self.get_sample_file_outpath(sampleID = sample.id, suffix = self.output_suffix)
+
         """
         # try to resolve an output_suffix
         if not suffix:
@@ -545,7 +564,28 @@ class AnalysisSampleTask(AnalysisTask):
 
     def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
         """
-        Create the path to an expected sample file in the input directory
+        Creates a path to an expected file in the analysis input directory by concatenating the provided ``sampleID`` and ``suffix`` into a file basename and then preprending the path to the task's ``input_dir``.
+
+        Parameters
+        ----------
+        sampleID: str
+            the ID for the sample
+        suffix: str
+            the suffix of the file to create. If ``None`` is passed, the task's ``input_suffix`` is used instead
+        validate: bool
+            whether or not the filepath should be validated; ``True`` by default
+
+        Returns
+        -------
+        str
+            the path to the expected input file for the sample
+
+        Examples
+        --------
+        Example usage::
+
+            sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
+
         """
         # try to resolve an input_suffix
         if not suffix:
@@ -558,7 +598,17 @@ class AnalysisSampleTask(AnalysisTask):
 
     def get_expected_output_files(self, analysis = None):
         """
-        Return a list of all the expected output files for all of the samples in the analysis
+        Creates a list of all the expected output files for all of the samples in the analysis
+
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+
+        Returns
+        -------
+        list
+            a list of files that are expected to be output by the task
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -596,9 +646,25 @@ class AnalysisSampleTask(AnalysisTask):
 
     def run(self, analysis = None, *args, **kwargs):
         """
-        Run a task that operates on every sample in the analysis individually
+        Runs a task that operates on every sample in the analysis individually
 
-        overrides AnalysisTask.run()
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+        args: list
+            a list of extra positional arguments to pass to ``self.main()``
+        kwargs: dict
+            a dictionary of extra positional arguments to pass to ``self.main()``
+
+        Notes
+        -----
+        This method 'runs' the task, by making a call to ``self.main``.
+
+        Todo
+        ----
+        Should this method ``return`` something?
+
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
