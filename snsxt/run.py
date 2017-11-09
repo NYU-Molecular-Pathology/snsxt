@@ -40,7 +40,7 @@ def logpath():
 def email_logpath():
     """
     Returns the path to the email log file; needed by the logging.yml config file
-    
+
     This generates dynamic output log file paths & names
 
     Returns
@@ -174,7 +174,7 @@ def get_task_class(task_name):
     # make sure the task is present in sns_tasks
     if not task_name in dir(sns_tasks):
         logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
-        raise
+        raise _e.SnsTaskMissing(message = 'Task {0} was not found in the sns_tasks module'.format(task_name), errors = '')
     else:
         logger.debug('Loading task {0} '.format(task_name))
     # load the task class from the module
@@ -214,12 +214,10 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
     tasks_output['email_files'] = []
 
     if analysis_dir and analysis:
-        logger.error('Both analysis_dir and analysis were passed; there can be only one.')
-        raise
+        raise _e.ArgumentError(message = 'Both analysis_dir and analysis were passed; there can be only one.', errors = '')
 
     if not analysis_dir and not analysis:
-        logger.error('Neither analysis_dir nor analysis were passed; there must be one.')
-        raise
+        raise _e.ArgumentError(message = 'Neither analysis_dir nor analysis were passed; there must be one.', errors = '')
 
     # list to capture qsub jobs submitted but not monitored by a task
     background_jobs = []
@@ -403,9 +401,7 @@ def main(**kwargs):
 
     analysis_dir = kwargs.pop('analysis_dir', None)
     if not analysis_dir:
-        logger.error('No analysis dir passed')
-        # TODO: make sure this raise works, intended for when snsxt is not called as script
-        raise
+        raise _e.ArgumentError(message = 'No analysis_dir passed', errors = '')
 
     # rebuild the kwargs with only the items chosen
     kwargs = {

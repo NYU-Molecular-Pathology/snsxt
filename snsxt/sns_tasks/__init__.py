@@ -18,3 +18,4 @@ from _DemoQsubAnalysisTask import DemoQsubAnalysisTask
 from _StartSns import StartSns
 from _SnsWes import SnsWes
 from _SnsWesPairsSnv import SnsWesPairsSnv
+from _DemoSnsTask import DemoSnsTask

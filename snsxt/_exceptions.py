@@ -10,6 +10,36 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ~~~~~ EXCEPTIONS ~~~~~ #
+class ArgumentError(Exception):
+    """
+    Base exception to use if improper arguments were passed to a function
+
+    Examples
+    --------
+    Example usage::
+
+        raise _e.ArgumentError(message = err_message, errors = '')
+
+    """
+    def __init__(self, message, errors):
+        super(ArgumentError, self).__init__(message)
+        self.errors = errors
+
+class SnsTaskMissing(Exception):
+    """
+    Base exception to use if the sns analysis task could not be found
+
+    Examples
+    --------
+    Example usage::
+
+        raise _e.SnsTaskMissing(message = err_message, errors = '')
+
+    """
+    def __init__(self, message, errors):
+        super(SnsTaskMissing, self).__init__(message)
+        self.errors = errors
+
 class AnalysisInvalid(Exception):
     """
     Base exception to use if the analysis is invalid

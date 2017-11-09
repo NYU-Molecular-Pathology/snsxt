@@ -9,6 +9,10 @@ from AnalysisTask import AnalysisTask
 class SnsTask(AnalysisTask):
     """
     Base class for a task that runs the ``sns`` pipeline. A wrapper for running the ``sns`` pipeline in the context of ``snsxt``.
+
+    Notes
+    -----
+    The ``run()`` method for this class should be overriden by the end-user's custom ``run()`` method, per task. See other included ``SnsTask`` classes for examples.  
     """
     def __init__(self, taskname, analysis_dir = None, config_file = None, extra_handlers = None):
         """
@@ -107,7 +111,7 @@ class SnsTask(AnalysisTask):
         Returns
         -------
         list
-            a list of ``qsub.Job`` objects representing qsub jobs that were submitted 
+            a list of ``qsub.Job`` objects representing qsub jobs that were submitted
         """
         jobs = []
         for job in [self.qsub.Job(id = job_id, name = job_name)
