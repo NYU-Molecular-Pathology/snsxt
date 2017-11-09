@@ -24,7 +24,25 @@ snsxt.sns_tasks.task_classes module
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: snsxt.sns_tasks.AnalysisSampleTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
+.. automodule:: snsxt.sns_tasks.QsubAnalysisTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: snsxt.sns_tasks.QsubSampleTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: snsxt.sns_tasks.SnsTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
