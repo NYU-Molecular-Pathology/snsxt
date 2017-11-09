@@ -77,14 +77,28 @@ class AnalysisTask(LoggedObject):
     """
     Base class for an sns analysis tasks
 
-    from task_classes import AnalysisTask
-    x = AnalysisTask(taskname = 'Delly2', config_file = 'Delly2.yml')
+    Examples
+    --------
+    Example usage::
+
+        from task_classes import AnalysisTask
+        x = AnalysisTask(taskname = 'Delly2', config_file = 'Delly2.yml')
+
     """
     def __init__(self, taskname, config_file, analysis = None, extra_handlers = None, setup_report = True):
         """
-        Initialize the object
-        taskname = name of this task
-        analysis = SnsWESAnalysisOutput object
+        Parameters
+        ----------
+        taskname: str
+            the name of the task
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on
+        config_file: str
+            basename of the YAML formatted config file in the ``tasks_config_dir`` to use for ``task_configs``
+        extra_handlers: list
+            a list of extra Filehandlers to use for logging
+        setup_report: bool
+            ``True`` or ``False``, whether or not the task's ``report_files`` should be copied over and configured in the ``output_dir``
         """
         LoggedObject.__init__(self, id = taskname, extra_handlers = extra_handlers)
         self.taskname = str(taskname)
@@ -100,6 +114,9 @@ class AnalysisTask(LoggedObject):
 
         # get the 'main_configs' from this script
         self.main_configs = configs
+        """
+        The global configs for the program
+        """
 
         if config_file:
             # get the 'task_configs' from external YAML file, load them in self.task_configs
@@ -120,9 +137,7 @@ class AnalysisTask(LoggedObject):
 
     def _init_task_attrs(self):
         """
-        Initialize some extra object attributes from the task config, if they're present
-
-        These are convenience items for easy access in child classes
+        Initializes object attributes from the ``task_configs``, if they're present in the YAML config file
         """
         if self.task_configs.get('input_pattern', None):
             self.input_pattern = self.task_configs['input_pattern']
@@ -155,7 +170,7 @@ class AnalysisTask(LoggedObject):
 
     def _init_locs(self):
         """
-        Initialize locations for the task
+        Initializes locations for the task
         """
         self.output_dir = self.tools.mkdirs(path = os.path.join(self.analysis.dir, self.task_configs['output_dir_name']), return_path = True)
         self.logger.debug('task output_dir: {0}'.format(self.output_dir))
@@ -164,8 +179,12 @@ class AnalysisTask(LoggedObject):
 
     def _task_config_from_file(self, config_file):
         """
-        Load a YAML formatted file and add it to the object's configs
-        config_file = basename of a file in the tasks_config_dir, for convenience
+        Loads a YAML formatted config file and adds it to the object's ``task_configs`` dictionary
+
+        Parameters
+        ----------
+        config_file: str
+            basename of the YAML formatted config file in the ``tasks_config_dir`` to use for ``task_configs``
         """
         config_filepath = os.path.join(self.main_configs['tasks_config_dir'], config_file)
         self.logger.debug('Loading task config file: {0}'.format(config_filepath))
@@ -176,7 +195,21 @@ class AnalysisTask(LoggedObject):
 
     def get_path(self, dirpath, file_basename, validate = False):
         """
-        Get the path to a file, optionally validate the file
+        Generates an expected filepath for an item associated with the analysis. Optionally validate the file
+
+        Parameters
+        ----------
+        dirpath: str
+            path to the parent directory for the expected file
+        file_basename: str
+            name of the expected file
+        validate: bool
+            whether or not to validate the file e.g. to check if it exists, etc.
+
+        Returns
+        -------
+        str
+            the expected path to the file
         """
         # self.logger.debug('dirpath is {0}'.format(dirpath))
         # self.logger.debug('file_basename is {0}'.format(file_basename))
@@ -189,21 +222,77 @@ class AnalysisTask(LoggedObject):
 
     def get_analysis_file_outpath(self, file_basename):
         """
-        Create a path to a file in the analysis output directory
+        Creates a path to a file in the analysis ``output_dir``
+
+        Parameters
+        ----------
+        file_basename: str
+            name of the expected file
+
+        Returns
+        -------
+        str
+            the expected path to the file
+
+        Notes
+        -----
+        Does not validate that the file exists
+
+        Examples
+        --------
+        Example usage::
+
+            output_file = self.get_analysis_file_outpath(file_basename = 'foo.txt')
+
         """
         output_path = self.get_path(dirpath = self.output_dir, file_basename = file_basename, validate = False)
         return(output_path)
 
     def get_analysis_file_inputpath(self, file_basename, validate = True):
         """
-        Create the path to an expected sample file in the input directory
+        Creates a path to a file that is expected to exist in the analysis ``input_dir``
+
+        Parameters
+        ----------
+        file_basename: str
+            name of the expected file
+
+        Returns
+        -------
+        str
+            the expected path to the file
+
+        Notes
+        -----
+        Validates that the file exists by default, raising an exception if the file does not exist or pass validation
+
+        Examples
+        --------
+        Example usage::
+
+            input_file = self.get_analysis_file_inputpath(file_basename = 'foo.txt')
+
         """
         path = self.get_path(dirpath = self.input_dir, file_basename = file_basename, validate = validate)
         return(path)
 
     def get_expected_output_files(self, analysis = None):
         """
-        Return a list of all the expected output files for all of the samples in the analysis
+        Gets the paths to all files expected to be output by the task.
+
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+
+        Returns
+        -------
+        list
+            a list of the expected output file paths for all files expected to be output by the task
+
+        Notes
+        -----
+        Filepaths returned are not validated for existence. Expected output files must be listed in the task's ``config_file``
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -226,9 +315,18 @@ class AnalysisTask(LoggedObject):
 
     def get_expected_email_files(self, analysis = None):
         """
-        Return a list of all the expected email files for all of the samples in the analysis
+        Gets the paths to all files from the task output which should be included in email output
 
-        Only run this after the task completion !!
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+
+        Returns
+        -------
+        list
+            a list of the expected output file paths
+
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -251,30 +349,40 @@ class AnalysisTask(LoggedObject):
 
     def validate_items(self, items):
         """
-        Run validations on a list of items
-        items = list of file or dir paths
+        Runs validations on a list of items. Makes sure that all paths passed exist.
+
+        Parameters
+        ----------
+        items: list
+            a list of file or directory paths
+
+        Todo
+        ----
+        Add more validation criteria.
+
+        Need to raise an exception here if no items were passed?
         """
         # self.logger.debug('validating items: {0}'.format(items))
         self.logger.debug('validating {0} items'.format(len(items)))
         if len(items) < 1 or not items:
-            self.logger.error('No items were passed')
-            sys.exit()
+            # TODO: what to raise here?
+            self.logger.error('No items were passed for validation')
+            # sys.exit()
+            return()
         # make sure all files and dirs exist
         items_exist = {}
         for item in items:
             # self.logger.debug('item is: {0}'.format(item))
             items_exist[item] = self.tools.item_exists(item)
-        # items_exist = {item: self.tools.item_exists(item) for item in items}
         if not all(items_exist.values()):
             # self.logger.error('Some items did not exist:')
             # self.logger.error('{0}'.format(items_exist))
-            # sys.exit()
             raise _e.AnalysisFileMissing(message = 'Expected files for {0} do not exist:\n{1}'.format(self, items_exist), errors = '')
             # add more criteria here...
 
     def validate_output(self):
         """
-        Validate all the expected output files per sample from the analysis task
+        Validates all the expected output files from the analysis task
         """
         self.logger.debug('Validating expected task output')
         expected_output = self.get_expected_output_files()
@@ -283,7 +391,18 @@ class AnalysisTask(LoggedObject):
 
     def get_report_files(self):
         """
-        Get the files for the report based on the configs, return a list of files
+        Gets the files for the report based on the configs
+
+        Returns
+        -------
+        list
+            a list of paths to files that should be used in the report for the task
+
+        Notes
+        -----
+        Files for inclusion in the task's report should be set in the task config file.
+
+        Files will be validated for existence, etc..
         """
         report_files = []
 
@@ -301,8 +420,12 @@ class AnalysisTask(LoggedObject):
 
     def setup_report(self, output_dir = None):
         """
-        Set up the report files output for the pipeline step
-        by copying over every associated file for the report to the output dir
+        Sets up the report files output for the pipeline step by copying over every associated file for the report to the task output dir
+
+        Parameters
+        ----------
+        output_dir: str
+            the output directory to copy files to. If ``None`` was passed, ``self.output_dir`` is used instead
         """
         # try to get an outputdir if it wasnt passed
         if not output_dir:
@@ -323,9 +446,32 @@ class AnalysisTask(LoggedObject):
         else:
             self.logger.debug('No report files set for task')
 
-    def annotate(self, input_dir = None, extra_handlers = None):
+    def annotate(self, input_dir, extra_handlers = None):
         """
-        Run the ANNOVAR in-place annotation on the analysis task;
+        Runs ANNOVAR annotation in-place on the analysis task output
+
+        Parameters
+        ----------
+        input_dir: str
+            the path to a directory with .bed files for annotation
+        extra_handlers: list
+            a list of extra Filehandlers to use for logging
+
+        Returns
+        -------
+        None
+            does not return anything
+
+        Todo
+        ----
+        Should this method return something?
+
+        Should extra handling be implemented to validate the input directory?
+
+        Notes
+        -----
+        This method makes use of the ``AnnotationInplace`` class ``AnalysisTask`` to perform this extra analysis step on an analysis task's output without having to explicitly create an extra analysis task just for output annotation.
+
         """
         if not extra_handlers:
             extra_handlers = getattr(self, 'extra_handlers', None)
@@ -335,15 +481,34 @@ class AnalysisTask(LoggedObject):
         if input_dir:
             x = AnnotationInplace(extra_handlers = extra_handlers).annotate(input_dir = self.output_dir, annotation_method = 'ANNOVAR')
         else:
-            self.logger.debug('No input_dir specified')
+            self.logger.error('No input_dir specified')
         return()
 
     def run(self, analysis = None, *args, **kwargs):
         """
-        Run a task that operates an analysis (not per-sample)
-        analysis is an SnsWESAnalysisOutput object
+        Runs a task that operates an entire analysis output
 
-        this will be overwritten with run() set by subclasses
+        Parameters
+        ----------
+        analysis: SnsWESAnalysisOutput
+            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
+        args: list
+            a list of extra positional arguments to pass to ``self.main()``
+        kwargs: dict
+            a dictionary of extra positional arguments to pass to ``self.main()``
+
+        Notes
+        -----
+        This method 'runs' the task, by making a call to ``self.main``.
+
+        This method will be overwritten with ``run()`` set by child subclasses of ``AnalysisTask``.
+
+        This default method is not intended for analysis tasks that submit qsub jobs, or for tasks that operate on each sample in an analysis individually.
+
+        Todo
+        ----
+        Should this method ``return`` something?
+        
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
