@@ -35,6 +35,12 @@ snsxt/run.py -d .
 
 ```
 
+- __Example command:__
+
+```bash
+$ snsxt/run.py -d mini_analysis-controls/ -f mini_analysis-controls/fastq/ -a mini_analysis -r results1 -t task_lists/dev.yml --pairs_sheet mini_analysis-controls/samples.pairs.csv_usethis --debug_mode
+```
+
 ## Arguments
 
 ### Required
