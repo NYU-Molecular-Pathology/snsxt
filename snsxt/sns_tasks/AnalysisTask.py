@@ -476,10 +476,15 @@ class AnalysisTask(LoggedObject):
 
 class AnnotationInplace(AnalysisTask):
     """
-    Class for annotation object to add to other analysis steps
+    An ``AnalysisTask`` sub-task that performs annotation of .bed files with ANNOVAR. This is used to perform an in-place annotation of a task's output, so an extra analysis task is not needed to annotate output files.
 
-    from task_classes import AnnotationInplace
-    x = AnnotationInplace()
+    Examples
+    --------
+    Example usage::
+
+        from task_classes import AnnotationInplace
+        x = AnnotationInplace()
+
     """
     def __init__(self, taskname = 'Annotation_inplace', config_file = 'Annotation_inplace.yml', extra_handlers = None):
         """
@@ -488,24 +493,20 @@ class AnnotationInplace(AnalysisTask):
 
     def annotate(self, input_dir, annotation_method = 'ANNOVAR'):
         """
-        Run an annotation command
+        Runs an annotation command using the external annotation code repository. Annotates genomic regions saved in .bed files in the provided ``input_dir``.
 
-        Function for annotating genomic regions and variants output by other pipeline steps in-place
-        without creating a new output directory just for the annotations
-        because for reporting purposes, you might end up needing both the pipeline task
-        raw output and the annotations in the same location.
+        Parameters
+        ----------
+        input_dir: str
+            the path to a directory with .bed files for annotation
+        annotation_method: str
+            one of 'ANNOVAR', 'ChIPseeker', or 'biomaRt_ChIPpeakAnno'. Currently, only 'ANNOVAR' is supported, and used by default.
 
-        This function will use the ANNOVAR annotation script, which finds and runs ANNOVAR
-        on all the .bed files found (maybe .vcf too? TODO: decide this later)
+        Notes
+        -----
+        This task calls an external script, which annotates all .bed files found in the provided directory. For ANNVOVAR annotation, the script will produce and run a command that looks like this::
 
-        annotation_method is one of ANNOVAR, ChIPseeker, or biomaRt_ChIPpeakAnno,
-        based on the external configs which are based on the subdirs in the annotation
-        package
-
-        TODO: add testing to this function... somehow...
-
-        example command output:
-        annotation_command = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/annotate-peaks/ANNOVAR/annotate.R -d /ifs/data/molecpathlab/scripts/snsxt/example_sns_analysis2/Summary-Avg-Coverage --bin-dir /ifs/data/molecpathlab/bin/annovar_annotate --db-dir /ifs/data/molecpathlab/bin/annovar_annotate/db --genome hg19'
+            annotation_command = '/ifs/data/molecpathlab/scripts/snsxt/snsxt/sns_tasks/scripts/annotate-peaks/ANNOVAR/annotate.R -d /ifs/data/molecpathlab/scripts/snsxt/example_sns_analysis2/Summary-Avg-Coverage --bin-dir /ifs/data/molecpathlab/bin/annovar_annotate --db-dir /ifs/data/molecpathlab/bin/annovar_annotate/db --genome hg19'
         """
         self.logger.debug("Starting annotation for dir: {0}".format(input_dir))
         self.logger.debug("Annotation method: {0}".format(annotation_method))
