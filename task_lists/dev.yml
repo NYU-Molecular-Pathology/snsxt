@@ -12,11 +12,5 @@ tasks:
     qsub_wait: False
   DemoQsubAnalysisTask:
     qsub_wait: False
-  # Delly2: 
-  #   qsub_wait: False
-  # GATKDepthOfCoverageCustom: 
-  #   qsub_wait: True
-  # SummaryAvgCoverage: 
-  # HapMapVariantRef:
 
 setup_report: True

@@ -1,4 +1,12 @@
-# tasks I am working on testing and developing for the pipeline
+# this task list will perform a full, new analysis, from start to finish
+
+# sns analysis setup tasks
+sns:
+  StartSns:
+  SnsWes:
+  SnsWesPairsSnv:
+
+# downstream analysis tasks
 tasks:
   Delly2: 
     qsub_wait: False
@@ -7,4 +15,5 @@ tasks:
   SummaryAvgCoverage: 
   HapMapVariantRef:
 
+# compile the report for the analysis
 setup_report: True
