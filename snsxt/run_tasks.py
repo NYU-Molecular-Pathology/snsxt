@@ -17,6 +17,7 @@ import job_management
 import setup_report
 import validation
 import _exceptions as _e
+from util import qsub
 
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 import config
