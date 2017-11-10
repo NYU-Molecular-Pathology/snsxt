@@ -63,7 +63,7 @@ extra_handlers = [h for h in log.get_all_handlers(logger)]
 Python logging Filehandlers to be passed throughout the program, in order to keep all submodules logging to the same file(s) set by `logpath()` and  `email_logpath()`
 """
 
-logger.debug("snsxt program is starting at location: {0}".format(__file__))
+logger.debug("snsxt program is starting at location: {0}".format(os.path.realpath(os.path.expanduser(__file__))))
 # print the paths to the log files to the log
 log.print_filehandler_filepaths_to_log(logger)
 
@@ -400,6 +400,7 @@ def main(**kwargs):
     pairs_sheet = kwargs.pop('pairs_sheet', None)
 
     analysis_dir = kwargs.pop('analysis_dir', None)
+    logger.debug('analysis_dir passed to script: {0}'.format(analysis_dir))
     if not analysis_dir:
         raise _e.ArgumentError(message = 'No analysis_dir passed', errors = '')
 
@@ -407,6 +408,7 @@ def main(**kwargs):
         raise _e.AnalysisFileMissing(message = 'analysis_dir does not exist!', errors = '')
 
     analysis_dir = os.path.realpath(os.path.expanduser(analysis_dir))
+    logger.info('Analysis directory will be: {0}'.format(analysis_dir))
 
     # rebuild the kwargs with only the items chosen
     kwargs = {

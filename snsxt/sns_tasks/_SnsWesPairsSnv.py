@@ -7,6 +7,7 @@ import re
 import shutil
 import task_classes
 from task_classes import SnsTask
+from time import sleep
 
 class SnsWesPairsSnv(SnsTask):
     """
@@ -31,4 +32,7 @@ class SnsWesPairsSnv(SnsTask):
         command = 'sns/run wes-pairs-snv'
         run_cmd = self.run_sns_command(command = command)
         jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout, log_dir = expected_log_dir)
+
+        # wait a few seconds to allow time for jobs to initialize
+        sleep(10)
         return(jobs)
