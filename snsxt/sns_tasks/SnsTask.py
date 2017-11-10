@@ -12,7 +12,7 @@ class SnsTask(AnalysisTask):
 
     Notes
     -----
-    The ``run()`` method for this class should be overriden by the end-user's custom ``run()`` method, per task. See other included ``SnsTask`` classes for examples.  
+    The ``run()`` method for this class should be overriden by the end-user's custom ``run()`` method, per task. See other included ``SnsTask`` classes for examples.
     """
     def __init__(self, taskname, analysis_dir = None, config_file = None, extra_handlers = None):
         """
@@ -96,7 +96,7 @@ class SnsTask(AnalysisTask):
             self.logger.debug(run_cmd.proc_stderr)
         return(run_cmd)
 
-    def catch_sns_jobs(self, proc_stdout):
+    def catch_sns_jobs(self, proc_stdout, log_dir = None):
         """
         Parses the stdout message for entries that correspond to qsub jobs that were submitted
         Capture the job ID's of all qsub jobs submitted by an sns command
@@ -114,7 +114,7 @@ class SnsTask(AnalysisTask):
             a list of ``qsub.Job`` objects representing qsub jobs that were submitted
         """
         jobs = []
-        for job in [self.qsub.Job(id = job_id, name = job_name)
+        for job in [self.qsub.Job(id = job_id, name = job_name, log_dir = log_dir)
                     for job_id, job_name
                     in self.qsub.find_all_job_id_names(text = proc_stdout)]:
             jobs.append(job)

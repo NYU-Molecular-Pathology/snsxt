@@ -19,7 +19,8 @@ class SnsWes(SnsTask):
     def run(self, *args, **kwargs):
         """
         """
+        expected_log_dir = os.path.join(self.analysis_dir, "logs-qsub")
         command = 'sns/run wes'
         run_cmd = self.run_sns_command(command = command)
-        jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
+        jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout, log_dir = expected_log_dir)
         return(jobs)
