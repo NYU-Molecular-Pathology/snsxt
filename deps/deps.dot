@@ -13,7 +13,7 @@ strict digraph "dependencies" {
         ]
 
        node [
-           fontsize=10
+           fontsize=48
            shape=ellipse
            // style=filled
            // shape=box

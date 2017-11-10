@@ -15,9 +15,16 @@ if [ ! -d blais-snakefood-6d55510bd30b ]; then
         rm -f 6d55510bd30b.zip
     }
 fi
+
 # install
 if [ ! -d venv ]; then
     virtualenv venv --no-site-packages
+
+    (
+    source venv/bin/activate
+    pip install six
+    )
+
 
     if [ -d venv ]; then
         source venv/bin/activate
