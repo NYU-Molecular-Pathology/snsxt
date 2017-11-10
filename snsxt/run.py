@@ -403,6 +403,11 @@ def main(**kwargs):
     if not analysis_dir:
         raise _e.ArgumentError(message = 'No analysis_dir passed', errors = '')
 
+    if not tools.item_exists(analysis_dir):
+        raise _e.AnalysisFileMissing(message = 'analysis_dir does not exist!', errors = '')
+
+    analysis_dir = os.path.realpath(os.path.expanduser(analysis_dir))
+
     # rebuild the kwargs with only the items chosen
     kwargs = {
     'analysis_id': analysis_id,
