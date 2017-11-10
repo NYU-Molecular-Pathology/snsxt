@@ -27,10 +27,7 @@ class SnsWesPairsSnv(SnsTask):
     def run(self, *args, **kwargs):
         """
         """
-        # command = 'sns/run wes-pairs-snv'
-        command = 'echo "foo" '
-        # run_cmd = self.run_sns_command(command = command)
-        # jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
-        # return(jobs)
-        self.logger.debug(command)
-        return()
+        command = 'sns/run wes-pairs-snv'
+        run_cmd = self.run_sns_command(command = command)
+        jobs = self.catch_sns_jobs(proc_stdout = run_cmd.proc_stdout)
+        return(jobs)
