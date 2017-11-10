@@ -109,6 +109,7 @@ from util import find
 from util import qsub
 from util import mutt
 from sns_classes.classes import SnsWESAnalysisOutput
+import run_tasks
 import job_management
 import validation
 import cleanup
@@ -120,7 +121,21 @@ import _exceptions as _e
 # add log file to email output
 mail.email_files.append(log_file)
 
+# add handlers to run_tasks
+run_tasks.extra_handlers = [h for h in extra_handlers]
+
 # ~~~~~ FUNCTIONS ~~~~~~ #
+def startup():
+    """
+    Configures global attributes of other modules, and performs other actions, when the program starts up
+    """
+    # add log file to email output
+    mail.email_files.append(log_file)
+
+    # add handlers to run_tasks
+    run_tasks.extra_handlers = [h for h in extra_handlers]
+
+
 def get_task_list(task_list_file):
     """
     Reads the task_list from a YAML formatted file
@@ -157,146 +172,146 @@ def get_task_list(task_list_file):
     return(task_list)
 
 
-def get_task_class(task_name):
-    """
-    Gets the task's class from the `sns_tasks` module
+# def get_task_class(task_name):
+#     """
+#     Gets the task's class from the `sns_tasks` module
+#
+#     Parameters
+#     ----------
+#     task_name: str
+#         the name of an analysis task, assumed to correspond to a Class loaded in the `sns_tasks` module
+#
+#     Returns
+#     -------
+#     Class
+#         the Class object matching the `task_name`
+#     """
+#     # make sure the task is present in sns_tasks
+#     if not task_name in dir(sns_tasks):
+#         logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
+#         raise _e.SnsTaskMissing(message = 'Task {0} was not found in the sns_tasks module'.format(task_name), errors = '')
+#     else:
+#         logger.debug('Loading task {0} '.format(task_name))
+#     # load the task class from the module
+#     task_class = getattr(sns_tasks, task_name)
+#     return(task_class)
 
-    Parameters
-    ----------
-    task_name: str
-        the name of an analysis task, assumed to correspond to a Class loaded in the `sns_tasks` module
-
-    Returns
-    -------
-    Class
-        the Class object matching the `task_name`
-    """
-    # make sure the task is present in sns_tasks
-    if not task_name in dir(sns_tasks):
-        logger.error('Task {0} was not found in the sns_tasks module'.format(task_name))
-        raise _e.SnsTaskMissing(message = 'Task {0} was not found in the sns_tasks module'.format(task_name), errors = '')
-    else:
-        logger.debug('Loading task {0} '.format(task_name))
-    # load the task class from the module
-    task_class = getattr(sns_tasks, task_name)
-    return(task_class)
-
-def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, **kwargs):
-    """
-    Runs a series of analysis tasks
-
-    Parameters
-    ----------
-    tasks: dict
-        a dictionary (e.g. loaded from a YAML formatted `task_list`) containing the names of analysis tasks to be run
-    analysis_dir: str
-        the path to a directory to use for the analysis. For `sns` tasks, this corresponds to the data output location. For downstream `tasks`, this will be used to create a `SnsWESAnalysisOutput` object
-    analysis: SnsWESAnalysisOutput
-        object representing output from an `sns wes` analysis pipeline output on which to run downstream analysis tasks
-    debug_mode: bool
-        prevent the program from halting if errors are found in qsub log output files; defaults to `False`. `True` = do not stop for qsub log errors, `False` = stop if errors are found
-    kwargs: dict
-        a dictionary containing extra args to pass to the `task_class` upon initialization
-
-    Returns
-    -------
-    tasks_output: dict
-        a dictionary containing items output by the analysis task(s) which were run
-
-    Todo
-    ----
-    Figure out what should be contained in `tasks_output`
-
-    """
-    # items output by tasks which should be returned by this function
-    tasks_output = {}
-    # list of files to send in output email
-    tasks_output['email_files'] = []
-
-    if analysis_dir and analysis:
-        raise _e.ArgumentError(message = 'Both analysis_dir and analysis were passed; there can be only one.', errors = '')
-
-    if not analysis_dir and not analysis:
-        raise _e.ArgumentError(message = 'Neither analysis_dir nor analysis were passed; there must be one.', errors = '')
-
-    # list to capture qsub jobs submitted but not monitored by a task
-    background_jobs = []
-    """
-    If an analysis task generated qsub jobs, but did not wait for them to finish, they will be captured in this list and will be monitored to completion when `run_tasks` finishes running all tasks. This way, the program will not exit until all jobs created have finished.
-    """
-
-    # list to capture background output that should be validated after all jobs finish
-    background_output_files = []
-    """
-    By default, a task will validated its expected output files upon task completion. However, tasks that submit qsub jobs and do not wait for them to complete will not be able to validate their expected output files. Instead, the paths to those expected files will be collected in this list, and they will be evaluated once all qsub jobs have been monitored to completion and validated.
-    """
-
-    for task_name, task_params in tasks.items():
-        task_class = get_task_class(task_name)
-
-        # create the task object
-        if analysis_dir:
-            task = task_class(analysis_dir = analysis_dir, extra_handlers = extra_handlers, **kwargs)
-        if analysis:
-            # make sure the ana analysis ouput object is valid before continuing
-            if not debug_mode:
-                if not analysis.is_valid:
-                    err_message = 'The analysis did not pass validations\n'
-                    validations_message = json.dumps(analysis.validations, indent = 4)
-                    logger.error(err_message)
-                    raise _e.AnalysisInvalid(message = err_message + validations_message, errors = '')
-            task = task_class(analysis = analysis, extra_handlers = extra_handlers)
-
-        # run the task
-        if task_params:
-            # with the params
-            task_output = task.run(**task_params)
-        else:
-            # without the params
-            task_output = task.run()
-
-        # check for files from the task which should be included in email output
-        expected_email_files = task.get_expected_email_files()
-        logger.debug('task email files: {0}'.format(expected_email_files))
-        if expected_email_files:
-            for item in expected_email_files:
-                # tasks_output['email_files'].append(item)
-                mail.email_files.append(item)
-
-        # check the output of the task
-        if task_output:
-            # check for background qsub jobs output by the task
-            task_jobs = []
-            for item in task_output:
-                if isinstance(item, qsub.Job):
-                    task_jobs.append(item)
-            # if no task_jobs were produced, validate the task output immediately
-            if not task_jobs:
-                logger.debug('Validating task output files')
-                task.validate_output()
-            else:
-                # add task jobs to background jobs
-                logger.debug('Background qsub jobs were generated by the task and will be monitored at program completion')
-                for job in task_jobs:
-                    background_jobs.append(job)
-                # add task expected output to background output to be validated later
-                logger.debug('Expected output files for the task will be validated at program completion')
-                task_output_files = task.get_expected_output_files()
-                for item in task_output_files:
-                    background_output_files.append(item)
-
-    # monitor and validate all background jobs
-    if background_jobs:
-        logger.debug('Background jobs will be monitored for completion and validated')
-        job_management.monitor_validate_jobs(jobs = background_jobs)
-
-    # validate all background output files
-    if background_output_files:
-        logger.debug('Background task output files will be validated')
-        validation.validate_items(items = background_output_files)
-
-    return(tasks_output)
-
+# def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, **kwargs):
+#     """
+#     Runs a series of analysis tasks
+#
+#     Parameters
+#     ----------
+#     tasks: dict
+#         a dictionary (e.g. loaded from a YAML formatted `task_list`) containing the names of analysis tasks to be run
+#     analysis_dir: str
+#         the path to a directory to use for the analysis. For `sns` tasks, this corresponds to the data output location. For downstream `tasks`, this will be used to create a `SnsWESAnalysisOutput` object
+#     analysis: SnsWESAnalysisOutput
+#         object representing output from an `sns wes` analysis pipeline output on which to run downstream analysis tasks
+#     debug_mode: bool
+#         prevent the program from halting if errors are found in qsub log output files; defaults to `False`. `True` = do not stop for qsub log errors, `False` = stop if errors are found
+#     kwargs: dict
+#         a dictionary containing extra args to pass to the `task_class` upon initialization
+#
+#     Returns
+#     -------
+#     tasks_output: dict
+#         a dictionary containing items output by the analysis task(s) which were run
+#
+#     Todo
+#     ----
+#     Figure out what should be contained in `tasks_output`
+#
+#     """
+#     # items output by tasks which should be returned by this function
+#     tasks_output = {}
+#     # list of files to send in output email
+#     tasks_output['email_files'] = []
+#
+#     if analysis_dir and analysis:
+#         raise _e.ArgumentError(message = 'Both analysis_dir and analysis were passed; there can be only one.', errors = '')
+#
+#     if not analysis_dir and not analysis:
+#         raise _e.ArgumentError(message = 'Neither analysis_dir nor analysis were passed; there must be one.', errors = '')
+#
+#     # list to capture qsub jobs submitted but not monitored by a task
+#     background_jobs = []
+#     """
+#     If an analysis task generated qsub jobs, but did not wait for them to finish, they will be captured in this list and will be monitored to completion when `run_tasks` finishes running all tasks. This way, the program will not exit until all jobs created have finished.
+#     """
+#
+#     # list to capture background output that should be validated after all jobs finish
+#     background_output_files = []
+#     """
+#     By default, a task will validated its expected output files upon task completion. However, tasks that submit qsub jobs and do not wait for them to complete will not be able to validate their expected output files. Instead, the paths to those expected files will be collected in this list, and they will be evaluated once all qsub jobs have been monitored to completion and validated.
+#     """
+#
+#     for task_name, task_params in tasks.items():
+#         task_class = get_task_class(task_name)
+#
+#         # create the task object
+#         if analysis_dir:
+#             task = task_class(analysis_dir = analysis_dir, extra_handlers = extra_handlers, **kwargs)
+#         if analysis:
+#             # make sure the ana analysis ouput object is valid before continuing
+#             if not debug_mode:
+#                 if not analysis.is_valid:
+#                     err_message = 'The analysis did not pass validations\n'
+#                     validations_message = json.dumps(analysis.validations, indent = 4)
+#                     logger.error(err_message)
+#                     raise _e.AnalysisInvalid(message = err_message + validations_message, errors = '')
+#             task = task_class(analysis = analysis, extra_handlers = extra_handlers)
+#
+#         # run the task
+#         if task_params:
+#             # with the params
+#             task_output = task.run(**task_params)
+#         else:
+#             # without the params
+#             task_output = task.run()
+#
+#         # check for files from the task which should be included in email output
+#         expected_email_files = task.get_expected_email_files()
+#         logger.debug('task email files: {0}'.format(expected_email_files))
+#         if expected_email_files:
+#             for item in expected_email_files:
+#                 # tasks_output['email_files'].append(item)
+#                 mail.email_files.append(item)
+#
+#         # check the output of the task
+#         if task_output:
+#             # check for background qsub jobs output by the task
+#             task_jobs = []
+#             for item in task_output:
+#                 if isinstance(item, qsub.Job):
+#                     task_jobs.append(item)
+#             # if no task_jobs were produced, validate the task output immediately
+#             if not task_jobs:
+#                 logger.debug('Validating task output files')
+#                 task.validate_output()
+#             else:
+#                 # add task jobs to background jobs
+#                 logger.debug('Background qsub jobs were generated by the task and will be monitored at program completion')
+#                 for job in task_jobs:
+#                     background_jobs.append(job)
+#                 # add task expected output to background output to be validated later
+#                 logger.debug('Expected output files for the task will be validated at program completion')
+#                 task_output_files = task.get_expected_output_files()
+#                 for item in task_output_files:
+#                     background_output_files.append(item)
+#
+#     # monitor and validate all background jobs
+#     if background_jobs:
+#         logger.debug('Background jobs will be monitored for completion and validated')
+#         job_management.monitor_validate_jobs(jobs = background_jobs)
+#
+#     # validate all background output files
+#     if background_output_files:
+#         logger.debug('Background task output files will be validated')
+#         validation.validate_items(items = background_output_files)
+#
+#     return(tasks_output)
+#
 
 
 
@@ -398,19 +413,22 @@ def main(**kwargs):
     targets_bed = kwargs.pop('targets_bed', default_targets)
     probes_bed = kwargs.pop('probes_bed', default_probes)
     pairs_sheet = kwargs.pop('pairs_sheet', None)
-
     analysis_dir = kwargs.pop('analysis_dir', None)
+
+    # make sure that analysis_dir was passed
     logger.debug('analysis_dir passed to script: {0}'.format(analysis_dir))
     if not analysis_dir:
         raise _e.ArgumentError(message = 'No analysis_dir passed', errors = '')
 
+    # make sure the analysis_dir exists
     if not tools.item_exists(analysis_dir):
         raise _e.AnalysisFileMissing(message = 'analysis_dir does not exist!', errors = '')
 
+    # get the full path to the analysis_dir
     analysis_dir = os.path.realpath(os.path.expanduser(analysis_dir))
     logger.info('Analysis directory will be: {0}'.format(analysis_dir))
 
-    # rebuild the kwargs with only the items chosen
+    # rebuild the kwargs with only the items chosen to pass on
     kwargs = {
     'analysis_id': analysis_id,
     'task_list_file': task_list_file,
@@ -425,8 +443,6 @@ def main(**kwargs):
     # get the task list contents
     task_list = get_task_list(task_list_file)
 
-    # list to hold
-
     # try to run all the tasks for the analysis
     try:
         # check if 'sns' is in the task list
@@ -434,14 +450,20 @@ def main(**kwargs):
             # check if there are items there
             if task_list['sns']:
                 logger.debug('sns tasks:\n{0}'.format(task_list['sns'].items()))
-                run_sns_tasks(task_list, analysis_dir, **kwargs)
+                run_tasks.run_sns_tasks(task_list, analysis_dir, **kwargs)
 
         # check if there are downstream snsxt tasks
         if task_list.get('tasks', None):
             # check if there are items there
             if task_list['tasks']:
                 logger.debug('downstream snsxt tasks:\n{0}'.format(task_list['tasks'].items()))
-                run_snsxt_tasks(task_list, analysis_dir, **kwargs)
+                run_tasks.run_snsxt_tasks(task_list, analysis_dir, **kwargs)
+
+        # check if the report should be setup
+        if task_list.get('setup_report', None):
+            # TODO: move report out of this function and into main as part of cleanup
+            logger.debug('Starting report setup')
+            setup_report.setup_report(output_dir = analysis_dir, analysis_id = analysis_id, results_id = results_id)
     except:
         # run this if an exception is caught
         logger.exception('Encountered an exception while running tasks')

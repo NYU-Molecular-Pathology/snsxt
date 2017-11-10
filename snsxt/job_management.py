@@ -18,7 +18,29 @@ scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
 
 
+# ~~~~~ GLOBALS ~~~~~~ #
+# list to capture qsub jobs submitted but not monitored by a task
+background_jobs = []
+"""
+If an analysis task generated qsub jobs, but did not wait for them to finish, they will be captured in this list and will be monitored to completion when `run_tasks` finishes running all tasks. This way, the program will not exit until all jobs created have finished.
+"""
+
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
+def monitor_validate_background_jobs():
+    """
+    Monitors the global ``background_jobs`` until completion, then validates their completion status.
+    """
+    if background_jobs:
+        logger.debug('Background jobs will be monitored for completion and validated')
+        monitor_validate_jobs(jobs = background_jobs)
+        # make sure the job list was cleared
+        if background_jobs:
+            err_message = 'Jobs are still left in the background_jobs queue after monitoring: {0}'.format([job for job in background_jobs])
+            raise _e.ComputeJobInvalid(message = err_message, errors = '')
+    else:
+        logger.debug('No background jobs present for monitoring')
+
+
 def monitor_validate_jobs(jobs):
     """
     Monitors a list of qsub jobs until completion, then validates their completion status.
