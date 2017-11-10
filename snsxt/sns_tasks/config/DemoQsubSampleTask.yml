@@ -24,7 +24,6 @@ report_files:
 # ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
 # use these if the analysis task will operate on each sample individually
 # naming pattern for files produced by this task
-# output_pattern: '.combined.txt'
 output_suffix: '.combined.txt'
 
 # suffixes of files that should be sent in the email output
