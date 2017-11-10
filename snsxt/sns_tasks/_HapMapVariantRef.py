@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import re
 from task_classes import AnalysisSampleTask
 

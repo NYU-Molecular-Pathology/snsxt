@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
-import re
-import task_classes
 from task_classes import SnsTask
 from time import sleep
 
