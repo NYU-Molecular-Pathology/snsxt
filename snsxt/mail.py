@@ -123,3 +123,4 @@ def email_output(message_file, *args, **kwargs):
     if run_cmd.process.returncode != 0:
         err_message = 'The mutt email command did not complete successfully'
         raise _e.SubprocessCmdError(message = err_message, errors = '')
+        # TODO: need a backup email function to run in case this gets raised
