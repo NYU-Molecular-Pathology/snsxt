@@ -10,6 +10,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ~~~~~ EXCEPTIONS ~~~~~ #
+class SubprocessCmdError(Exception):
+    """
+    Base exception to use if there was a problem executing a subprocess command
+
+    Examples
+    --------
+    Example usage::
+
+        raise _e.SubprocessCmdError(message = err_message, errors = '')
+
+    """
+    def __init__(self, message, errors):
+        super(SubprocessCmdError, self).__init__(message)
+        self.errors = errors
+
 class ArgumentError(Exception):
     """
     Base exception to use if improper arguments were passed to a function

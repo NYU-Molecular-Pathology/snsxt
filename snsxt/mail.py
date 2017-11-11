@@ -11,6 +11,7 @@ import logging
 import config
 from util import tools
 from util import mutt
+import _exceptions as _e
 
 logger = logging.getLogger(__name__)
 
@@ -114,4 +115,11 @@ def email_output(message_file, *args, **kwargs):
                     message_file = message_file,
                     attachment_files = email_files,
                     return_only_mode = True)
-    tools.SubprocessCmd(command = mail_command).run()
+    run_cmd = tools.SubprocessCmd(command = mail_command).run()
+    # print run command output messages
+    logger.debug(run_cmd.proc_stdout)
+    logger.debug(run_cmd.proc_stderr)
+    # check for success of the command
+    if run_cmd.process.returncode != 0:
+        err_message = 'The mutt email command did not complete successfully'
+        raise _e.SubprocessCmdError(message = err_message, errors = '')
