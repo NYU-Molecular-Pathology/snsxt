@@ -26,6 +26,13 @@ If an analysis task generated qsub jobs, but did not wait for them to finish, th
 """
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
+def kill_background_jobs():
+    """
+    Kills all jobs in the ``background_jobs``
+    """
+    logger.warning("Killing background jobs: {0}".format(background_jobs))
+    qsub.kill_jobs(jobs = background_jobs)
+    
 def monitor_validate_background_jobs():
     """
     Monitors the global ``background_jobs`` until completion, then validates their completion status.
