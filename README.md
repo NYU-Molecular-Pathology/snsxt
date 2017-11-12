@@ -8,9 +8,9 @@ Bioinformatics pipeline framework for data analysis, designed as a wrapper & ext
 
 This program is meant to be an extension to the [`sns wes` pipeline](https://github.com/NYU-Molecular-Pathology/sns) for bioinformatic analysis of whole/target exome sequencing data. 
 
-`snsxt` is a BYOC framework (Bring Your Own Code) for running downstream analysis tasks on sns-wes pipeline output. 
+`snsxt` is a BYOC framework (Bring Your Own Code) for setting up new `sns` analyses, and running downstream analysis tasks on their output.
 
-Use this framework to run any extra analysis tasks you like after an `sns` pipeline analysis has finished.
+`snsxt` includes built-in handling of HPC cluster jobs, email output, and a modular reporting framework which includes a base `sns wes` report along with the ability to add R Markdown formatted report entries for your custom downstream tasks. 
 
 # Usage
 
