@@ -4,6 +4,8 @@
 # snsxt
 Bioinformatics pipeline framework for data analysis, designed as a wrapper & extension for the [`sns`](https://github.com/NYU-Molecular-Pathology/sns) pipeline
 
+__Documentation located [[here](http://snsxt.readthedocs.io/en/latest/index.html)]__
+
 # Overview
 
 This program is meant to be an extension to the [`sns wes` pipeline](https://github.com/NYU-Molecular-Pathology/sns) for bioinformatic analysis of whole/target exome sequencing data. 
@@ -98,19 +100,23 @@ The `sns_tasks` submodule contains code for the various analysis tasks to be run
 
 ## Task Types
 
-Tasks can come in a few flavors:
+Tasks can come in a few flavors, which are described by the following template Python base classes:
 
-- tasks that operate on the entire analysis at once
+- `AnalysisTask`: a task that operate on the entire analysis at once
 
-- tasks that operate on a single sample at a time
+- `AnalysisSampleTask`: a task that operate on ever sample in the analysis individually
 
-Additionally, tasks can be run a few different ways:
+- `QsubAnalysisTask`: a task that submits a single qsub HPC job for the entire analysis
 
-- run in the current program session
+- `QsubSampleTask`: a task that will submit a single qsub HPC job for every sample in the analysis
 
-- submitted as a compute job to the HPC cluster with `qsub`
+These base classes each come with predefined attributes and methods to use for completing the task, including a `run()` method which will run the task by calling the task's `main()` method (created by the end-user). These classes are not meant to be used directly, but as templates for the end user's custom task classes, which will implement a `main()` method to run the task's custom actions. 
 
-Each combination of task type and run type utilizes a separate ['run' function](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/task_classes.py#L158), which should be wrapped by the task's [`run()` method](https://github.com/NYU-Molecular-Pathology/snsxt/blob/2c6f446e8dd0e1165e1e2dfc06e7c7679dc23589/snsxt/sns_tasks/_GATKDepthOfCoverageCustom.py#L126).
+One other special type of task is included:
+
+- `SnsTask`: a task that runs the `sns` analysis pipeline
+
+This special type of task class is used to set up a new `sns` analysis, and run the various `sns` pipelines when a new analysis is being created. The end user should not have to modify these tasks, but can specify them in their custom task list. 
 
 ## Task Lists
 
