@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/snsxt/badge/?version=latest)](http://snsxt.readthedocs.io/en/latest/snsxt.html)
 
 # snsxt
-Extension to the sns pipeline
+Bioinformatics pipeline framework for data analysis, designed as a wrapper & extension for the [`sns`](https://github.com/NYU-Molecular-Pathology/sns) pipeline
 
 # Overview
 
