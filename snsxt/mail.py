@@ -46,6 +46,34 @@ Example usage::
 """
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
+def sns_start_email(analysis_dir, **kwargs):
+    """
+    Emails the user when the sns pipeline starts
+
+    Parameters
+    ----------
+    analysis_dir: str
+        path to a directory to hold the analysis output
+    kwargs: dict
+        dictionary containing extra args to pass to `run_tasks`
+
+    """
+    recipient_list = kwargs.pop('recipient_list', default_recipients)
+    reply_to = kwargs.pop('reply_to', default_reply_to)
+    subject_line = "sns started"
+    message = "sns analysis started in directory:\n{0}".format(analysis_dir)
+
+    mail_command = mutt.mutt_mail(recipient_list = recipient_list,
+                    reply_to = reply_to,
+                    subject_line = subject_line,
+                    message = message,
+                    return_only_mode = True)
+    run_cmd = tools.SubprocessCmd(command = mail_command).run()
+    # print run command output messages
+    logger.debug(run_cmd.proc_stdout)
+    logger.debug(run_cmd.proc_stderr)
+
+
 def validate_email_files():
     """
     Makes sure all the items in the ``email_files`` list exist and are considered valid for inclusion in email output

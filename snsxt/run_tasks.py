@@ -26,6 +26,11 @@ configs = config.config
 
 # ~~~~~ GLOBALS ~~~~~ #
 extra_handlers = []
+sns_started = False
+"""
+Used to determine if sns analysis has started
+
+"""
 
 
 # ~~~~~ FUNCTIONS ~~~~~ #
@@ -174,6 +179,7 @@ def run_sns_tasks(task_list, analysis_dir, **kwargs):
     Each sns task will be run individually, so that all qsub jobs will be monitored to completion at every step.
 
     """
+    global sns_started
     # get the args that were passed
     fastq_dirs = kwargs.pop('fastq_dirs')
     targets_bed = kwargs.pop('targets_bed')
@@ -185,6 +191,11 @@ def run_sns_tasks(task_list, analysis_dir, **kwargs):
     # run tasks one at a time
     tasks = task_list['sns']
     for key, value in tasks.items():
+    	# checking if this is the first task that starts the sns analysis and sends an email
+    	if not sns_started:
+    		sns_started = True
+    		mail.sns_start_email(analysis_dir = analysis_dir)
+
         run_tasks(tasks = {key: value}, analysis_dir = analysis_dir, fastq_dirs = fastq_dirs, targets_bed = targets_bed, probes_bed = probes_bed, pairs_sheet = pairs_sheet, **kwargs)
 
 def run_snsxt_tasks(task_list, analysis_dir, **kwargs):
