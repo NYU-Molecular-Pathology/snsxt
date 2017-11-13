@@ -1,0 +1,18 @@
+# this task list will set up a new analysis directory
+# and then run demo tasks that don't perform any analysis
+# just to check if the program is working
+
+# sns analysis setup tasks
+sns:
+  StartSns:
+  DemoSnsTask:
+
+# downstream analysis tasks
+tasks:
+  DemoQsubSampleTask: 
+    qsub_wait: False
+  DemoQsubAnalysisTask:
+    qsub_wait: False
+
+# compile the report for the analysis
+setup_report: False
