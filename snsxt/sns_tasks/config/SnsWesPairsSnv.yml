@@ -31,10 +31,12 @@ report_files:
 
 # files that should be output by the analysis task
 output_files:
+  - summary-combined.wes.csv
   - samples.pairs.csv
 
 # files that should be sent in email output for the task
 email_files:
+  - summary-combined.wes.csv
   - samples.pairs.csv
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #

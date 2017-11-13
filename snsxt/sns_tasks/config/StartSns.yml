@@ -32,13 +32,11 @@ report_files:
 # files that should be output by the analysis task
 output_files:
   - settings.txt
-  - summary-combined.wes.csv
   - samples.fastq-raw.csv
 
 # files that should be sent in email output for the task
 email_files:
   - settings.txt
-  - summary-combined.wes.csv
   - samples.fastq-raw.csv
 
 # ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
