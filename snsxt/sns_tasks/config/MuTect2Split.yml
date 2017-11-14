@@ -1,0 +1,62 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: MuTect2Split
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'BAM-GATK-RA-RC'
+
+# or exact suffix to append to sample ID for input file
+input_suffix: '.dd.ra.rc.bam'
+
+# name of the parent directory to use for the program output
+output_dir_name: 'VCF-MuTect2-Split'
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+
+
+# ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
+# use these if the analysis task will operate on each sample individually
+# naming pattern for files produced by this task
+output_suffix: 
+
+# suffixes of files that should be sent in the email output
+email_suffixes:
+
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #
+# example command:
+# java -Xms16G -Xmx16G -jar /software/GenomeAnalysisTK/GenomeAnalysisTK-3.6-0/GenomeAnalysisTK.jar -T MuTect2 
+# -dt NONE 
+# --logging_level WARN 
+# --standard_min_confidence_threshold_for_calling 30 
+# --max_alt_alleles_in_normal_count 10 
+# --max_alt_allele_in_normal_fraction 0.05 
+# --max_alt_alleles_in_normal_qscore_sum 40 
+# --reference_sequence /ref/hg19/genome.fa 
+# --dbsnp /ref/hg19/gatk-bundle/dbsnp_138.hg19.vcf 
+# --cosmic /ref/hg19/CosmicCodingMuts_v73.hg19.vcf 
+# --intervals /ifs/data/molecpathlab/NGS580_WES/NGS580_targets.bed 
+# --interval_padding 10 
+# --input_file:tumor SampleID-T.dd.ra.rc.bam 
+# --input_file:normal SampleID-N.dd.ra.rc.bam 
+# --out SampleID-T_SampleID-N.original.vcf
+
+bin: '/ifs/data/molecpathlab/bin/GenomeAnalysisTK-3.8-0/GenomeAnalysisTK.jar'
+downsampling: 'NONE' # -dt
+logging_level: 'ERROR'
+standard_min_confidence_threshold_for_calling: '30'
+max_alt_alleles_in_normal_count: '10'
+max_alt_allele_in_normal_fraction: '0.05'
+max_alt_alleles_in_normal_qscore_sum: '40'
+reference_sequence: '/local/data/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa'
+dbsnp: '/ifs/data/molecpathlab/ref/hg19/gatk-bundle/dbsnp_138.hg19.vcf'
+cosmic: '/ifs/data/molecpathlab/ref/hg19/CosmicCodingMuts_v73.hg19.vcf'
+# intervals -> the split .bed files
+interval_padding: '10'
+
+
