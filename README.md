@@ -6,6 +6,8 @@ Bioinformatics pipeline framework for data analysis, designed as a wrapper & ext
 
 __Documentation located [[here](http://snsxt.readthedocs.io/en/latest/index.html)]__
 
+__Overview presentation located [[here](https://github.com/NYU-Molecular-Pathology/snsxt/blob/pdf/pdf/snsxt.pdf)]__
+
 # Overview
 
 This program is meant to be an extension to the [`sns wes` pipeline](https://github.com/NYU-Molecular-Pathology/sns) for bioinformatic analysis of whole/target exome sequencing data. 
