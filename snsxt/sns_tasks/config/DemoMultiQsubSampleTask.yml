@@ -1,0 +1,34 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the parent Python module
+task_name: DemoMultiQsubSampleTask
+
+# name of the sns output subdirectory from which to take input files 
+input_dir: 'BAM-GATK-RA-RC'
+
+# filename pattern to use for input file
+# input_pattern: '*.dd.ra.rc.bam'
+
+# or exact suffix to append to sample ID for input file
+input_suffix: '.dd.ra.rc.bam'
+
+# name of the parent directory to use for the program output
+output_dir_name: Demo-DemoMultiQsubSampleTask
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+
+
+# ~~~~~ SAMPLE TASK ITEMS ~~~~~ # 
+# use these if the analysis task will operate on each sample individually
+# naming pattern for files produced by this task
+output_suffix: '.combined.txt'
+
+# suffixes of files that should be sent in the email output
+email_suffixes:
+  - '.txt'
+
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #

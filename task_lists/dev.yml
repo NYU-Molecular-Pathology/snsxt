@@ -2,15 +2,17 @@
 
 # sns analysis setup tasks
 sns:
-  StartSns:
-  SnsWes:
-  SnsWesPairsSnv:
+  # StartSns:
+  # SnsWes:
+  # SnsWesPairsSnv:
 
 # downstream analysis tasks
 tasks:
-  DemoQsubSampleTask: 
-    qsub_wait: False
-  DemoQsubAnalysisTask:
-    qsub_wait: False
+  MuTect2Split:
+  # DemoMultiQsubSampleTask:
+  # DemoQsubSampleTask: 
+  #   qsub_wait: False
+  # DemoQsubAnalysisTask:
+  #   qsub_wait: False
 
-setup_report: True
+setup_report: False

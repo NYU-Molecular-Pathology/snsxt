@@ -13,6 +13,7 @@ tasks:
     qsub_wait: False
   DemoQsubAnalysisTask:
     qsub_wait: False
+  DemoMultiQsubSampleTask:
 
 # compile the report for the analysis
 setup_report: False

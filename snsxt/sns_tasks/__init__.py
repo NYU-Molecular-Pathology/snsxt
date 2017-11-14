@@ -3,19 +3,20 @@
 """
 Initialize the sns_tasks module and import task classes
 """
-
-# task classes
-# from _template import TemplateAnalysisTask
-# from _template import TemplateAnalysisSampleTask
-from _HapMapVariantRef import HapMapVariantRef
-from _GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
-from _SummaryAvgCoverage import SummaryAvgCoverage
-from _Delly2 import Delly2
+# demo classes
 from _DemoQsubSampleTask import DemoQsubSampleTask
 from _DemoQsubAnalysisTask import DemoQsubAnalysisTask
+from _DemoMultiQsubSampleTask import DemoMultiQsubSampleTask
+from _DemoSnsTask import DemoSnsTask
 
 # sns tasks
 from _StartSns import StartSns
 from _SnsWes import SnsWes
 from _SnsWesPairsSnv import SnsWesPairsSnv
-from _DemoSnsTask import DemoSnsTask
+
+# task classes
+from _HapMapVariantRef import HapMapVariantRef
+from _GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
+from _SummaryAvgCoverage import SummaryAvgCoverage
+from _Delly2 import Delly2
+from _MuTect2_split import MuTect2Split

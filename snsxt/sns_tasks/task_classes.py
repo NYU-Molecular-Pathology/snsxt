@@ -48,6 +48,7 @@ from AnalysisTask import AnnotationInplace
 from AnalysisSampleTask import AnalysisSampleTask
 from QsubSampleTask import QsubSampleTask
 from QsubAnalysisTask import QsubAnalysisTask
+from MultiQsubSampleTask import MultiQsubSampleTask
 from SnsTask import SnsTask
 
 # ~~~~~ DECORATORS ~~~~~ #
