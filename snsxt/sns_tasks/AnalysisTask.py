@@ -19,7 +19,7 @@ from util import find
 from util import tools
 from util import log
 from util import qsub
-from util import bed_chrom_split
+from util import splitbed
 from util.classes import LoggedObject
 import job_management
 import _exceptions as _e
@@ -66,7 +66,7 @@ class AnalysisTask(LoggedObject):
         self.qsub = qsub
         self.log = log
         self.find = find
-        self.bed_chrom_split = bed_chrom_split
+        self.splitbed = splitbed
         self._exceptions = _e
         self.job_management = job_management
 
