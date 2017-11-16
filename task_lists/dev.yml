@@ -2,8 +2,8 @@
 
 # sns analysis setup tasks
 sns:
-  StartSns:
-  SnsWes:
+  # StartSns:
+  # SnsWes:
   # SnsWesPairsSnv:
 
 # downstream analysis tasks
