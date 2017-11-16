@@ -2,9 +2,10 @@
 
 # sns analysis setup tasks
 sns:
-  # StartSns:
-  # SnsWes:
-  # SnsWesPairsSnv:
+  StartSns: # new sns pipeline
+  # SnsWes: # WES pipeline with unpaired variant calling
+  SnsSetupPairs: # copy over the user's "samples.pairs.csv" sheet for downstream custom usage
+  # SnsWesPairsSnv: # sns tumor-normal paired variant calling pipeline
 
 # downstream analysis tasks
 tasks:
