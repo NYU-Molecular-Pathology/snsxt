@@ -196,6 +196,112 @@ class MuTect2Split(MultiQsubSampleTask):
 
         return(valid_comparisons)
 
+    def create_split_targets(self, sampleID, targets_bed):
+        """
+        Creates the split targets.bed files for the sample
+
+        Parameters
+        ----------
+        sampleID: str
+            sample ID for the sample
+        targets_bed: str
+            the path to the input targets .bed file
+
+        Returns
+        -------
+        dict
+            a dictionary of the filename for each chrom in the .bed file, in the format::
+
+                {'chr15': 'output/targets_chr15.bed', 'chr14': 'output/targets_chr14.bed', 'chrY': 'output/targets_chrY.bed'}
+
+        Notes
+        -----
+        Convenience internal wrapper around ``splitbed.make_bed_splitchrom_filenames`` and ``splitbed.split_bed_by_chrom``
+
+        """
+        # get the path to the targets split output directory to use
+        targets_split_outdir = self.tools.mkdirs(path = os.path.join(self.output_dir, sampleID + '_targets_split'), return_path = True)
+
+        # get the paths to the output split targets files per chrom
+        chrom_filenames = self.splitbed.make_bed_splitchrom_filenames(bed_file = targets_bed, output_dir = targets_split_outdir)
+        # {'chr15': '/ifs/data/molecpathlab/snsxt-dev/example_runs/mini_analysis/VCF-MuTect2-Split/SeraCare-1to1-Positive_targets_split/targets_chr15.bed', ... }
+
+        # create the split .bed files
+        self.logger.debug('Creating split targets .bed file for the sample...')
+        self.splitbed.split_bed_by_chrom(bed_file = targets_bed, chrom_filenames = chrom_filenames)
+
+        return(chrom_filenames)
+
+    def submit_MuTect2_jobs(self, chrom_filenames, tumor_normal_pairs, input_suffix, input_dir, sampleID, qsub_log_dir):
+        """
+        Submits qsub jobs for the MuTect2 commands to run for all combinations of sample tumor-normal comparisons and chrom targets files
+
+        Parameters
+        ----------
+        sampleID: str
+            sample ID for the sample
+        input_suffix: str
+            filename suffix for the .bam files to search for
+        input_dir: str
+            path to the input directory in which to search for .bam files
+        qsub_log_dir: str
+            path to directory to use for the qsub log output
+        chrom_filenames: dict
+            a dictionary of the filename for each chrom in the .bed file, from ``create_split_targets()``
+        tumor_normal_pairs: list
+            a list of dictionaries from ``find_sample_tumor_normal_pairs()``, in the format::
+
+                [{'#SAMPLE-N': 'HapMap-B17-1267', '#SAMPLE-T': 'SeraCare-1to1-Positive'}]
+
+        Returns
+        -------
+        list
+            a list of qsub.Job objects, or an empty list
+        """
+        # qsub jobs submitted
+        jobs = []
+
+        for comparisons in tumor_normal_pairs:
+
+            # get the sample IDs for the tumor and normal, and the comparison
+            tumor_ID = comparisons['#SAMPLE-T'] # 'SeraCare-1to1-Positive'
+            normal_ID = comparisons['#SAMPLE-N'] # 'HapMap-B17-1267'
+            comparison_ID = tumor_ID + '_' + normal_ID # SeraCare-1to1-Positive_HapMap-B17-1267
+
+            # get the .bam files for them
+            tumor_bam = self.get_sample_bam_file(sampleID = tumor_ID, file_suffix = input_suffix, input_dir = input_dir)
+            normal_bam = self.get_sample_bam_file(sampleID = normal_ID, file_suffix = input_suffix, input_dir = input_dir)
+
+            # the paths to the required .bam.bai files
+            tumor_bai = tumor_bam + '.bai'
+            normal_bai = normal_bam + '.bai'
+
+
+            # add in the chrom targets..
+            for chrom, targets_file in chrom_filenames.items():
+
+                # make sure all files exist
+                self.add_and_validate_MuTect2_files(sampleID = sampleID, items = [tumor_bam, tumor_bai, normal_bam, normal_bai, targets_file, qsub_log_dir])
+
+                # ID for the tumor - normal - chrom combination
+                tumor_normal_chrom_ID = comparison_ID + '_' + chrom # SeraCare-1to1-Positive_HapMap-B17-1267_chr5
+
+                # .vcf output file
+                output_file = os.path.join(self.output_dir, tumor_normal_chrom_ID + '.vcf')
+
+                # make the shell command to run
+                MuTect2_command = self.MuTect2_split_cmd(input_file_tumor = tumor_bam, input_file_normal = normal_bam, intervals_file = targets_file, output_file = output_file)
+
+                # name for the qsub job
+                job_name = self.taskname + '.' + tumor_normal_chrom_ID # MuTect2Split.SeraCare-1to1-Positive_HapMap-B17-1267_chr5
+
+                # submit the qsub job
+                job = self.qsub.submit(command = MuTect2_command, name = job_name, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1)
+
+                # add it to the jobs list
+                jobs.append(job)
+        return(jobs)
+
     def main(self, sample):
         """
         Runs MuTect2 on a single sample, submitting one qsub job per chromosome in the targets.bed file
@@ -243,62 +349,23 @@ class MuTect2Split(MultiQsubSampleTask):
         self.logger.debug('tumor_normal_pairs is: {0}'.format(tumor_normal_pairs))
         # tumor_normal_pairs is: [{'#SAMPLE-N': 'HapMap-B17-1267', '#SAMPLE-T': 'SeraCare-1to1-Positive'}]
 
-        # list to hold qsub jobs to be generated
-        jobs = []
-
         if not tumor_normal_pairs:
+            self.logger.debug('No tumor_normal_pairs generated for sample')
             # return an empty list if there are no comparisons; default output is a list of jobs
             return([])
 
         if tumor_normal_pairs:
-            # get the path to the targets split output directory to use
-            targets_split_outdir = self.tools.mkdirs(path = os.path.join(self.output_dir, sample.id + '_targets_split'), return_path = True)
+            # list to hold qsub jobs to be generated
+            jobs = []
+            self.logger.debug('Generating qsub jobs for tumor_normal_pairs')
 
             # get the paths to the output split targets files per chrom
-            chrom_filenames = self.splitbed.make_bed_splitchrom_filenames(bed_file = targets_bed, output_dir = targets_split_outdir)
-            # {'chr15': '/ifs/data/molecpathlab/snsxt-dev/example_runs/mini_analysis/VCF-MuTect2-Split/SeraCare-1to1-Positive_targets_split/targets_chr15.bed', ... }
-
-            # create the split .bed files
-            self.logger.debug('Creating split targets .bed file for the sample...')
-            self.splitbed.split_bed_by_chrom(bed_file = targets_bed, chrom_filenames = chrom_filenames)
-
-            for comparisons in tumor_normal_pairs:
-
-                # get the sample IDs for the tumor and normal, and the comparison
-                tumor_ID = comparisons['#SAMPLE-T'] # 'SeraCare-1to1-Positive'
-                normal_ID = comparisons['#SAMPLE-N'] # 'HapMap-B17-1267'
-                comparison_ID = tumor_ID + '_' + normal_ID # SeraCare-1to1-Positive_HapMap-B17-1267
-
-                # get the .bam files for them
-                tumor_bam = self.get_sample_bam_file(sampleID = tumor_ID, file_suffix = input_suffix, input_dir = input_dir)
-                normal_bam = self.get_sample_bam_file(sampleID = normal_ID, file_suffix = input_suffix, input_dir = input_dir)
-
-                # the paths to the required .bam.bai files
-                tumor_bai = tumor_bam + '.bai'
-                normal_bai = normal_bam + '.bai'
-
-
-                # add in the chrom targets..
-                for chrom, targets_file in chrom_filenames.items():
-
-                    # make sure all files exist
-                    self.add_and_validate_MuTect2_files(sampleID = sample.id, items = [tumor_bam, tumor_bai, normal_bam, normal_bai, targets_file])
-
-                    # ID for the tumor - normal - chrom combination
-                    tumor_normal_chrom_ID = comparison_ID + '_' + chrom # SeraCare-1to1-Positive_HapMap-B17-1267_chr5
-
-                    # .vcf output file
-                    output_file = os.path.join(self.output_dir, tumor_normal_chrom_ID + '.vcf')
-
-                    # make the shell command to run
-                    MuTect2_command = self.MuTect2_split_cmd(input_file_tumor = tumor_bam, input_file_normal = normal_bam, intervals_file = targets_file, output_file = output_file)
-
-                    # name for the qsub job
-                    job_name = self.taskname + '.' + tumor_normal_chrom_ID # MuTect2Split.SeraCare-1to1-Positive_HapMap-B17-1267_chr5
-
-                    # submit the qsub job
-                    job = self.qsub.submit(command = MuTect2_command, name = job_name, stdout_log_dir = qsub_log_dir, stderr_log_dir = qsub_log_dir, verbose = True, sleeps = 1)
-
-                    # add it to the jobs list
+            chrom_filenames = self.create_split_targets(sampleID = sample.id, targets_bed = targets_bed)
+            for job in self.submit_MuTect2_jobs(chrom_filenames = chrom_filenames,
+                                                tumor_normal_pairs = tumor_normal_pairs,
+                                                input_suffix = input_suffix, input_dir = input_dir,
+                                                sampleID = sample.id,
+                                                qsub_log_dir = qsub_log_dir):
                     jobs.append(job)
-        return(jobs)
+            self.logger.debug('Number of jobs created: {0}'.format(len(jobs)))
+            return(jobs)
