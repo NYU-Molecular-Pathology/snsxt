@@ -26,12 +26,28 @@ tasks_sns_repo_dir: 'sns'
 
 # ~~~~~ MAIL ~~~~~ # 
 # settings to use when sending email from the pipeline
+
+# email server to use in the reply-to field of emails sent
+reply_to_server: 'nyumc.org'
+
 # email addresses to send results to; format is 'email1@server.com,email2@server.com'
 # email_recipients: '#MolecularPathology@nyumc.org'
 email_recipients: 'kellys04@nyumc.org'
 
-# email server to use in the reply-to field of emails sent
-reply_to_server: 'nyumc.org'
+# NOTE: the keyword '__self__' can be used to indicate that the 
+# username of the user running the program should be used, combined with the 
+# 'reply_to_server' value
+# address to send email to upon the successful completion of the analysis pipeline
+success_recipients: '__self__'
+# address to send email to if an error occurs
+error_recipients: '__self__'
+# address to send notification emails of pipeline progress to
+notification_recipients: '__self__'
+
+# base subject lines to use for various emails; extra information will be appended to the end
+success_subject_line_base: '[NGS580] [Success]'
+error_subject_line_base: '[NGS580] [Error]'
+notification_subject_line_base: '[NGS580] [Update]'
 
 # files to include in the email output from the parent analysis dir
 mail_files:
