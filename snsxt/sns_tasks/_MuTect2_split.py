@@ -51,10 +51,8 @@ class MuTect2Split(MultiQsubSampleTask):
             a list of file and directory paths to add and validate
         """
         if items:
-            self.logger.debug(items)
             for item in items:
                 self.MuTect2_required_files_per_sample[sampleID].append(item)
-            self.logger.debug(self.MuTect2_required_files_per_sample[sampleID])
             self.MuTect2_required_files_per_sample[sampleID] = list(set(self.MuTect2_required_files_per_sample[sampleID]))
             self.validate_items(self.MuTect2_required_files_per_sample[sampleID])
 
