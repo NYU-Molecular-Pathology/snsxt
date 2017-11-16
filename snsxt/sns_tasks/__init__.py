@@ -13,6 +13,7 @@ from _DemoSnsTask import DemoSnsTask
 from _StartSns import StartSns
 from _SnsWes import SnsWes
 from _SnsWesPairsSnv import SnsWesPairsSnv
+from _SnsRnaStar import SnsRnaStar
 
 # task classes
 from _HapMapVariantRef import HapMapVariantRef
