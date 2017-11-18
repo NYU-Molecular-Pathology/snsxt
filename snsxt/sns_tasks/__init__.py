@@ -4,20 +4,20 @@
 Initialize the sns_tasks module and import task classes
 """
 # demo classes
-from _DemoQsubSampleTask import DemoQsubSampleTask
-from _DemoQsubAnalysisTask import DemoQsubAnalysisTask
-from _DemoMultiQsubSampleTask import DemoMultiQsubSampleTask
-from _DemoSnsTask import DemoSnsTask
+from DemoQsubSampleTask import DemoQsubSampleTask
+from DemoQsubAnalysisTask import DemoQsubAnalysisTask
+from DemoMultiQsubSampleTask import DemoMultiQsubSampleTask
+from DemoSnsTask import DemoSnsTask
 
 # sns tasks
-from _StartSns import StartSns
-from _SnsWes import SnsWes
-from _SnsWesPairsSnv import SnsWesPairsSnv
-from _SnsRnaStar import SnsRnaStar
+from StartSns import StartSns
+from SnsWes import SnsWes
+from SnsWesPairsSnv import SnsWesPairsSnv
+from SnsRnaStar import SnsRnaStar
 
 # task classes
-from _HapMapVariantRef import HapMapVariantRef
-from _GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
-from _SummaryAvgCoverage import SummaryAvgCoverage
-from _Delly2 import Delly2
-from _MuTect2_split import MuTect2Split
+from HapMapVariantRef import HapMapVariantRef
+from GATKDepthOfCoverageCustom import GATKDepthOfCoverageCustom
+from SummaryAvgCoverage import SummaryAvgCoverage
+from Delly2 import Delly2
+from MuTect2_split import MuTect2Split
