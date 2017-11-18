@@ -20,9 +20,6 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 logger.debug("loading configurations...")
 
 # ~~~~ GET EXTERNAL CONFIGS ~~~~~~ #
-with open(os.path.join(scriptdir, "sns.yml"), "r") as f:
-    sns = yaml.load(f)
-
 with open(os.path.join(scriptdir, "snsxt.yml"), "r") as f:
     snsxt = yaml.load(f)
 
@@ -31,4 +28,3 @@ with open(os.path.join(scriptdir, "snsxt.yml"), "r") as f:
 config = {}
 
 config.update(snsxt)
-config.update(sns)

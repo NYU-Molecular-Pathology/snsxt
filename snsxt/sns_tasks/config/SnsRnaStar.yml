@@ -1,0 +1,37 @@
+# ~~~~~ REQUIRED TASK ITEMS ~~~~~ #
+# every sns_task should have these items
+
+# name of the task
+task_name: SnsRnaStar
+
+
+# name of the sns output subdirectory from which to take input files; ignored for sns tasks
+# input_dir: '.'
+
+
+# exact suffix to append to sample ID for input file; ignored for sns tasks
+# input_suffix: ''
+
+# name of the parent directory to use for the program output; ignored for sns tasks
+# output_dir_name: Demo-QsubSampleTask
+# i.e. analysis_dir/QC-Coverage-Custom will be used
+
+# files in the `report_dir` associated with this sns_task; should end in '_report.Rmd'
+report_files: 
+
+
+# ~~~~~ ANALYSIS TASK ITEMS ~~~~~ # 
+# use these if the task will operate on the analysis as a whole
+
+# input_files: 
+# - 'baz.txt'
+
+# files that should be output by the analysis task
+output_files:
+  - summary-combined.rna-star.csv
+
+# files that should be sent in email output for the task
+email_files:
+  - summary-combined.rna-star.csv
+
+# ~~~~~ TASK SPECIFIC CUSTOM ITEMS ~~~~~ #

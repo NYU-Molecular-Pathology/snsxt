@@ -1,0 +1,12 @@
+# this task list will perform sns RNA-Seq analysis with STAR alignment
+
+# sns analysis setup tasks
+sns:
+  StartSns:
+  SnsRnaStar:
+
+# downstream analysis tasks
+tasks:
+
+# compile the report for the analysis
+setup_report: False
