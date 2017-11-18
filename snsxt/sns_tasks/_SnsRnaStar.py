@@ -7,9 +7,9 @@ from time import sleep
 
 class SnsRnaStar(SnsTask):
     """
-    Run the sns rna-star analysis pipeline 
+    Run the sns rna-star analysis pipeline
     """
-    def __init__(self, analysis_dir, taskname = 'SnsWes', extra_handlers = None, **kwargs):
+    def __init__(self, analysis_dir, taskname = 'SnsRnaStar', extra_handlers = None, **kwargs):
         """
         """
         SnsTask.__init__(self, analysis_dir = analysis_dir, taskname = taskname, extra_handlers = extra_handlers)
