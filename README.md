@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/NYU-Molecular-Pathology/snsxt.svg?branch=master)](https://travis-ci.org/NYU-Molecular-Pathology/snsxt)
-[![Documentation Status](https://readthedocs.org/projects/snsxt/badge/?version=latest)](http://snsxt.readthedocs.io/en/latest/snsxt.html)
+[![Documentation Status](https://readthedocs.org/projects/snsxt/badge/?version=latest)](http://snsxt.readthedocs.io/en/latest/index.html)
 
 # snsxt
 Bioinformatics pipeline framework for data analysis, designed as a wrapper & extension for the [`sns`](https://github.com/NYU-Molecular-Pathology/sns) pipeline
@@ -177,6 +177,4 @@ Requires `pandoc` version 1.13+ for reporting
 [sns](https://github.com/NYU-Molecular-Pathology/sns) pipeline output is required to run this. 
 
 `snsxt` uses the [util](https://github.com/NYU-Molecular-Pathology/util) and [sns_classes](https://github.com/NYU-Molecular-Pathology/sns_classes) libraries as dependecies
-
-this is a test
 

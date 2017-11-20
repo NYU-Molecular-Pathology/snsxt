@@ -1,4 +1,4 @@
-# settings for the 'sns' pipeline output
+# settings for the 'sns wes' pipeline output
 
 # index of parent directory names for existing sns wes pipeline output
 # and extensions for the files generated at each step
@@ -6,8 +6,8 @@ analysis_output_index:
   _parent:
     file-names:
       - settings.txt
-      - samples.pairs.csv
-      - summary-combined.wes.csv
+      - samples.pairs.csv 
+      - summary-combined.wes.csv 
       - samples.fastq-raw.csv
   BAM-BWA:
     file_types:

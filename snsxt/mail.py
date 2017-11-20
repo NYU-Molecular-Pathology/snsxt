@@ -20,14 +20,48 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 scriptname = os.path.basename(__file__)
 script_timestamp = log.timestamp()
 
+# ~~~~~ SETUP FUNCTIONS ~~~~~ #
+def check_default_address(address, server, default_key = '__self__'):
+    """
+    Checks if the provided ``address`` matches the ``default_key``, and if so, returns a default email address made from the username of the user running the program + the ``server``.
+
+    Parameters
+    ----------
+    address: str
+        email address(es) in the format 'email1@server.com,email2@server.com'
+    server: str
+        email server to use for a default email address
+    default_key: str
+        value to use for recognizing when a default address should be returned
+
+    Returns
+    -------
+    str
+        either the original ``address`` string, or an email address composed of the user's system name + ``server``
+
+    """
+    if address == default_key:
+        default_address = mutt.get_reply_to_address(server = server)
+        return(default_address)
+    else:
+        return(address)
+
+
 # ~~~~~ LOAD CONFIGS ~~~~~ #
 configs = config.config
 
-default_recipients = configs['email_recipients']
+reply_to_server = configs['reply_to_server']
+
+success_recipients = check_default_address(address = configs['success_recipients'], server = reply_to_server)
+error_recipients = check_default_address(address = configs['error_recipients'], server = reply_to_server)
+notification_recipients = check_default_address(address = configs['notification_recipients'], server = reply_to_server)
+default_recipients = success_recipients
+
 default_reply_to = mutt.get_reply_to_address(server = configs['reply_to_server'])
-default_subject_line_base = '[NGS580] Success'
-error_subject_line_base = '[NGS580] Error'
-error_recipients = mutt.get_reply_to_address(server = configs['reply_to_server'])
+
+success_subject_line_base = configs['success_subject_line_base']
+error_subject_line_base = configs['error_subject_line_base']
+notification_subject_line_base = configs['notification_subject_line_base']
 
 # list to hold files to send as attachments
 # other modults should append to this
@@ -58,9 +92,12 @@ def sns_start_email(analysis_dir, **kwargs):
         dictionary containing extra args to pass to `run_tasks`
 
     """
-    recipient_list = kwargs.pop('recipient_list', default_recipients)
+    recipient_list = kwargs.pop('recipient_list', notification_recipients)
     reply_to = kwargs.pop('reply_to', default_reply_to)
-    subject_line = "sns started"
+    subject_line = kwargs.pop('subject_line', notification_subject_line_base)
+
+    subject_line = subject_line + ' sns analysis started'
+
     message = "sns analysis started in directory:\n{0}".format(analysis_dir)
 
     mail_command = mutt.mutt_mail(recipient_list = recipient_list,
@@ -131,7 +168,7 @@ def email_output(message_file, *args, **kwargs):
     """
     recipient_list = kwargs.pop('recipient_list', default_recipients)
     reply_to = kwargs.pop('reply_to', default_reply_to)
-    subject_line = kwargs.pop('subject_line', default_subject_line_base)
+    subject_line = kwargs.pop('subject_line', success_subject_line_base)
 
     validate_email_files()
 

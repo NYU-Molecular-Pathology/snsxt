@@ -10,10 +10,11 @@ import shutil
 
 
 # ~~~~ LOAD MORE PACKAGES ~~~~~~ #
-# add parent dir to sys.path to import util
+# need to import modules two levels up
 scriptdir = os.path.dirname(os.path.realpath(__file__)) # this script's dir
 parentdir = os.path.dirname(scriptdir) # this script's parent dir
-sys.path.insert(0, parentdir)
+parent_parentdir = os.path.dirname(parentdir)
+sys.path.insert(0, parent_parentdir)
 import util
 from util import find
 from util import tools
