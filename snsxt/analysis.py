@@ -33,6 +33,7 @@ class Analysis(LoggedObject):
     Example usage::
 
         from analysis import Analysis; x = Analysis(id = 'foo', dir = '..')
+        from analysis import Analysis, Sample; x = Analysis(id = 'foo', dir = '../..'); x.get_samples(file = '../../samples.fastq-raw.csv', method = 'samples.fastq-raw.csv')
 
     Notes
     -----
@@ -61,7 +62,7 @@ class Analysis(LoggedObject):
     def __repr__(self):
         return("Analysis(id='{0}', dir='{1}', results_id='{2}', debug='{3}', extra_handlers='{4}')".format(self.id, self.dir, self.results_id, self.debug, self.extra_handlers))
 
-    def get_samples(self, file, method):
+    def get_samples(self, file, method = 'samples.fastq-raw.csv'):
         """
         Gets the samples in the analysis
 
@@ -85,7 +86,8 @@ class Analysis(LoggedObject):
         """
         if method == "samples.fastq-raw.csv":
             sampleIDs = self.sampleIDs_fastq_raw(file = file)
-            return(sampleIDs)
+            samples = [Sample(id = sampleID, analysis = self, extra_handlers = self.extra_handlers) for sampleID in sampleIDs]
+            return(samples)
 
     def sampleIDs_fastq_raw(self, file):
         """
@@ -116,3 +118,21 @@ class Sample(LoggedObject):
         pairs_sheet = sample.static_files['paired_samples']
         self.logger.debug(sample.static_files)
     """
+    def __init__(self, id, analysis, extra_handlers = None):
+        """
+        Parameters
+        ----------
+        id: str
+            an identifier for the sample
+        analysis: Analysis
+            the parent analysis object for the sample
+        extra_handlers: list
+            a list of Filehandlers to be added to the object's internal logger
+        """
+        LoggedObject.__init__(self, id = id, extra_handlers = extra_handlers)
+        self.id = str(id)
+        self.analysis = analysis
+        self.extra_handlers = extra_handlers
+
+    def __repr__(self):
+        return("Sample(id='{0}', analysis='{1}', extra_handlers='{2}')".format(self.id, self.analysis, self.extra_handlers))
