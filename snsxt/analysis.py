@@ -83,11 +83,20 @@ class Analysis(LoggedObject):
         Example usage::
 
             x.get_samples(file = '../../samples.fastq-raw.csv', method = 'samples.fastq-raw.csv')
+
+        Todo
+        ----
+        Implement more sample ID import methods from other file types and use a more generic modular function for this purpose
         """
         if method == "samples.fastq-raw.csv":
             sampleIDs = self.sampleIDs_fastq_raw(file = file)
             samples = [Sample(id = sampleID, analysis = self, extra_handlers = self.extra_handlers) for sampleID in sampleIDs]
             return(samples)
+        else:
+            err_message = 'Analysis sample import method not recognized; method supplied: {0}'.format(method)
+            self.logger.error(err_message)
+            raise _e.ArgumentError(message = err_message, errors = '')
+
 
     def sampleIDs_fastq_raw(self, file):
         """
