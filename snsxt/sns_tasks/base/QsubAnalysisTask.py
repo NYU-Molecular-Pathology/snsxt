@@ -38,7 +38,7 @@ class QsubAnalysisTask(AnalysisTask):
 
         Notes
         -----
-        If ``qsub_wait`` is ``True``, then qsub jobs will also be validated for completion status. 
+        If ``qsub_wait`` is ``True``, then qsub jobs will also be validated for completion status.
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
@@ -48,7 +48,7 @@ class QsubAnalysisTask(AnalysisTask):
         job = self.main(analysis = analysis, *args, **kwargs)
         if job:
             jobs.append(job)
-            self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+            self.logger.debug('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
         if qsub_wait:
             # montitor the qsub jobs until they are all completed
