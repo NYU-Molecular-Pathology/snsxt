@@ -43,13 +43,13 @@ config.config['tasks_files_dir'] = os.path.join(config.config['sns_tasks_dir'], 
 # TODO: add this path
 
 # ~~~~ LOAD BASE CLASSES ~~~~~~ #
-from AnalysisTask import AnalysisTask
-from AnalysisTask import AnnotationInplace
-from AnalysisSampleTask import AnalysisSampleTask
-from QsubSampleTask import QsubSampleTask
-from QsubAnalysisTask import QsubAnalysisTask
-from MultiQsubSampleTask import MultiQsubSampleTask
-from SnsTask import SnsTask
+from base.AnalysisTask import AnalysisTask
+from base.AnalysisTask import AnnotationInplace
+from base.AnalysisSampleTask import AnalysisSampleTask
+from base.QsubSampleTask import QsubSampleTask
+from base.QsubAnalysisTask import QsubAnalysisTask
+from base.MultiQsubSampleTask import MultiQsubSampleTask
+from base.SnsTask import SnsTask
 
 # ~~~~~ DECORATORS ~~~~~ #
 def _setup_report(func, *args, **kwargs):
