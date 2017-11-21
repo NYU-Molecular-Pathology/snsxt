@@ -55,7 +55,7 @@ class QsubSampleTask(AnalysisSampleTask):
             job = self.main(sample = sample, *args, **kwargs)
             if job:
                 jobs.append(job)
-        self.logger.info('Submitted jobs: {0}'.format([job.id for job in jobs]))
+        self.logger.debug('Submitted jobs: {0}'.format([job.id for job in jobs]))
 
         # montitor the qsub jobs until they are all completed
         if qsub_wait:
