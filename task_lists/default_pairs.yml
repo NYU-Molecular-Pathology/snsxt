@@ -4,6 +4,7 @@
 sns:
   StartSns: # new sns pipeline
   SnsWes: # WES pipeline with unpaired variant calling
+  SnsWesPairsSnv: # tumor-normal paired variant calling pipeline
 
 # downstream analysis tasks
 tasks:
