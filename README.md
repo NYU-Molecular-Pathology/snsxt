@@ -68,6 +68,14 @@ $ snsxt/run.py -d mini_analysis-controls/ -f mini_analysis-controls/fastq/ -a mi
 - `--pairs_sheet`: "samples.pairs.csv" samplesheet to use for paired analysis
 
 
+## Deployment
+
+You can 'deploy' a fresh copy of `snsxt` to setup a new NGS580 analysis directory. Use the following script:
+
+```bash
+$ snsxt/deploy.py NextSeq_run_ID -p samples.pairs.csv -s SampleSheet.csv
+```
+
 # Program Components
 
 _Names and locations of these items may change with development_
