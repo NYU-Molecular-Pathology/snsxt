@@ -219,6 +219,30 @@ def copy_sequencer_files(analysis_dir, sequencer_output_path, other_files = None
         logger.debug('Copying file from:\n{0}\nto:\n{1}'.format(copy_file, output_path))
         shutil.copy2(copy_file, output_path)
 
+def copy_pairs_sheet(pairs_sheet, analysis_dir):
+    """
+    Copies the ``pairs_sheet`` over to the ``analysis_dir``
+
+    Parameters
+    ----------
+    pairs_sheet: str
+        samplesheet to use for paired analysis
+    analysis_dir: str
+        path to the directory to copy analysis files to
+
+    Returns
+    -------
+    str
+        path to the copied pairs sheet
+    """
+    file_basename = os.path.basename(pairs_sheet)
+    output_path = os.path.join(analysis_dir, file_basename)
+    logger.debug('Copying file from:\n{0}\nto:\n{1}'.format(pairs_sheet, output_path))
+    shutil.copy2(pairs_sheet, output_path)
+    if not tools.item_exists(item = output_path, item_type = 'file'):
+        raise _e.AnalysisFileMissing(message = 'pairs_sheet output_path file does not exist: {0}'.format(output_path), errors = '')
+    return(output_path)
+
 
 def clone_snsxt(target_dir):
     """
@@ -260,12 +284,11 @@ def main(**kwargs):
         logger.warning('No tumor-normal pairs_sheet was passed')
 
     other_files = []
+    output_pairs_sheet = None
 
     if pairs_sheet:
         if not tools.item_exists(item = pairs_sheet, item_type = 'file'):
             raise _e.AnalysisFileMissing(message = 'pairs_sheet file does not exist: {0}'.format(pairs_sheet), errors = '')
-        else:
-            other_files.append(pairs_sheet)
 
     if sample_sheet:
         if not tools.item_exists(item = sample_sheet, item_type = 'file'):
@@ -316,8 +339,12 @@ def main(**kwargs):
             raise _e.AnalysisFileMissing(message = 'snsxt_dir did not get created correctly: {0}'.format(snsxt_dir), errors = '')
 
         # make a command to use to start the snsxt analysis
+        # check if a pairs_sheet was passed and copied
         if pairs_sheet:
-            snsxt_command_base = 'snsxt/run.py --pairs_sheet {0} -t task_lists/default_pairs.yml'.format(pairs_sheet)
+            output_pairs_sheet = copy_pairs_sheet(pairs_sheet = pairs_sheet, analysis_dir = analysis_dir)
+
+        if output_pairs_sheet:
+            snsxt_command_base = 'snsxt/run.py --pairs_sheet {0} -t task_lists/default_pairs.yml'.format(output_pairs_sheet)
         else:
             snsxt_command_base = 'snsxt/run.py -t task_lists/default.yml'
 
@@ -351,7 +378,9 @@ def parse():
     --------
     Example script usage::
 
-        snsxt$ snsxt/deploy.py ...
+        snsxt$ snsxt/deploy.py -s samplesheet.csv -p pairs_sheet.csv 171116_NB501073_0027_AHT5M2BGX3
+
+         snsxt/deploy.py 171116_NB501073_0027_AHT5M2BGX3 -p /ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/processed/171116_NB501073_0027_AHT5M2BGX3-samples.pairs.csv_ -s /ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/processed/171116_NB501073_0027_AHT5M2BGX3-SampleSheet.2017-11-20-11-59-33.csv
 
     """
     # ~~~~ GET SCRIPT ARGS ~~~~~~ #
