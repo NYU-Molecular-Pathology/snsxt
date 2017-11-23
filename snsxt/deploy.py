@@ -5,9 +5,16 @@ Script for preparing a new snsxt analysis directory. Uses ``settings.py`` locate
 
 - check the ``sequencer_directory`` (e.g. NextSeq output location) for a run matching the provided ID
 
--
+- setup an output analysis_dir for the new analysis
+
+- copy over samplesheet, samples pairs sheet, and other files from the sequencer to the analysis_dir
+
+- create the shell commands to run to start snsxt on the new analysis
 
 
+Todo:
+----
+Need to get the ``parse_run_params_xml.py`` script and output integrated
 """
 # ~~~~~ LOGGING ~~~~~~ #
 import os
