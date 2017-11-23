@@ -19,9 +19,14 @@ script_timestamp = log.timestamp()
 snsxt_parent_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)) )
 # /ifs/data/molecpathlab/scripts/snsxt/
 
+# dir for logs
+log_dir = os.path.join(snsxt_parent_dir, 'logs')
+# timestamped subdir for logs
+# log_subdir = os.path.join(snsxt_parent_dir, 'logs', script_timestamp)
+
 # set a timestamped log file for debug log
-log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.log'.format(scriptname, script_timestamp))
-email_log_file = os.path.join(scriptdir, 'logs', '{0}.{1}.email.log'.format(scriptname, script_timestamp))
+log_file = os.path.join(log_dir, '{0}.{1}.log'.format(scriptname, script_timestamp))
+email_log_file = os.path.join(log_dir, '{0}.{1}.email.log'.format(scriptname, script_timestamp))
 
 def logpath():
     """
