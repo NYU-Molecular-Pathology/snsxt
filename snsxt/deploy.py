@@ -67,6 +67,7 @@ sys.path.pop(0)
 import argparse
 from util import tools
 from util import find
+from util import git
 import _exceptions as _e
 import shutil
 
@@ -349,6 +350,10 @@ def main(**kwargs):
         # check if a pairs_sheet was passed and copied
         if pairs_sheet:
             output_pairs_sheet = copy_pairs_sheet(pairs_sheet = pairs_sheet, analysis_dir = analysis_dir)
+
+        # make a git repo in the dir
+        logger.debug('Setting up git repo in analysis_dir')
+        git.init(dir = analysis_dir, add_all = True)
 
         if output_pairs_sheet:
             snsxt_command_base = 'snsxt/run.py --pairs_sheet {0} -t task_lists/default_pairs.yml'.format(output_pairs_sheet)
