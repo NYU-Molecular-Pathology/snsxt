@@ -47,34 +47,6 @@ class SnsTask(AnalysisTask):
         self.sns_repo_dir = self.main_configs['sns_repo_dir']
 
 
-    # def get_expected_output_files(self, analysis_dir = None):
-    #     """
-    #     Gets the paths to all files expected to be output by the task, set in the task config file.
-    #
-    #     Parameters
-    #     ----------
-    #     analysis: SnsWESAnalysisOutput
-    #         the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
-    #
-    #     Returns
-    #     -------
-    #     list
-    #         a list of the expected output file paths for all files expected to be output by the task
-    #     """
-    #     if not analysis_dir:
-    #         analysis_dir = getattr(self, 'analysis_dir', None)
-    #
-    #     expected_output = []
-    #
-    #     for output_file in self.main_configs['analysis_output_index']['_parent']['file-names']:
-    #         path = self.get_analysis_file_outpath(file_basename = output_file)
-    #         expected_output.append(path)
-    #
-    #     if len(expected_output) < 1:
-    #         self.logger.warning('output files were not set for sns analysis task {0}'.format(self.taskname))
-    #
-    #     return(expected_output)
-
     def run_sns_command(self, command = None):
         """
         Runs a command in the context of an sns directory, e.g. to run the ``sns`` pipeline program itself. This method will change the current working directory to the location of the ``analysis_dir`` before executing the ``command`` given.
