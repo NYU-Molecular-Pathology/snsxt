@@ -235,14 +235,9 @@ class AnalysisTask(LoggedObject):
         path = self.get_path(dirpath = self.input_dir, file_basename = file_basename, validate = validate)
         return(path)
 
-    def get_expected_output_files(self, analysis = None):
+    def get_expected_output_files(self):
         """
         Gets the paths to all files expected to be output by the task.
-
-        Parameters
-        ----------
-        analysis: SnsWESAnalysisOutput
-            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
 
         Returns
         -------
@@ -253,9 +248,6 @@ class AnalysisTask(LoggedObject):
         -----
         Filepaths returned are not validated for existence. Expected output files must be listed in the task's ``config_file``
         """
-        if not analysis:
-            analysis = getattr(self, 'analysis', None)
-
         expected_output = []
 
         # check if there are output_files set
@@ -276,20 +268,12 @@ class AnalysisTask(LoggedObject):
         """
         Gets the paths to all files from the task output which should be included in email output
 
-        Parameters
-        ----------
-        analysis: SnsWESAnalysisOutput
-            the `sns` pipeline output object to run the task on. If ``None`` is passed, ``self.analysis`` is retrieved instead.
-
         Returns
         -------
         list
             a list of the expected output file paths
 
         """
-        if not analysis:
-            analysis = getattr(self, 'analysis', None)
-
         expected_email_files = []
 
         if not getattr(self, 'email_files', None):
