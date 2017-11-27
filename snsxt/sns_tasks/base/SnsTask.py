@@ -4,6 +4,7 @@
 Module for the base SnsTask object class
 """
 import os
+from time import sleep
 from AnalysisTask import AnalysisTask
 
 class SnsTask(AnalysisTask):
@@ -85,6 +86,9 @@ class SnsTask(AnalysisTask):
         list
             a list of ``qsub.Job`` objects representing qsub jobs that were submitted
         """
+        self.logger.debug('Waiting for jobs to initialize before capturing sns jobs...')
+        # wait a few seconds to allow time for jobs to initialize
+        sleep(30)
         jobs = []
         for job in [self.qsub.Job(id = job_id, name = job_name, log_dir = log_dir)
                     for job_id, job_name
