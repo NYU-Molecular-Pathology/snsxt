@@ -94,5 +94,9 @@ loggers:
     level: DEBUG
     handlers: [console, main, email]
     propagate: true
+  deploy:
+    level: DEBUG
+    handlers: [console, main, email]
+    propagate: true
 
 

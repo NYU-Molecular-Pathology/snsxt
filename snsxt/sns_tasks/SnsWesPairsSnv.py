@@ -22,7 +22,7 @@ class SnsWesPairsSnv(SnsTask):
             raise self._exceptions.AnalysisFileMissing(message = 'Samples pairs was not passed to task {0}'.format(self), errors = '')
         # copy the sample pairs sheet to the proper location
         pairs_sheet_output = self.get_analysis_file_outpath(file_basename = "samples.pairs.csv")
-        self.logger.debug('Copying samples pairs sheet from\n{0}\nto\n{0}'.format(pairs_sheet, pairs_sheet_output))
+        self.logger.debug('Copying samples pairs sheet from\n{0}\nto\n{1}'.format(pairs_sheet, pairs_sheet_output))
         shutil.copy2(pairs_sheet, pairs_sheet_output)
 
     def run(self, *args, **kwargs):
