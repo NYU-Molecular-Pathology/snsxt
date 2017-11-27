@@ -37,8 +37,6 @@ class SummaryAvgCoverage(AnalysisTask):
         Creates summary coverage files for all samples in the analysis
         """
         self.logger.debug('Analysis is: {0}'.format(analysis))
-        # logger.debug(sample.static_files)
-        self.log.print_filehandler_filepaths_to_log(logger = self.logger)
 
         # shell command to run
         command = self.make_run_script_cmd(input_dir = self.input_dir, output_dir = self.output_dir, run_script = self.task_configs['run_script_path'])
