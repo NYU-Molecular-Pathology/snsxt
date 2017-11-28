@@ -252,7 +252,7 @@ def copy_pairs_sheet(pairs_sheet, analysis_dir):
     return(output_path)
 
 
-def clone_snsxt(target_dir):
+def clone_snsxt(target_dir, branch = None):
     """
     Creates a ``git`` clone of the ``snsxt`` repo in the target directory
 
@@ -261,6 +261,7 @@ def clone_snsxt(target_dir):
     target_dir: str
         path to the location to clone the new copy of the repo
     """
+    snsxt_dir = os.path.join(target_dir, 'snsxt')
     snsxt_repo_URL = settings.snsxt_repo_URL
     git_clone_command = settings.git_clone_command
     command = '{0} {1}'.format(git_clone_command, snsxt_repo_URL)
@@ -269,6 +270,16 @@ def clone_snsxt(target_dir):
         run_cmd = tools.SubprocessCmd(command = command).run()
         logger.debug(run_cmd.proc_stdout)
         logger.debug(run_cmd.proc_stderr)
+    if branch:
+        if tools.item_exists(snsxt_dir):
+            with tools.DirHop(snsxt_dir) as d:
+                logger.debug('Checking out git branch: {0}'.format(str(branch)))
+                git_checkout_cmd = 'git checkout {0}'.format(str(branch))
+                run_cmd = tools.SubprocessCmd(command = git_checkout_cmd).run()
+                logger.debug(run_cmd.proc_stdout)
+                logger.debug(run_cmd.proc_stderr)
+        else:
+            raise _e.AnalysisFileMissing(message = 'snsxt_dir does not exist: {0}'.format(snsxt_dir), errors = '')
 
 def main(**kwargs):
     """
@@ -287,6 +298,7 @@ def main(**kwargs):
     analysis_ids = kwargs.pop('analysis_ids', [])
     pairs_sheet = kwargs.pop('pairs_sheet', None)
     sample_sheet = kwargs.pop('sample_sheet', None)
+    branch = kwargs.pop('branch', None)
 
     if not pairs_sheet:
         logger.warning('No tumor-normal pairs_sheet was passed')
@@ -339,7 +351,7 @@ def main(**kwargs):
 
         # clone the repo
         logger.debug('Cloning a new copy of the repo...')
-        clone_snsxt(target_dir = analysis_dir)
+        clone_snsxt(target_dir = analysis_dir, branch = branch)
         snsxt_dir = os.path.join(analysis_dir, 'snsxt')
 
         # make sure the dir exists
@@ -405,6 +417,7 @@ def parse():
     # optional flags
     parser.add_argument('-p', '--pairs_sheet', dest = 'pairs_sheet', help = '"samples.pairs.csv" samplesheet to use for paired analysis', default = None)
     parser.add_argument('-s', '--sample_sheet', dest = 'sample_sheet', help = 'samplesheet associated with the analysis', default = None)
+    parser.add_argument('-b', '--branch', dest = 'branch', help = 'git repo branch to checkout before running', default = None)
 
     # parse the args
     args = parser.parse_args()
