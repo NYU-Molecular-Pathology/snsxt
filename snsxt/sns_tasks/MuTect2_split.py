@@ -324,20 +324,23 @@ class MuTect2Split(MultiQsubSampleTask):
         input_suffix = self.task_configs['input_suffix']
 
         # get the path to the 'samples.pairs.csv' sheet
-        pairs_sheet = sample.static_files['paired_samples']
+        # pairs_sheet = sample.static_files['paired_samples']
+        pairs_sheet = self.main_configs['pairs_sheet']
         self.logger.debug('pairs_sheet is: {0}'.format(pairs_sheet))
 
         # get list of all sample IDs in the analysis
         sampleIDs = [s.id for s in self.analysis.get_samples() ]
 
         # get the dir for the qsub logs
-        qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        # qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        qsub_log_dir = self.qsub_log_dir
 
         # get the path to the sample's .bam file
         sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
 
         # get the path to the input targets .bed file
-        targets_bed = sample.list_none(sample.get_files('targets_bed'))
+        # targets_bed = sample.list_none(sample.get_files('targets_bed'))
+        targets_bed = self.main_configs['targets_bed']
 
         # add all items required so far to the expected items list for the sample, and validate them
         self.add_and_validate_MuTect2_files(sampleID = sample.id, items = [pairs_sheet, qsub_log_dir, sample_bam, targets_bed])

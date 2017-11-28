@@ -56,7 +56,8 @@ class DemoQsubSampleTask(QsubSampleTask):
         self.logger.debug('sample output file will be: {0}'.format(sample_output))
 
         # get the dir for the qsub logs
-        qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        # qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        qsub_log_dir = self.qsub_log_dir
 
         # make the shell command to run
         command = 'touch "{0}"; sleep 20'.format(sample_output)

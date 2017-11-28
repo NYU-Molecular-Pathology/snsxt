@@ -46,7 +46,8 @@ class DemoMultiQsubSampleTask(MultiQsubSampleTask):
         self.logger.debug('Sample is: {0}'.format(sample.id))
 
         # get the dir for the qsub logs
-        qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        # qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        qsub_log_dir = self.qsub_log_dir
         self.logger.debug('qsub_log_dir is: {0}'.format(qsub_log_dir))
 
         # get the path to the sample's .bam file

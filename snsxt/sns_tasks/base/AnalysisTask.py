@@ -27,7 +27,6 @@ import _exceptions as _e
 import config
 sys.path.pop(0)
 
-configs = config.config
 
 # ~~~~~ CLASSES ~~~~~ #
 class AnalysisTask(LoggedObject):
@@ -42,7 +41,7 @@ class AnalysisTask(LoggedObject):
         x = AnalysisTask(taskname = 'Delly2', config_file = 'Delly2.yml')
 
     """
-    def __init__(self, taskname, config_file, analysis = None, extra_handlers = None, setup_report = True):
+    def __init__(self, taskname, config_file, analysis = None, extra_handlers = None, setup_report = True, qsub_log_dir = 'logs-qsub'):
         """
         Parameters
         ----------
@@ -72,10 +71,14 @@ class AnalysisTask(LoggedObject):
         self.job_management = job_management
 
         # get the 'main_configs' from this script
-        self.main_configs = configs
+        self.main_configs = config.config
         """
         The global configs for the program
         """
+
+        # extra attributes for refactoring;
+        # TODO: refactor these more later, get them from CLI args or pipeline config, etc
+        self.qsub_log_dir = os.path.join(self.analysis.dir, qsub_log_dir)
 
         if config_file:
             # get the 'task_configs' from external YAML file, load them in self.task_configs

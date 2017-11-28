@@ -108,6 +108,7 @@ def run_tasks(tasks, analysis_dir = None, analysis = None, debug_mode = False, *
         if analysis:
             # make sure the ana analysis ouput object is valid before continuing
             if not debug_mode:
+                # TODO: deprecate this and more validations elsewhere
                 if not analysis.is_valid:
                     err_message = 'The analysis did not pass validations\n'
                     validations_message = json.dumps(analysis.validations, indent = 4)

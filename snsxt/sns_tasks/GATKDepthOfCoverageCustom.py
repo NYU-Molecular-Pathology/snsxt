@@ -97,17 +97,18 @@ class GATKDepthOfCoverageCustom(QsubSampleTask):
         return the qsub job for the sample
         """
         self.logger.debug('Sample is: {0}'.format(sample))
-        self.logger.debug(sample.static_files)
 
         # TODO: does this need to be here??
         self.setup_report()
 
         # get the dir for the qsub logs
-        qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        # qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+        qsub_log_dir = self.qsub_log_dir
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 
         sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
-        targets_bed = sample.list_none(sample.get_files('targets_bed'))
+        # targets_bed = sample.list_none(sample.get_files('targets_bed'))
+        targets_bed = self.main_configs['targets_bed']
 
         # make sure the files and locations exist
         self.validate_items([sample_bam, qsub_log_dir])

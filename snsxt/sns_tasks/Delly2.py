@@ -72,11 +72,15 @@ class Delly2(QsubSampleTask):
         sample is an SnsAnalysisSample object
         return the qsub job for the sample
         """
+        # TODO: does this need to be here?
         self.setup_report()
-        qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
+
+        qsub_log_dir = self.qsub_log_dir
+        # qsub_log_dir = sample.list_none(sample.analysis_config['dirs']['logs-qsub'])
         self.logger.debug('qsub_log_dir: {0}'.format(qsub_log_dir))
 
-        sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
+        sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
+        # sample_bam = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
 
         # make sure the files and locations exist
         self.validate_items([sample_bam, qsub_log_dir])

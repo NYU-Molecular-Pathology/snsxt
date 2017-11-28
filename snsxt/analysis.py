@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import csv
-import _exceptions as _e
+import _exceptions
 from util import tools
 from util.classes import LoggedObject
 
@@ -56,8 +56,13 @@ class Analysis(LoggedObject):
         self.dir = os.path.abspath(dir)
         self.debug = debug
         self.extra_handlers = extra_handlers
+
+        # embedded modules
+        self.tools = tools
+        self._exceptions = _exceptions
+
+        # attributes needed for backwards compatibility
         self.is_valid = True
-        # TODO: this is a deprecated feature, remove references from this elsewhere in the program and move the functionality to the tasks
 
     def __repr__(self):
         return("Analysis(id='{0}', dir='{1}', results_id='{2}', debug='{3}', extra_handlers='{4}')".format(self.id, self.dir, self.results_id, self.debug, self.extra_handlers))
@@ -95,7 +100,7 @@ class Analysis(LoggedObject):
         else:
             err_message = 'Analysis sample import method not recognized; method supplied: {0}'.format(method)
             self.logger.error(err_message)
-            raise _e.ArgumentError(message = err_message, errors = '')
+            raise self._exceptions.ArgumentError(message = err_message, errors = '')
 
 
     def sampleIDs_fastq_raw(self, file):
@@ -103,12 +108,13 @@ class Analysis(LoggedObject):
         Get samples from a  'samples.fastq-raw.csv' file
         """
         if not tools.item_exists(file):
-            raise _e.AnalysisFileMissing(message = 'The "samples_fastq_raw" file could not be found for the analysis: {0}'.format(file), errors = '')
+            raise self._exceptions.AnalysisFileMissing(message = 'The "samples_fastq_raw" file could not be found for the analysis: {0}'.format(file), errors = '')
         samplesIDs = []
         with open(file, "rb") as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 samplesIDs.append(row[0])
+        samplesIDs = list(set(samplesIDs))
         return(samplesIDs)
 
 

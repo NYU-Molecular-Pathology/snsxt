@@ -8,7 +8,8 @@ task_name: HapMap_variant_ref
 input_dir: 'VCF-GATK-HC-annot'
 
 # filename pattern to use for input file
-input_pattern: '*.combined.txt'
+# input_pattern: '*.combined.txt'
+input_suffix: '.combined.txt'
 
 # name of the parent directory to use for the program output
 output_dir_name: QC-HapMap-Reference

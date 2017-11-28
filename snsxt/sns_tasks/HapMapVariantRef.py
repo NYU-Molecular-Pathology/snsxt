@@ -27,7 +27,8 @@ class HapMapVariantRef(AnalysisSampleTask):
 
         # get paths to files for the sample
         # file with the sample's ANNOVAR annotations
-        sample_annot_file = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
+        sample_annot_file = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
+        # sample_annot_file = sample.list_none(sample.get_output_files(analysis_step = self.task_configs['input_dir'], pattern = self.task_configs['input_pattern']))
         self.logger.debug('sample_annot_file is: {0}\nand has {1} entries'.format(sample_annot_file, self.tools.num_lines(sample_annot_file, skip = 1)))
 
         # reference HapMap variants file

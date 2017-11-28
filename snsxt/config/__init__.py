@@ -26,5 +26,18 @@ with open(os.path.join(scriptdir, "snsxt.yml"), "r") as f:
 
 # ~~~~ CREATE INTERNAL CONFIGS ~~~~~~ #
 config = {}
+"""
+Main dictionary containing configurations to use in the program
+"""
 
 config.update(snsxt)
+
+config['parsed'] = {}
+"""
+Dictionary to hold configs passed by the user on the CLI
+"""
+
+config['main'] = {}
+"""
+Dictionary to hold main configurations set by the program 
+"""

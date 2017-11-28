@@ -210,6 +210,9 @@ def main(**kwargs):
         path to a .csv samplesheet to use for matching tumor and normal samples in the paired variant calling analysis steps. See GitHub for example.
 
     """
+    # update configs with the passed args
+    config.config['parsed'].update(kwargs)
+
     # get the args that were passed
     analysis_id = kwargs.pop('analysis_id', None)
     task_list_file = kwargs.pop('task_list_file', default_task_list)
@@ -245,6 +248,8 @@ def main(**kwargs):
     'probes_bed': probes_bed,
     'pairs_sheet': pairs_sheet
     }
+    # update configs with the main args
+    config.config['main'].update(kwargs)
 
     # get the task list contents
     task_list = get_task_list(task_list_file)

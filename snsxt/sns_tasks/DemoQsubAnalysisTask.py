@@ -52,7 +52,8 @@ class DemoQsubAnalysisTask(QsubAnalysisTask):
         self.logger.debug('output_bar is: {0}'.format(output_bar))
 
         # get the dir for the qsub logs
-        qsub_log_dir = analysis.list_none(analysis.get_dirs('logs-qsub'))
+        # qsub_log_dir = analysis.list_none(analysis.get_dirs('logs-qsub'))
+        qsub_log_dir = self.qsub_log_dir
         self.logger.debug('qsub_log_dir is {0}:'.format(qsub_log_dir))
 
         # make the shell command to run
