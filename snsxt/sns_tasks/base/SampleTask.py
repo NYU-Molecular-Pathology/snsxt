@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Module for the base AnalysisSampleTask object class
+Module for the base SampleTask object class
 """
 import os
 from AnalysisTask import AnalysisTask
 
-class AnalysisSampleTask(AnalysisTask):
+class SampleTask(AnalysisTask):
     """
     An ``AnalysisTask`` that will run actions separately for every sample in the analysis
     """

@@ -45,7 +45,7 @@ config.config['tasks_files_dir'] = os.path.join(config.config['sns_tasks_dir'], 
 # ~~~~ LOAD BASE CLASSES ~~~~~~ #
 from base.AnalysisTask import AnalysisTask
 from base.AnalysisTask import AnnotationInplace
-from base.AnalysisSampleTask import AnalysisSampleTask
+from base.SampleTask import SampleTask
 from base.QsubSampleTask import QsubSampleTask
 from base.QsubAnalysisTask import QsubAnalysisTask
 from base.MultiQsubSampleTask import MultiQsubSampleTask
