@@ -3,9 +3,9 @@
 
 import os
 import re
-from task_classes import AnalysisSampleTask
+from task_classes import SampleTask
 
-class HapMapVariantRef(AnalysisSampleTask):
+class HapMapVariantRef(SampleTask):
     """
     Class for comparing each HapMap sample variant calls against
     a known list of previously sequenced HapMap variants
@@ -17,7 +17,7 @@ class HapMapVariantRef(AnalysisSampleTask):
     def __init__(self, analysis, taskname = 'HapMap_variant_ref', config_file = 'HapMap_variant_ref.yml', extra_handlers = None):
         """
         """
-        AnalysisSampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
+        SampleTask.__init__(self, taskname = taskname, config_file = config_file, analysis = analysis, extra_handlers = extra_handlers)
 
     def main(self, sample):
         """

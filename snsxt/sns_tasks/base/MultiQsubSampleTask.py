@@ -3,18 +3,18 @@
 """
 Module for the base MultiQsubSampleTask object class
 """
-from AnalysisSampleTask import AnalysisSampleTask
+from SampleTask import SampleTask
 
-class MultiQsubSampleTask(AnalysisSampleTask):
+class MultiQsubSampleTask(SampleTask):
     """
-    Base class for an ``AnalysisSampleTask`` operates on each sample in the analysis, and multiple qsub jobs for each.
+    Base class for an ``SampleTask`` operates on each sample in the analysis, and multiple qsub jobs for each.
 
     Notes
     -----
     This class should have a ``main`` method that returns a list of ``qsub.Job`` objects for each sample in the analysis
     """
     def __init__(self, *ars, **kwargs):
-        AnalysisSampleTask.__init__(self, *ars, **kwargs)
+        SampleTask.__init__(self, *ars, **kwargs)
 
     def run(self, analysis = None, qsub_wait = True, *args, **kwargs):
         """
