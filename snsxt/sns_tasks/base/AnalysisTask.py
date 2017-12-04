@@ -76,10 +76,6 @@ class AnalysisTask(LoggedObject):
         The global configs for the program
         """
 
-        # extra attributes for refactoring;
-        # TODO: refactor these more later, get them from CLI args or pipeline config, etc
-        self.qsub_log_dir = os.path.join(self.analysis.dir, qsub_log_dir)
-
         if config_file:
             # get the 'task_configs' from external YAML file, load them in self.task_configs
             self._task_config_from_file(config_file = config_file) #
@@ -89,6 +85,9 @@ class AnalysisTask(LoggedObject):
         if analysis:
             # setup the input and output locations
             self._init_locs()
+            # extra attributes for refactoring;
+            # TODO: refactor these more later, get them from CLI args or pipeline config, etc
+            self.qsub_log_dir = os.path.join(self.analysis.dir, qsub_log_dir)
 
         if setup_report:
             # setup the report
