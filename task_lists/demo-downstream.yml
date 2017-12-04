@@ -9,6 +9,7 @@ sns:
 
 # downstream analysis tasks
 tasks:
+  DemoAnalysisSampleTask:
   DemoQsubSampleTask: 
     qsub_wait: False
   DemoQsubAnalysisTask:
