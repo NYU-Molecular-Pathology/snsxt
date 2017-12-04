@@ -42,5 +42,27 @@ class DemoAnalysisSampleTask(AnalysisSampleTask):
         self.logger.debug('Analysis is: {0}'.format(analysis.id))
         # get all the Sample objects for the analysis
         samples = analysis.get_samples()
+
+        # list to hold the input files
+        input_bams = []
+        output_files = []
+
+        for sample in samples:
+            sampleID = sample.id
+            input_bam = self.get_sample_file_inputpath(sampleID = sampleID, suffix = self.input_suffix)
+            output_file = self.get_sample_file_outpath(sampleID = sampleID, suffix = '.txt')
+            input_bams.append(input_bam)
+            output_files.append(output_file)
+
         self.logger.debug('samples is: {0}'.format(samples))
+        self.logger.debug('input_bams is: {0}'.format(input_bams))
+        self.logger.debug('output_files is: {0}'.format(output_files))
+
+
+        for output_file in output_files:
+            self.logger.debug('creating output_file: {0}'.format(output_file))
+            with open(output_file, 'w') as f:
+                pass
+
+
         return()

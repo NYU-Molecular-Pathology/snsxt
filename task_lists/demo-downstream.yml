@@ -10,11 +10,11 @@ sns:
 # downstream analysis tasks
 tasks:
   DemoAnalysisSampleTask:
-  DemoQsubSampleTask: 
-    qsub_wait: False
-  DemoQsubAnalysisTask:
-    qsub_wait: False
-  DemoMultiQsubSampleTask:
+  # DemoQsubSampleTask: 
+  #   qsub_wait: False
+  # DemoQsubAnalysisTask:
+  #   qsub_wait: False
+  # DemoMultiQsubSampleTask:
 
 # compile the report for the analysis
 setup_report: False
