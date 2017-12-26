@@ -16,6 +16,7 @@ from StartSns import StartSns
 from SnsWes import SnsWes
 from SnsWesPairsSnv import SnsWesPairsSnv
 from SnsRnaStar import SnsRnaStar
+from SnsValidate import SnsValidate
 
 # task classes
 from HapMapVariantRef import HapMapVariantRef

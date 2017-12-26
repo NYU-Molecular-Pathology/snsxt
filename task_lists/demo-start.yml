@@ -4,15 +4,12 @@
 
 # sns analysis setup tasks
 sns:
-  StartSns:
-  DemoSnsTask:
+  # StartSns:
+  # DemoSnsTask:
+  SnsValidate:
 
 # downstream analysis tasks
 tasks:
-#   DemoQsubSampleTask: 
-#     qsub_wait: False
-#   DemoQsubAnalysisTask:
-#     qsub_wait: False
 
 # compile the report for the analysis
 setup_report: False
