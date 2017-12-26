@@ -50,6 +50,7 @@ from base.QsubSampleTask import QsubSampleTask
 from base.QsubAnalysisTask import QsubAnalysisTask
 from base.MultiQsubSampleTask import MultiQsubSampleTask
 from base.SnsTask import SnsTask
+from base.AnalysisSampleTask import AnalysisSampleTask
 
 # ~~~~~ DECORATORS ~~~~~ #
 def _setup_report(func, *args, **kwargs):
