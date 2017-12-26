@@ -8,6 +8,7 @@ from DemoQsubSampleTask import DemoQsubSampleTask
 from DemoQsubAnalysisTask import DemoQsubAnalysisTask
 from DemoMultiQsubSampleTask import DemoMultiQsubSampleTask
 from DemoSnsTask import DemoSnsTask
+from DemoAnalysisSampleTask import DemoAnalysisSampleTask
 
 # sns tasks
 from _SnsSetupPairs import SnsSetupPairs

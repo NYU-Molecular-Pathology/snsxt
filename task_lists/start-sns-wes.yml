@@ -1,0 +1,19 @@
+# this task list will perform a full, new analysis, from start to finish
+
+# sns analysis setup tasks
+sns:
+  StartSns:
+  SnsWes:
+#  SnsWesPairsSnv:
+
+# downstream analysis tasks
+tasks:
+#   Delly2: 
+#     qsub_wait: False
+#   GATKDepthOfCoverageCustom: 
+#     qsub_wait: True
+#   SummaryAvgCoverage: 
+#   HapMapVariantRef:
+
+# compile the report for the analysis
+setup_report: True

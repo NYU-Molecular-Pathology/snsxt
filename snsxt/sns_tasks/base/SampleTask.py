@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Module for the base AnalysisSampleTask object class
+Module for the base SampleTask object class
 """
 import os
 from AnalysisTask import AnalysisTask
 
-class AnalysisSampleTask(AnalysisTask):
+class SampleTask(AnalysisTask):
     """
-    An ``AnalysisTask`` that will run actions for every sample in the analysis
+    An ``AnalysisTask`` that will run actions separately for every sample in the analysis
     """
     def __init__(self, *ars, **kwargs):
         AnalysisTask.__init__(self, *ars, **kwargs)
 
-    def get_sample_file_outpath(self, sampleID, suffix):
+    def get_sample_file_outpath(self, sampleID, suffix = None):
         """
         Creates a path to an expected file in the analysis output directory by concatenating the provided ``sampleID`` and ``suffix`` into a file basename and then preprending the path to the task's ``output_dir``.
 
@@ -22,7 +22,7 @@ class AnalysisSampleTask(AnalysisTask):
         sampleID: str
             the ID for the sample
         suffix: str
-            the suffix of the file to create.
+            the suffix of the file to create. If ``None`` is passed, the task's ``output_suffix`` is used instead
 
         Returns
         -------
@@ -36,10 +36,13 @@ class AnalysisSampleTask(AnalysisTask):
             sample_output = self.get_sample_file_outpath(sampleID = sample.id, suffix = self.output_suffix)
 
         """
+        # try to resolve an output_suffix
+        if not suffix:
+            suffix = self.output_suffix
         output_path = os.path.join(self.output_dir, sampleID + suffix)
         return(output_path)
 
-    def get_sample_file_inputpath(self, sampleID, suffix, validate = True):
+    def get_sample_file_inputpath(self, sampleID, suffix = None, validate = True):
         """
         Creates a path to an expected file in the analysis input directory by concatenating the provided ``sampleID`` and ``suffix`` into a file basename and then preprending the path to the task's ``input_dir``.
 
@@ -64,6 +67,9 @@ class AnalysisSampleTask(AnalysisTask):
             sample_bam = self.get_sample_file_inputpath(sampleID = sample.id, suffix = self.input_suffix)
 
         """
+        # try to resolve an input_suffix
+        if not suffix:
+            suffix = self.input_suffix
         path = os.path.join(self.input_dir, sampleID + suffix)
         if validate:
             self.logger.debug('Validating expected input file path: {0}'.format(path))
@@ -120,7 +126,7 @@ class AnalysisSampleTask(AnalysisTask):
 
     def run(self, analysis = None, *args, **kwargs):
         """
-        Runs a task that operates an entire analysis output
+        Runs a task that operates on every sample in the analysis individually
 
         Parameters
         ----------
@@ -135,10 +141,6 @@ class AnalysisSampleTask(AnalysisTask):
         -----
         This method 'runs' the task, by making a call to ``self.main``.
 
-        This method will be overwritten with ``run()`` set by child subclasses of ``AnalysisTask``.
-
-        This default method is not intended for analysis tasks that submit qsub jobs, or for tasks that operate on each sample in an analysis individually.
-
         Todo
         ----
         Should this method ``return`` something?
@@ -146,6 +148,10 @@ class AnalysisSampleTask(AnalysisTask):
         """
         if not analysis:
             analysis = getattr(self, 'analysis', None)
-        if analysis:
-            self.main(analysis = analysis, *args, **kwargs)
+        # get all the Sample objects for the analysis
+        samples = analysis.get_samples()
+        for sample in samples:
+            self.logger.debug('Running task {0} on sample {1}'.format(self.taskname, sample.id))
+            self.main(sample = sample, *args, **kwargs)
+        # TODO: what to return here??
         return()
