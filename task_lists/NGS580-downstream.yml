@@ -1,0 +1,20 @@
+# this task list will perform a full, new analysis, from start to finish
+
+# sns analysis setup tasks
+sns:
+  # StartSns: # new sns pipeline
+  # SnsWes: # WES pipeline with unpaired variant calling
+
+# downstream analysis tasks
+tasks:
+  MuTect2Split:
+    qsub_wait: False
+  Delly2: 
+    qsub_wait: False
+  GATKDepthOfCoverageCustom: 
+    qsub_wait: True
+  SummaryAvgCoverage: 
+  HapMapVariantRef:
+
+# compile the report for the analysis
+setup_report: True
