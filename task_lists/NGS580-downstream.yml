@@ -7,8 +7,8 @@ sns:
 
 # downstream analysis tasks
 tasks:
-  MuTect2Split:
-    qsub_wait: False
+  # MuTect2Split:
+  #   qsub_wait: False
   Delly2: 
     qsub_wait: False
   GATKDepthOfCoverageCustom: 
